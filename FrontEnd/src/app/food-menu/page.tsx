@@ -4,8 +4,8 @@ import MenuCard from "@/components/ui/MenuCard";
 const MenuData = [
   {
     productId: 1,
-    productName: "Matcha",
-    categoryName: "Milk Tea",
+    productName: "Fries",
+    categoryName: "Appetizer",
     sellingPrice: 90.0,
     imageUrl: "/assets/images/MilkTea.jpg",
   },
