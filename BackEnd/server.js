@@ -13,6 +13,50 @@ const db = mysql.createConnection({
   database: "tycherosdb"
 });
 
+// GET MENU DATA ENDPOINT
+app.get('/menu', (req, res) => {
+  const query = `
+    SELECT p.productID, p.productName, p.imageUrl, c.name as categoryName, pr.sellingPrice
+    FROM product p
+    JOIN category c ON p.categoryID = c.categoryID
+    JOIN price pr ON p.productID = pr.productID
+  `;
+
+  db.query(query, (err, result) => {
+    if (err) {
+      console.error("Error fetching menu data:", err);
+      return res.status(500).json({ error: "Internal Server Error" });
+    }
+    res.json(result);
+  });
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 //EMPLOYEE PAGE CRUD
 
 //READ ENDPOINT //DONE
