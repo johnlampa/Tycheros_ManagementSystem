@@ -1,9 +1,9 @@
 import Image from "next/image";
 import React from "react";
 
-import type { MenuCardDataTypes } from "../../../lib/types/MenuCardDataTypes";
+import type { ProductDataTypes } from "../../../lib/types/ProductDataTypes";
 
-const MenuCard: React.FC<MenuCardDataTypes> = ({
+const MenuCard: React.FC<ProductDataTypes> = ({
   productId,
   productName,
   categoryName,
@@ -32,20 +32,6 @@ const MenuCard: React.FC<MenuCardDataTypes> = ({
           Add Item
         </button>
       </div>
-
-      {/* <div className="relative w-[14.125rem] h-[20.125rem] rounded-[0.9375rem] overflow-hidden">
-        <Image
-          draggable={false}
-          fill
-          src={imageUrl}
-          className="object-cover object-center"
-          alt="/"
-        />
-        <div className="absolute bottom-0 left-0 px-5 pb-7 pl-5 z-10 font-poppins text-[#473d3d]">
-          <h3 className="text-2xl font-semibold ">{productName}</h3>
-          <span className="text-sm font-medium ">{sellingPrice}</span>
-        </div>
-      </div> */}
     </>
   );
 };
