@@ -1,105 +1,71 @@
-import React from "react";
+"use client";  // This directive makes the component a client component
+
+import React, { useEffect, useState } from "react";
 import MenuCard from "@/components/ui/MenuCard";
 
-const MenuData = [
-  {
-    productId: 1,
-    productName: "Fries",
-    categoryName: "Appetizer",
-    sellingPrice: 90.0,
-    imageUrl: "/assets/images/MilkTea.jpg",
-  },
-];
+// Define the structure of a menu item
+interface MenuItem {
+  productID: number;
+  productName: string;
+  categoryName: string;
+  sellingPrice: number;
+  imageUrl: string;
+}
 
 export default function Page() {
+  const [menuData, setMenuData] = useState<MenuItem[]>([]);
+
+  useEffect(() => {
+    fetch('http://localhost:8081/menu')
+      .then(response => response.json())
+      .then(data => setMenuData(data))
+      .catch(error => console.error('Error fetching menu data:', error));
+  }, []);
+
   return (
-    <>
-      <div className="w-[362px] p-6">
-        <div>Menu Page</div>
-        <div>
-          {" "}
-          Appetizer
-          <div className="grid grid-cols-2 gap-x-6 gap-y-3">
-            {MenuData.filter((item) => item.categoryName === "Appetizer").map(
-              (item, index) => (
-                <div key={index}>
-                  <MenuCard {...item} />
-                </div>
-              )
-            )}
-          </div>
-        </div>
+    <div className="w-[362px] p-6">
+      <div>Menu Page</div>
 
-        <div>
-          {" "}
-          Entrees
-          <div className="grid grid-cols-2 gap-x-6 gap-y-3">
-            {MenuData.filter((item) => item.categoryName === "Entrees").map(
-              (item, index) => (
-                <div key={index}>
-                  <MenuCard {...item} />
-                </div>
-              )
-            )}
-          </div>
-        </div>
-
-        <div>
-          {" "}
-          Snacks
-          <div className="grid grid-cols-2 gap-x-6 gap-y-3">
-            {MenuData.filter((item) => item.categoryName === "Snacks").map(
-              (item, index) => (
-                <div key={index}>
-                  <MenuCard {...item} />
-                </div>
-              )
-            )}
-          </div>
-        </div>
-
-        <div>
-          {" "}
-          Combo Meals
-          <div className="grid grid-cols-2 gap-x-6 gap-y-3">
-            {MenuData.filter((item) => item.categoryName === "Combo Meals").map(
-              (item, index) => (
-                <div key={index}>
-                  <MenuCard {...item} />
-                </div>
-              )
-            )}
-          </div>
-        </div>
-
-        <div>
-          {" "}
-          Wings
-          <div className="grid grid-cols-2 gap-x-6 gap-y-3">
-            {MenuData.filter((item) => item.categoryName === "Wings").map(
-              (item, index) => (
-                <div key={index}>
-                  <MenuCard {...item} />
-                </div>
-              )
-            )}
-          </div>
-        </div>
-
-        <div>
-          {" "}
-          Salads
-          <div className="grid grid-cols-2 gap-x-6 gap-y-3">
-            {MenuData.filter((item) => item.categoryName === "Salads").map(
-              (item, index) => (
-                <div key={index}>
-                  <MenuCard {...item} />
-                </div>
-              )
-            )}
-          </div>
+      <div>
+        Appetizer
+        <div className="grid grid-cols-2 gap-x-6 gap-y-3">
+          {menuData.filter(item => item.categoryName === "Appetizer").map(
+            (item, index) => (
+              <div key={index}>
+                <MenuCard 
+                  productId={item.productID}  // Map productID to productId
+                  productName={item.productName}
+                  categoryName={item.categoryName}
+                  sellingPrice={item.sellingPrice}
+                  imageUrl={item.imageUrl}
+                />
+              </div>
+            )
+          )}
         </div>
       </div>
-    </>
+
+      <div>
+        Entrees
+        <div className="grid grid-cols-2 gap-x-6 gap-y-3">
+          {menuData.filter(item => item.categoryName === "Entrees").map(
+            (item, index) => (
+              <div key={index}>
+                <MenuCard 
+                  productId={item.productID}  // Map productID to productId
+                  productName={item.productName}
+                  categoryName={item.categoryName}
+                  sellingPrice={item.sellingPrice}
+                  imageUrl={item.imageUrl}
+                />
+              </div>
+            )
+          )}
+        </div>
+      </div>
+      
+
+      {/* Repeat for other categories... */}
+    </div>
   );
 }
