@@ -16,29 +16,38 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `price`
+-- Table structure for table `purchaseorder`
 --
 
-DROP TABLE IF EXISTS `price`;
+DROP TABLE IF EXISTS `purchaseorder`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `price` (
-  `priceID` int NOT NULL AUTO_INCREMENT,
-  `productID` int DEFAULT NULL,
-  `sellingPrice` int DEFAULT NULL,
-  PRIMARY KEY (`priceID`),
-  KEY `price_product_ID_idx` (`productID`),
-  CONSTRAINT `price_product_ID` FOREIGN KEY (`productID`) REFERENCES `product` (`productID`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+CREATE TABLE `purchaseorder` (
+  `purchaseorderID` int NOT NULL AUTO_INCREMENT,
+  `supplierID` int DEFAULT NULL,
+  `employeeID` int DEFAULT NULL,
+  `quantityOrdered` int DEFAULT NULL,
+  `actualQuantity` int DEFAULT NULL,
+  `pricePerUnit` int DEFAULT NULL,
+  `stockInDate` date DEFAULT NULL,
+  `expiryDate` date DEFAULT NULL,
+  PRIMARY KEY (`purchaseorderID`),
+  UNIQUE KEY `purchaseorderID_UNIQUE` (`purchaseorderID`),
+  KEY `purchaseorder_supplierID_idx` (`supplierID`),
+  KEY `purchaseorder_employeeID_idx` (`employeeID`),
+  CONSTRAINT `purchaseorder_employee_ID` FOREIGN KEY (`employeeID`) REFERENCES `employees` (`employeeID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `purchaseorder_supplier_ID` FOREIGN KEY (`supplierID`) REFERENCES `supplier` (`supplierID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `price`
+-- Dumping data for table `purchaseorder`
 --
 
-LOCK TABLES `price` WRITE;
-/*!40000 ALTER TABLE `price` DISABLE KEYS */;
-/*!40000 ALTER TABLE `price` ENABLE KEYS */;
+LOCK TABLES `purchaseorder` WRITE;
+/*!40000 ALTER TABLE `purchaseorder` DISABLE KEYS */;
+INSERT INTO `purchaseorder` VALUES (1,1,1,30,30,250,'2024-10-20','2024-11-20'),(2,2,1,40,40,230,'2024-11-20','2024-12-20');
+/*!40000 ALTER TABLE `purchaseorder` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -50,4 +59,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-08-16 14:26:33
+-- Dump completed on 2024-08-23 16:04:13

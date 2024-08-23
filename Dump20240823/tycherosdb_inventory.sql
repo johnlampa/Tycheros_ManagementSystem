@@ -16,31 +16,29 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `subitem`
+-- Table structure for table `inventory`
 --
 
-DROP TABLE IF EXISTS `subitem`;
+DROP TABLE IF EXISTS `inventory`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `subitem` (
-  `subitemID` int NOT NULL AUTO_INCREMENT,
-  `productID` int DEFAULT NULL,
-  `subinventoryID` int DEFAULT NULL,
-  PRIMARY KEY (`subitemID`),
-  KEY `subitem_product_ID_idx` (`productID`),
-  KEY `subitem_subinventory_ID_idx` (`subinventoryID`),
-  CONSTRAINT `subitem_product_ID` FOREIGN KEY (`productID`) REFERENCES `product` (`productID`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `subitem_subinventory_ID` FOREIGN KEY (`subinventoryID`) REFERENCES `subinventory` (`subinventoryID`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+CREATE TABLE `inventory` (
+  `inventoryID` int NOT NULL AUTO_INCREMENT,
+  `inventoryName` varchar(45) DEFAULT NULL,
+  `unitOfMeasure` varchar(45) DEFAULT NULL,
+  `reorderPoint` int DEFAULT NULL,
+  PRIMARY KEY (`inventoryID`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `subitem`
+-- Dumping data for table `inventory`
 --
 
-LOCK TABLES `subitem` WRITE;
-/*!40000 ALTER TABLE `subitem` DISABLE KEYS */;
-/*!40000 ALTER TABLE `subitem` ENABLE KEYS */;
+LOCK TABLES `inventory` WRITE;
+/*!40000 ALTER TABLE `inventory` DISABLE KEYS */;
+INSERT INTO `inventory` VALUES (1,'flour','g',1000),(2,'pepperoni','g',1000),(3,'tomato','g',1000);
+/*!40000 ALTER TABLE `inventory` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -52,4 +50,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-08-16 14:26:33
+-- Dump completed on 2024-08-23 16:04:13

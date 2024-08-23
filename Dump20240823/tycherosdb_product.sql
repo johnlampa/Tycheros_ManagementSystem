@@ -16,32 +16,31 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `subinventory`
+-- Table structure for table `product`
 --
 
-DROP TABLE IF EXISTS `subinventory`;
+DROP TABLE IF EXISTS `product`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `subinventory` (
-  `subinventoryID` int NOT NULL AUTO_INCREMENT,
-  `inventoryID` int DEFAULT NULL,
-  `purchaseorderID` int DEFAULT NULL,
-  `quantityRemaining` int DEFAULT NULL,
-  PRIMARY KEY (`subinventoryID`),
-  KEY `subinventory_inventory_ID_idx` (`inventoryID`),
-  KEY `subinventory_purchaseorder_ID_idx` (`purchaseorderID`),
-  CONSTRAINT `subinventory_inventory_ID` FOREIGN KEY (`inventoryID`) REFERENCES `inventory` (`inventoryID`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `subinventory_purchaseorder_ID` FOREIGN KEY (`purchaseorderID`) REFERENCES `purchaseorder` (`purchaseorderID`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+CREATE TABLE `product` (
+  `productID` int NOT NULL AUTO_INCREMENT,
+  `productName` varchar(45) DEFAULT NULL,
+  `imageUrl` varchar(500) DEFAULT NULL,
+  `categoryID` int DEFAULT NULL,
+  PRIMARY KEY (`productID`),
+  KEY `product_category_ID_idx` (`categoryID`),
+  CONSTRAINT `product_category_ID` FOREIGN KEY (`categoryID`) REFERENCES `category` (`categoryID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `subinventory`
+-- Dumping data for table `product`
 --
 
-LOCK TABLES `subinventory` WRITE;
-/*!40000 ALTER TABLE `subinventory` DISABLE KEYS */;
-/*!40000 ALTER TABLE `subinventory` ENABLE KEYS */;
+LOCK TABLES `product` WRITE;
+/*!40000 ALTER TABLE `product` DISABLE KEYS */;
+INSERT INTO `product` VALUES (1,'Pepperoni Pizza','/assets/images/chocolate-cake.jpg',2);
+/*!40000 ALTER TABLE `product` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -53,4 +52,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-08-16 14:26:33
+-- Dump completed on 2024-08-23 16:04:12

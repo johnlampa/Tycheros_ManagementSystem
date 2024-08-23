@@ -16,32 +16,27 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `orderitem`
+-- Table structure for table `supplier`
 --
 
-DROP TABLE IF EXISTS `orderitem`;
+DROP TABLE IF EXISTS `supplier`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `orderitem` (
-  `orderitemID` int NOT NULL AUTO_INCREMENT,
-  `orderID` int DEFAULT NULL,
-  `productID` int DEFAULT NULL,
-  `quantity` int DEFAULT NULL,
-  PRIMARY KEY (`orderitemID`),
-  KEY `orderitem_order_ID_idx` (`orderID`),
-  KEY `orderitem_product_ID_idx` (`productID`),
-  CONSTRAINT `orderitem_order_ID` FOREIGN KEY (`orderID`) REFERENCES `order` (`orderID`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `orderitem_product_ID` FOREIGN KEY (`productID`) REFERENCES `product` (`productID`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+CREATE TABLE `supplier` (
+  `supplierID` int NOT NULL AUTO_INCREMENT,
+  `supplierName` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`supplierID`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `orderitem`
+-- Dumping data for table `supplier`
 --
 
-LOCK TABLES `orderitem` WRITE;
-/*!40000 ALTER TABLE `orderitem` DISABLE KEYS */;
-/*!40000 ALTER TABLE `orderitem` ENABLE KEYS */;
+LOCK TABLES `supplier` WRITE;
+/*!40000 ALTER TABLE `supplier` DISABLE KEYS */;
+INSERT INTO `supplier` VALUES (1,'Tycheros'),(2,'World'),(3,'Cafe'),(4,'and Bar');
+/*!40000 ALTER TABLE `supplier` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -53,4 +48,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-08-16 14:26:33
+-- Dump completed on 2024-08-23 16:04:13

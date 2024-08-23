@@ -16,39 +16,33 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `purchaseorder`
+-- Table structure for table `subitem`
 --
 
-DROP TABLE IF EXISTS `purchaseorder`;
+DROP TABLE IF EXISTS `subitem`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `purchaseorder` (
-  `purchaseorderID` int NOT NULL AUTO_INCREMENT,
-  `supplierID` int DEFAULT NULL,
-  `subinventoryID` int DEFAULT NULL,
-  `employeeID` int DEFAULT NULL,
-  `quantityOrdered` int DEFAULT NULL,
-  `actualQuantity` int DEFAULT NULL,
-  `pricePerUnit` int DEFAULT NULL,
-  `stockInDate` date DEFAULT NULL,
-  `expiryDate` date DEFAULT NULL,
-  PRIMARY KEY (`purchaseorderID`),
-  KEY `purchaseorder_supplierID_idx` (`supplierID`),
-  KEY `purchaseorder_subinventoryID_idx` (`subinventoryID`),
-  KEY `purchaseorder_employeeID_idx` (`employeeID`),
-  CONSTRAINT `purchaseorder_employee_ID` FOREIGN KEY (`employeeID`) REFERENCES `employees` (`employeeID`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `purchaseorder_subinventory_ID` FOREIGN KEY (`subinventoryID`) REFERENCES `subinventory` (`subinventoryID`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `purchaseorder_supplier_ID` FOREIGN KEY (`supplierID`) REFERENCES `supplier` (`supplierID`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+CREATE TABLE `subitem` (
+  `subitemID` int NOT NULL AUTO_INCREMENT,
+  `productID` int DEFAULT NULL,
+  `inventoryID` int DEFAULT NULL,
+  `quantityNeeded` int DEFAULT NULL,
+  PRIMARY KEY (`subitemID`),
+  KEY `subitem_product_ID_idx` (`productID`),
+  KEY `subitem_inventory_ID_idx` (`inventoryID`),
+  CONSTRAINT `subitem_inventory_ID` FOREIGN KEY (`inventoryID`) REFERENCES `inventory` (`inventoryID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `subitem_product_ID` FOREIGN KEY (`productID`) REFERENCES `product` (`productID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `purchaseorder`
+-- Dumping data for table `subitem`
 --
 
-LOCK TABLES `purchaseorder` WRITE;
-/*!40000 ALTER TABLE `purchaseorder` DISABLE KEYS */;
-/*!40000 ALTER TABLE `purchaseorder` ENABLE KEYS */;
+LOCK TABLES `subitem` WRITE;
+/*!40000 ALTER TABLE `subitem` DISABLE KEYS */;
+INSERT INTO `subitem` VALUES (1,1,3,5),(2,1,2,1000);
+/*!40000 ALTER TABLE `subitem` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -60,4 +54,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-08-16 14:26:33
+-- Dump completed on 2024-08-23 16:04:13

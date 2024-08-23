@@ -16,26 +16,32 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `category`
+-- Table structure for table `employees`
 --
 
-DROP TABLE IF EXISTS `category`;
+DROP TABLE IF EXISTS `employees`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `category` (
-  `categoryID` int NOT NULL AUTO_INCREMENT,
-  `name` varchar(45) DEFAULT NULL,
-  PRIMARY KEY (`categoryID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+CREATE TABLE `employees` (
+  `employeeID` int NOT NULL AUTO_INCREMENT,
+  `firstName` varchar(45) DEFAULT NULL,
+  `lastName` varchar(45) DEFAULT NULL,
+  `password` varchar(45) DEFAULT NULL,
+  `designation` varchar(45) DEFAULT NULL,
+  `status` varchar(45) DEFAULT NULL,
+  `contactInformation` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`employeeID`)
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `category`
+-- Dumping data for table `employees`
 --
 
-LOCK TABLES `category` WRITE;
-/*!40000 ALTER TABLE `category` DISABLE KEYS */;
-/*!40000 ALTER TABLE `category` ENABLE KEYS */;
+LOCK TABLES `employees` WRITE;
+/*!40000 ALTER TABLE `employees` DISABLE KEYS */;
+INSERT INTO `employees` VALUES (1,'AJ James','Salcedo','ajtzy','Cashier','Active','123'),(2,'John Kyle','Lampa','jklampa','Kitchen Staff','Active','09091323'),(3,'John Lauro','Buo',NULL,'Pimp','Active','09090909090'),(4,'John Lauro','Buo',NULL,'Bisag unsa','Active','09090909090'),(5,'Aaron Daniel','Ramirez',NULL,'Kitchen Staff','Active','09091232141'),(6,'Andrei Nicolette','Sereno',NULL,'Owner','Inactive','13291490123');
+/*!40000 ALTER TABLE `employees` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -47,4 +53,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-08-16 14:26:33
+-- Dump completed on 2024-08-23 16:04:13

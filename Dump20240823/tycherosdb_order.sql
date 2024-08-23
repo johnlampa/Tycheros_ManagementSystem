@@ -16,28 +16,33 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `payment`
+-- Table structure for table `order`
 --
 
-DROP TABLE IF EXISTS `payment`;
+DROP TABLE IF EXISTS `order`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `payment` (
-  `paymentID` int NOT NULL AUTO_INCREMENT,
-  `amount` int DEFAULT NULL,
-  `method` varchar(45) DEFAULT NULL,
-  `referenceNumber` varchar(45) DEFAULT NULL,
-  PRIMARY KEY (`paymentID`)
+CREATE TABLE `order` (
+  `orderID` int NOT NULL AUTO_INCREMENT,
+  `paymentID` int DEFAULT NULL,
+  `employeeID` int DEFAULT NULL,
+  `date` datetime DEFAULT NULL,
+  `status` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`orderID`),
+  KEY `order_payment_ID_idx` (`paymentID`),
+  KEY `order_employee_ID_idx` (`employeeID`),
+  CONSTRAINT `order_employee_ID` FOREIGN KEY (`employeeID`) REFERENCES `employees` (`employeeID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `order_payment_ID` FOREIGN KEY (`paymentID`) REFERENCES `payment` (`paymentID`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `payment`
+-- Dumping data for table `order`
 --
 
-LOCK TABLES `payment` WRITE;
-/*!40000 ALTER TABLE `payment` DISABLE KEYS */;
-/*!40000 ALTER TABLE `payment` ENABLE KEYS */;
+LOCK TABLES `order` WRITE;
+/*!40000 ALTER TABLE `order` DISABLE KEYS */;
+/*!40000 ALTER TABLE `order` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -49,4 +54,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-08-16 14:26:33
+-- Dump completed on 2024-08-23 16:04:13

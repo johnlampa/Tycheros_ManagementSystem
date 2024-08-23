@@ -16,26 +16,30 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `supplier`
+-- Table structure for table `price`
 --
 
-DROP TABLE IF EXISTS `supplier`;
+DROP TABLE IF EXISTS `price`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `supplier` (
-  `supplierID` int NOT NULL AUTO_INCREMENT,
-  `name` varchar(45) DEFAULT NULL,
-  PRIMARY KEY (`supplierID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+CREATE TABLE `price` (
+  `priceID` int NOT NULL AUTO_INCREMENT,
+  `productID` int DEFAULT NULL,
+  `sellingPrice` int DEFAULT NULL,
+  PRIMARY KEY (`priceID`),
+  KEY `price_product_ID_idx` (`productID`),
+  CONSTRAINT `price_product_ID` FOREIGN KEY (`productID`) REFERENCES `product` (`productID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `supplier`
+-- Dumping data for table `price`
 --
 
-LOCK TABLES `supplier` WRITE;
-/*!40000 ALTER TABLE `supplier` DISABLE KEYS */;
-/*!40000 ALTER TABLE `supplier` ENABLE KEYS */;
+LOCK TABLES `price` WRITE;
+/*!40000 ALTER TABLE `price` DISABLE KEYS */;
+INSERT INTO `price` VALUES (1,1,250),(2,1,90),(3,1,400);
+/*!40000 ALTER TABLE `price` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -47,4 +51,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-08-16 14:26:33
+-- Dump completed on 2024-08-23 16:04:12

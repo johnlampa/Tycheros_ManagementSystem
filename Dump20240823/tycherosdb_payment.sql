@@ -16,28 +16,28 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `inventory`
+-- Table structure for table `payment`
 --
 
-DROP TABLE IF EXISTS `inventory`;
+DROP TABLE IF EXISTS `payment`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `inventory` (
-  `inventoryID` int NOT NULL AUTO_INCREMENT,
-  `name` varchar(45) DEFAULT NULL,
-  `unitOfMeasure` varchar(45) DEFAULT NULL,
-  `reorderPoint` int DEFAULT NULL,
-  PRIMARY KEY (`inventoryID`)
+CREATE TABLE `payment` (
+  `paymentID` int NOT NULL AUTO_INCREMENT,
+  `amount` int DEFAULT NULL,
+  `method` varchar(45) DEFAULT NULL,
+  `referenceNumber` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`paymentID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `inventory`
+-- Dumping data for table `payment`
 --
 
-LOCK TABLES `inventory` WRITE;
-/*!40000 ALTER TABLE `inventory` DISABLE KEYS */;
-/*!40000 ALTER TABLE `inventory` ENABLE KEYS */;
+LOCK TABLES `payment` WRITE;
+/*!40000 ALTER TABLE `payment` DISABLE KEYS */;
+/*!40000 ALTER TABLE `payment` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -49,4 +49,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-08-16 14:26:33
+-- Dump completed on 2024-08-23 16:04:13

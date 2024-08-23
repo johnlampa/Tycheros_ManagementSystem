@@ -16,31 +16,27 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `employees`
+-- Table structure for table `category`
 --
 
-DROP TABLE IF EXISTS `employees`;
+DROP TABLE IF EXISTS `category`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `employees` (
-  `employeeID` int NOT NULL AUTO_INCREMENT,
-  `firstName` varchar(45) DEFAULT NULL,
-  `lastName` varchar(45) DEFAULT NULL,
-  `password` varchar(45) DEFAULT NULL,
-  `designation` varchar(45) DEFAULT NULL,
-  `status` varchar(45) DEFAULT NULL,
-  `contactInformation` varchar(45) DEFAULT NULL,
-  PRIMARY KEY (`employeeID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+CREATE TABLE `category` (
+  `categoryID` int NOT NULL AUTO_INCREMENT,
+  `categoryName` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`categoryID`)
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `employees`
+-- Dumping data for table `category`
 --
 
-LOCK TABLES `employees` WRITE;
-/*!40000 ALTER TABLE `employees` DISABLE KEYS */;
-/*!40000 ALTER TABLE `employees` ENABLE KEYS */;
+LOCK TABLES `category` WRITE;
+/*!40000 ALTER TABLE `category` DISABLE KEYS */;
+INSERT INTO `category` VALUES (1,'Appetizer'),(2,'Entrees'),(3,'Snacks'),(4,'Combo Meals'),(5,'Wings'),(6,'Salads'),(7,'Milk Tea'),(8,'Beer'),(9,'Coffee'),(10,'Whiskey'),(11,'Frappe'),(12,'Tea');
+/*!40000 ALTER TABLE `category` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -52,4 +48,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-08-16 14:26:33
+-- Dump completed on 2024-08-23 16:04:13
