@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ProductModalProps } from "../../lib/types/ProductModalProps";
+import { ProductModalProps } from "../../lib/types/props/ProductModalProps";
 import Modal from "@/components/ui/Modal";
 import { ProductDataTypes } from "../../lib/types/ProductDataTypes";
 
@@ -86,8 +86,8 @@ const ProductModal: React.FC<ProductModalProps> = ({
   return (
     <>
       <Modal
-        productModalIsVisible={productModalIsVisible}
-        setProductModalVisibility={setProductModalVisibility}
+        modalIsVisible={productModalIsVisible}
+        setModalVisibility={setProductModalVisibility}
       >
         <form id="productForm" onSubmit={handleSubmit}>
           <p className="text-black dark:text-black flex justify-center items-center mb-4 text-xl font-bold">

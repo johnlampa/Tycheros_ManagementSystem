@@ -1,5 +1,12 @@
-import React from "react";
+"use client";
+import React, { useState } from "react";
+
 import MenuCard from "@/components/ui/MenuCard";
+import Modal from "@/components/ui/Modal";
+
+import { CategoriesDataTypes } from "../../../lib/types/CategoriesDataTypes";
+import { Order } from "../../../lib/types/OrderDataTypes";
+import { ProductDataTypes } from "../../../lib/types/ProductDataTypes";
 
 const MenuData = [
   {
@@ -9,96 +16,95 @@ const MenuData = [
     sellingPrice: 90.0,
     imageUrl: "/assets/images/MilkTea.jpg",
   },
+  {
+    productId: 1,
+    productName: "Match",
+    categoryName: "Milk Tea",
+    sellingPrice: 90.0,
+    imageUrl: "/assets/images/MilkTea.jpg",
+  },
+];
+
+const categories: CategoriesDataTypes[] = [
+  {
+    categoryId: 1,
+    categoryName: "Milk Tea",
+  },
+  {
+    categoryId: 2,
+    categoryName: "Beer",
+  },
+  {
+    categoryId: 3,
+    categoryName: "Coffee",
+  },
+  {
+    categoryId: 4,
+    categoryName: "Whiskey",
+  },
+  {
+    categoryId: 5,
+    categoryName: "Frappe",
+  },
+  {
+    categoryId: 6,
+    categoryName: "Tea",
+  },
 ];
 
 export default function Page() {
+  const [productToAdd, setProductToAdd] = useState<ProductDataTypes>({
+    productId: 1,
+    productName: "Matcha",
+    categoryName: "Milk Tea",
+    sellingPrice: 90.0,
+    imageUrl: "/assets/images/MilkTea.jpg",
+  });
+
+  const [cart, setCart] = useState<Order>({
+    employeeId: 1,
+    date: Date(),
+    status: "unpaid",
+    orderItems: [],
+  });
+
+  const [confirmedOrder, setConfirmedOrder] = useState<Order>({
+    employeeId: 1,
+    date: Date(),
+    status: "unpaid",
+    orderItems: [],
+  });
+
+  const [quantityModalVisibility, setQuantityModalVisibility] = useState(false);
+
   return (
     <>
-      <div className="w-[362px] p-6">
-        <div>Menu Page</div>
-        <div>
-          {" "}
-          Milk Tea
-          <div className="grid grid-cols-2 gap-x-6 gap-y-3">
-            {MenuData.filter((item) => item.categoryName === "Milk Tea").map(
-              (item, index) => (
-                <div key={index}>
-                  <MenuCard {...item} />
-                </div>
-              )
-            )}
-          </div>
+      <div className="w-[362px] p-6 border mx-auto">
+        <div className="flex items-center justify-center font-bold text-2xl mb-5">
+          Bar Menu
         </div>
 
-        <div>
-          {" "}
-          Beer
-          <div className="grid grid-cols-2 gap-x-6 gap-y-3">
-            {MenuData.filter((item) => item.categoryName === "Beer").map(
-              (item, index) => (
+        {categories.map((category) => (
+          <div key={category.categoryName} className="mb-8">
+            <p className="font-semibold text-lg">{category.categoryName}</p>
+            <div className="grid grid-cols-2 gap-x-6 gap-y-3">
+              {MenuData.filter(
+                (item) => item.categoryName === category.categoryName
+              ).map((item, index) => (
                 <div key={index}>
-                  <MenuCard {...item} />
+                  <MenuCard
+                    product={item}
+                    setProductToAdd={setProductToAdd}
+                    cart={cart}
+                    setCart={setCart}
+                    quantityModalIsVisible={quantityModalVisibility}
+                    setQuantityModalVisibility={setQuantityModalVisibility}
+                  />
                 </div>
-              )
-            )}
+              ))}
+            </div>
           </div>
-        </div>
-
-        <div>
-          {" "}
-          Coffee
-          <div className="grid grid-cols-2 gap-x-6 gap-y-3">
-            {MenuData.filter((item) => item.categoryName === "Coffee").map(
-              (item, index) => (
-                <div key={index}>
-                  <MenuCard {...item} />
-                </div>
-              )
-            )}
-          </div>
-        </div>
-
-        <div>
-          {" "}
-          Whiskey
-          <div className="grid grid-cols-2 gap-x-6 gap-y-3">
-            {MenuData.filter((item) => item.categoryName === "Whiskey").map(
-              (item, index) => (
-                <div key={index}>
-                  <MenuCard {...item} />
-                </div>
-              )
-            )}
-          </div>
-        </div>
-
-        <div>
-          {" "}
-          Frappe
-          <div className="grid grid-cols-2 gap-x-6 gap-y-3">
-            {MenuData.filter((item) => item.categoryName === "Frappe").map(
-              (item, index) => (
-                <div key={index}>
-                  <MenuCard {...item} />
-                </div>
-              )
-            )}
-          </div>
-        </div>
-
-        <div>
-          {" "}
-          Tea
-          <div className="grid grid-cols-2 gap-x-6 gap-y-3">
-            {MenuData.filter((item) => item.categoryName === "Tea").map(
-              (item, index) => (
-                <div key={index}>
-                  <MenuCard {...item} />
-                </div>
-              )
-            )}
-          </div>
-        </div>
+        ))}
       </div>
     </>
   );

@@ -4,7 +4,7 @@ import ProductModal from "@/components/ProductModal";
 
 import type { ProductDataTypes } from "../../lib/types/ProductDataTypes";
 import type { InventoryDataTypes } from "../../lib/types/InventoryDataTypes";
-import { MenuManagementCardProps } from "../../lib/types/MenuManagementCardProps";
+import { MenuManagementCardProps } from "../../lib/types/props/MenuManagementCardProps";
 
 const MenuManagementCard: React.FC<MenuManagementCardProps> = ({
   menuData,
