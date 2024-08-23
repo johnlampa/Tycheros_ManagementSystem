@@ -263,20 +263,7 @@ export default function Home() {
                 style={{ marginBottom: '10px', padding: '8px', width: '100%', color: 'black' }}
               />
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <button
-                  onClick={() => setShowAddOverlay(false)}
-                  style={{
-                    backgroundColor: 'black',
-                    color: 'white',
-                    padding: '8px 16px',
-                    borderRadius: '4px',
-                    border: 'none',
-                    cursor: 'pointer',
-                  }}
-                >
-                  Cancel
-                </button>
-                <button
+              <button
                   onClick={() => {
                     handleAddEmployee(); 
                     setShowAddOverlay(false); 
@@ -292,6 +279,19 @@ export default function Home() {
                   }}
                 >
                   Confirm
+                </button>
+                <button
+                  onClick={() => setShowAddOverlay(false)}
+                  style={{
+                    backgroundColor: 'black',
+                    color: 'white',
+                    padding: '8px 16px',
+                    borderRadius: '4px',
+                    border: 'none',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Cancel
                 </button>
               </div>
             </div>
@@ -359,6 +359,19 @@ export default function Home() {
                 style={{ marginBottom: '10px', padding: '8px', width: '100%', color: 'black' }}
               />
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <button
+                  onClick={() => setShowConfirmOverlay(true)}
+                  style={{
+                    backgroundColor: 'black',
+                    color: 'white',
+                    padding: '8px 16px',
+                    borderRadius: '4px',
+                    border: 'none',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Save
+                </button>
                 <button
                   onClick={() => setShowEditOverlay(false)}
                   style={{
@@ -371,19 +384,6 @@ export default function Home() {
                   }}
                 >
                   Cancel
-                </button>
-                <button
-                  onClick={() => setShowConfirmOverlay(true)}
-                  style={{
-                    backgroundColor: 'black',
-                    color: 'white',
-                    padding: '8px 16px',
-                    borderRadius: '4px',
-                    border: 'none',
-                    cursor: 'pointer',
-                  }}
-                >
-                  Save
                 </button>
               </div>
             </div>
@@ -416,6 +416,19 @@ export default function Home() {
             <h2 style={{ color: 'black' }}>Confirm Changes</h2>
             <p style={{ color: 'black' }}>Are you sure you want to save these changes?</p>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <button
+                onClick={handleSaveChanges}
+                style={{
+                  backgroundColor: 'black',
+                  color: 'white',
+                  padding: '8px 16px',
+                  borderRadius: '4px',
+                  border: 'none',
+                  cursor: 'pointer',
+                }}
+              >
+                Confirm
+              </button>
               <button
                 onClick={() => setShowConfirmOverlay(false)}
                 style={{
@@ -428,19 +441,6 @@ export default function Home() {
                 }}
               >
                 Cancel
-              </button>
-              <button
-                onClick={handleSaveChanges}
-                style={{
-                  backgroundColor: 'black',
-                  color: 'white',
-                  padding: '8px 16px',
-                  borderRadius: '4px',
-                  border: 'none',
-                  cursor: 'pointer',
-                }}
-              >
-                Confirm
               </button>
             </div>
           </div>
