@@ -16,7 +16,7 @@ export default function Page() {
   const [menuData, setMenuData] = useState<MenuItem[]>([]);
 
   useEffect(() => {
-    fetch('http://localhost:8081/menu')
+    fetch('http://localhost:8081/ordering/getCustomerMenu')
       .then(response => response.json())
       .then(data => setMenuData(data))
       .catch(error => console.error('Error fetching menu data:', error));
