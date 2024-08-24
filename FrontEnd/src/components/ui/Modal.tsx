@@ -8,7 +8,7 @@ const Modal: React.FC<ModalProps> = ({
   return (
     <>
       {modalIsVisible && (
-        <div className="fixed inset-0 z-50 flex justify-center items-center">
+        <div className="fixed inset-0 z-50 flex justify-center items-center w-full">
           <div
             onClick={() => {
               setModalVisibility(false);

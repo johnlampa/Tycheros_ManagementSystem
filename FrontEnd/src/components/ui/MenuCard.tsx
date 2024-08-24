@@ -6,8 +6,7 @@ import { ProductDataTypes } from "../../../lib/types/ProductDataTypes";
 
 const MenuCard: React.FC<MenuCardProps> = ({
   product,
-  cart,
-  setCart,
+  setProductToAdd,
   quantityModalIsVisible,
   setQuantityModalVisibility,
 }) => {
@@ -31,6 +30,7 @@ const MenuCard: React.FC<MenuCardProps> = ({
           className="bg-[#5A3714] border-[#5A3714] border text-white mx-1 rounded-md hover:bg-white hover:border-[#5A3714] hover:text-[#5A3714] duration-200"
           onClick={() => {
             setQuantityModalVisibility(true);
+            setProductToAdd(product);
           }}
         >
           Add Item

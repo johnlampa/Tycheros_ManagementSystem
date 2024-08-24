@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 
 import MenuCard from "@/components/ui/MenuCard";
-import Modal from "@/components/ui/Modal";
+import QuantityModal from "@/components/QuantityModal";
 
 import { CategoriesDataTypes } from "../../../lib/types/CategoriesDataTypes";
 import { Order } from "../../../lib/types/OrderDataTypes";
@@ -17,7 +17,7 @@ const MenuData = [
     imageUrl: "/assets/images/MilkTea.jpg",
   },
   {
-    productId: 1,
+    productId: 2,
     productName: "Match",
     categoryName: "Milk Tea",
     sellingPrice: 90.0,
@@ -95,8 +95,6 @@ export default function Page() {
                   <MenuCard
                     product={item}
                     setProductToAdd={setProductToAdd}
-                    cart={cart}
-                    setCart={setCart}
                     quantityModalIsVisible={quantityModalVisibility}
                     setQuantityModalVisibility={setQuantityModalVisibility}
                   />
@@ -105,6 +103,15 @@ export default function Page() {
             </div>
           </div>
         ))}
+      </div>
+      <div className="w-[312px] p-4">
+        <QuantityModal
+          productToAdd={productToAdd}
+          cart={cart}
+          setCart={setCart}
+          quantityModalIsVisible={quantityModalVisibility}
+          setQuantityModalVisibility={setQuantityModalVisibility}
+        ></QuantityModal>
       </div>
     </>
   );
