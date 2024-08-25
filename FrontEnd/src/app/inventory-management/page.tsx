@@ -39,7 +39,7 @@ export default function InventoryManagementPage() {
   useEffect(() => {
     const fetchInventory = async () => {
       try {
-        const response = await fetch('http://localhost:8081/inventory');
+        const response = await fetch('http://localhost:8081/inventoryManagement/getSubitem');
         if (!response.ok) {
           throw new Error('Network response was not ok');
         }
@@ -57,7 +57,7 @@ export default function InventoryManagementPage() {
 
   const handleAddItem = async () => {
     try {
-      const response = await fetch('http://localhost:8081/addSubitem', {
+      const response = await fetch('http://localhost:8081/inventoryManagement/postSubitem', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -75,7 +75,7 @@ export default function InventoryManagementPage() {
         reorderPoint: 0,
       });
 
-      const updatedInventory = await fetch('http://localhost:8081/inventory').then((res) =>
+      const updatedInventory = await fetch('http://localhost:8081/inventoryManagement/getSubitem').then((res) =>
         res.json()
       );
       setInventoryData(updatedInventory);
@@ -99,7 +99,7 @@ export default function InventoryManagementPage() {
   const handleSaveChanges = async () => {
     if (itemToEdit) {
       try {
-        const response = await fetch(`http://localhost:8081/editSubitem/${itemToEdit.inventoryID}`, {
+        const response = await fetch(`http://localhost:8081/inventoryManagement/putSubitem/${itemToEdit.inventoryID}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -111,7 +111,7 @@ export default function InventoryManagementPage() {
           throw new Error('Failed to update subitem');
         }
 
-        const updatedInventory = await fetch('http://localhost:8081/inventory').then((res) =>
+        const updatedInventory = await fetch('http://localhost:8081/inventoryManagement/getSubitem').then((res) =>
           res.json()
         );
         setInventoryData(updatedInventory);
@@ -127,7 +127,7 @@ export default function InventoryManagementPage() {
   const handleDeleteItem = async () => {
     if (itemToDelete) {
       try {
-        const response = await fetch(`http://localhost:8081/deleteSubitem/${itemToDelete.inventoryID}`, {
+        const response = await fetch(`http://localhost:8081/inventoryManagement/deleteSubitem/${itemToDelete.inventoryID}`, {
           method: 'DELETE',
         });
 
@@ -135,7 +135,7 @@ export default function InventoryManagementPage() {
           throw new Error('Failed to delete subitem');
         }
 
-        const updatedInventory = await fetch('http://localhost:8081/inventory').then((res) =>
+        const updatedInventory = await fetch('http://localhost:8081/inventoryManagement/getSubitem').then((res) =>
           res.json()
         );
         setInventoryData(updatedInventory);
@@ -555,20 +555,7 @@ export default function InventoryManagementPage() {
             <p style={{ color: 'black' }}><strong>Reorder Point:</strong> {itemToDelete.reorderPoint}</p>
             <p style={{ color: 'black' }}><strong>Unit of Measure:</strong> {itemToDelete.unitOfMeasure}</p>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <button
-                onClick={() => setShowDeleteOverlay(false)}
-                style={{
-                  backgroundColor: 'black',
-                  color: 'white',
-                  padding: '8px 16px',
-                  borderRadius: '4px',
-                  border: 'none',
-                  cursor: 'pointer',
-                }}
-              >
-                Cancel
-              </button>
-              <button
+            <button
                 onClick={async () => {
                   await handleDeleteItem();
                   setShowDeleteOverlay(false);
@@ -583,6 +570,19 @@ export default function InventoryManagementPage() {
                 }}
               >
                 Confirm
+              </button>
+              <button
+                onClick={() => setShowDeleteOverlay(false)}
+                style={{
+                  backgroundColor: 'black',
+                  color: 'white',
+                  padding: '8px 16px',
+                  borderRadius: '4px',
+                  border: 'none',
+                  cursor: 'pointer',
+                }}
+              >
+                Cancel
               </button>
             </div>
           </div>
