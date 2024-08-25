@@ -157,7 +157,13 @@ export default function InventoryManagementPage() {
     return <p>Error: {error.message}</p>;
   }
 
-  const formatDate = (dateString: string) => format(new Date(dateString), 'yyyy-MM-dd');
+  const formatDate = (dateString?: string | null) => {
+    if (!dateString) {
+      return '';
+    }
+    const date = new Date(dateString);
+    return isNaN(date.getTime()) ? '' : format(date, 'yyyy-MM-dd');
+  };
 
   return (
     <div
