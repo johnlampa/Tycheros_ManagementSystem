@@ -16,40 +16,40 @@ const db = mysql.createConnection({
 router.get('/getSubitem', (req, res) => {
   const query = `
     SELECT 
-        i.inventoryID,
-        i.inventoryName,
-        i.reorderPoint,
-        i.unitOfMeasure,
-        sub.totalQuantity,  -- Total quantity of all subitems with the same inventoryID
-        si.quantityRemaining,  -- Quantity remaining for the specific subinventory record
-        po.pricePerUnit,
-        DATE(po.stockInDate) AS stockInDate,  -- Extract DATE from DATETIME
-        DATE(po.expiryDate) AS expiryDate,    -- Extract DATE from DATETIME
-        s.supplierName,
-        CONCAT(e.firstName, ' ', e.lastName) AS employeeName
-    FROM 
-        inventory i
-    LEFT JOIN 
-        subinventory si ON i.inventoryID = si.inventoryID
-    LEFT JOIN 
-        purchaseorder po ON si.purchaseOrderID = po.purchaseOrderID
-    LEFT JOIN 
-        supplier s ON po.supplierID = s.supplierID
-    LEFT JOIN 
-        employees e ON po.employeeID = e.employeeID
-    LEFT JOIN 
-        (
-            SELECT 
-                inventoryID,
-                SUM(quantityRemaining) AS totalQuantity
-            FROM 
-                subinventory
-            GROUP BY 
-                inventoryID
-        ) sub ON i.inventoryID = sub.inventoryID
-    ORDER BY 
-        i.inventoryName ASC,  -- Order alphabetically by inventory name
-        po.stockInDate ASC;   -- Order by oldest stock-in date
+    i.inventoryID,
+    i.inventoryName,
+    i.reorderPoint,
+    i.unitOfMeasure,
+    sub.totalQuantity,
+    si.quantityRemaining,
+    po.pricePerUnit,
+    DATE(po.stockInDate) AS stockInDate,  -- Format stockInDate as DATE
+    DATE(po.expiryDate) AS expiryDate,    -- Format expiryDate as DATE
+    s.supplierName,
+    CONCAT(e.firstName, ' ', e.lastName) AS employeeName
+FROM 
+    inventory i
+LEFT JOIN 
+    subinventory si ON i.inventoryID = si.inventoryID
+LEFT JOIN 
+    purchaseorder po ON si.purchaseOrderID = po.purchaseOrderID
+LEFT JOIN 
+    supplier s ON po.supplierID = s.supplierID
+LEFT JOIN 
+    employees e ON po.employeeID = e.employeeID
+LEFT JOIN 
+    (
+        SELECT 
+            inventoryID,
+            SUM(quantityRemaining) AS totalQuantity
+        FROM 
+            subinventory
+        GROUP BY 
+            inventoryID
+    ) sub ON i.inventoryID = sub.inventoryID
+ORDER BY 
+    i.inventoryName ASC,
+    po.expiryDate ASC;
   `;
 
   db.query(query, (err, result) => {
