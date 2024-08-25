@@ -1,5 +1,7 @@
 import { ReactNode } from "react";
+
 import "@/styles/globals.css";
+import { CartProvider } from "../../lib/context/CartContext";
 
 export const metadata = {
   title: "Tycheros Management System",
@@ -13,7 +15,9 @@ interface RootLayoutProps {
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <CartProvider>{children}</CartProvider>
+      </body>
     </html>
   );
 }

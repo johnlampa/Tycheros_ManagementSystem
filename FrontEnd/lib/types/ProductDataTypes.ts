@@ -1,5 +1,5 @@
 export type ProductDataTypes = {
-    productId: number,
+    productId?: number,
     productName: string,
     categoryName?: string,
     sellingPrice: number,

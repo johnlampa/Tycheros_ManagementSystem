@@ -1,14 +1,17 @@
 import { useState } from "react";
+
 import { QuantityModalProps } from "../../lib/types/props/QuantityModalProps";
+import { useCartContext } from "../../lib/context/CartContext";
+
 import Modal from "@/components/ui/Modal";
 
 const QuantityModal: React.FC<QuantityModalProps> = ({
   productToAdd,
-  cart,
-  setCart,
   quantityModalIsVisible,
   setQuantityModalVisibility,
 }) => {
+  const { cart, setCart } = useCartContext();
+
   const [quantity, setQuantity] = useState(0);
 
   const handleSave = () => {

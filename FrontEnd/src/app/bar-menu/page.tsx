@@ -61,12 +61,12 @@ export default function Page() {
     imageUrl: "/assets/images/MilkTea.jpg",
   });
 
-  const [cart, setCart] = useState<Order>({
-    employeeId: 1,
-    date: Date(),
-    status: "unpaid",
-    orderItems: [],
-  });
+  // const [cart, setCart] = useState<Order>({
+  //   employeeId: 1,
+  //   date: Date(),
+  //   status: "unpaid",
+  //   orderItems: [],
+  // });
 
   const [confirmedOrder, setConfirmedOrder] = useState<Order>({
     employeeId: 1,
@@ -107,8 +107,6 @@ export default function Page() {
       <div className="w-[312px] p-4">
         <QuantityModal
           productToAdd={productToAdd}
-          cart={cart}
-          setCart={setCart}
           quantityModalIsVisible={quantityModalVisibility}
           setQuantityModalVisibility={setQuantityModalVisibility}
         ></QuantityModal>
