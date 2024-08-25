@@ -33,7 +33,7 @@ export default function Home() {
   useEffect(() => {
     const fetchEmployees = async () => {
       try {
-        const response = await fetch('http://localhost:8081/employees');
+        const response = await fetch('http://localhost:8081/employeeManagement/getEmployee');
         if (!response.ok) {
           throw new Error('Network response was not ok');
         }
@@ -51,7 +51,7 @@ export default function Home() {
 
   const handleAddEmployee = async () => {
     try {
-      const response = await fetch('http://localhost:8081/addEmployee', {
+      const response = await fetch('http://localhost:8081/employeeManagement/postEmployee', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -74,7 +74,7 @@ export default function Home() {
       });
   
       // Fetch updated employee list
-      const updatedEmployees = await fetch('http://localhost:8081/employees').then(res => res.json());
+      const updatedEmployees = await fetch('http://localhost:8081/employeeManagement/getEmployee').then(res => res.json());
       setEmployees(updatedEmployees);
   
       // Display success message
@@ -103,7 +103,7 @@ export default function Home() {
 
   const handleSaveChanges = async () => {
     try {
-      const response = await fetch(`http://localhost:8081/editEmployee/${employeeToEdit?.employeeID}`, {
+      const response = await fetch(`http://localhost:8081/employeeManagement/putEmployee/${employeeToEdit?.employeeID}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
