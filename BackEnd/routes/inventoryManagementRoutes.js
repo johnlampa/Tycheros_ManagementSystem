@@ -16,17 +16,17 @@ const db = mysql.createConnection({
 router.get('/getSubitem', (req, res) => {
   const query = `
     SELECT 
-      i.inventoryID,
-      i.inventoryName,
-      i.reorderPoint,
-      i.unitOfMeasure,
-      COALESCE(SUM(si.quantityRemaining), 0) AS totalQuantity,
-      si.quantityRemaining,
-      po.pricePerUnit,
-      po.stockInDate,
-      po.expiryDate,
-      s.supplierName,
-      CONCAT(e.firstName, ' ', e.lastName) AS employeeName
+        i.inventoryID,
+        i.inventoryName,
+        i.reorderPoint,
+        i.unitOfMeasure,
+        sub.totalQuantity,  -- Total quantity of all subitems with the same inventoryID
+        si.quantityRemaining,  -- Quantity remaining for the specific subinventory record
+        po.pricePerUnit,
+        DATE(po.stockInDate) AS stockInDate,  -- Extract DATE from DATETIME
+        DATE(po.expiryDate) AS expiryDate,    -- Extract DATE from DATETIME
+        s.supplierName,
+        CONCAT(e.firstName, ' ', e.lastName) AS employeeName
     FROM 
         inventory i
     LEFT JOIN 
@@ -37,20 +37,19 @@ router.get('/getSubitem', (req, res) => {
         supplier s ON po.supplierID = s.supplierID
     LEFT JOIN 
         employees e ON po.employeeID = e.employeeID
-    GROUP BY 
-        i.inventoryID, 
-        i.inventoryName, 
-        i.reorderPoint, 
-        i.unitOfMeasure, 
-        si.subinventoryID, 
-        si.quantityRemaining,
-        po.pricePerUnit, 
-        po.stockInDate, 
-        po.expiryDate, 
-        s.supplierName, 
-        e.employeeID
+    LEFT JOIN 
+        (
+            SELECT 
+                inventoryID,
+                SUM(quantityRemaining) AS totalQuantity
+            FROM 
+                subinventory
+            GROUP BY 
+                inventoryID
+        ) sub ON i.inventoryID = sub.inventoryID
     ORDER BY 
-        i.inventoryName;
+        i.inventoryName ASC,  -- Order alphabetically by inventory name
+        po.stockInDate ASC;   -- Order by oldest stock-in date
   `;
 
   db.query(query, (err, result) => {
@@ -133,5 +132,88 @@ router.delete('/deleteSubitem/:inventoryID', (req, res) => {
     return res.json({ message: "Subitem deleted successfully" });
   });
 });
+
+
+// STOCK IN STOCK OUT STOCK IN STOCK OUT STOCK IN STOCK OUT STOCK IN STOCK OUT STOCK IN STOCK OUT STOCK IN STOCK OUT STOCK IN STOCK OUT
+
+// STOCK IN ENDPOINT
+router.post('/stockInSubitem', (req, res) => {
+  const { inventoryID, supplierName, employeeID, quantityOrdered, actualQuantity, pricePerUnit, stockInDate, expiryDate } = req.body;
+
+  // Start a transaction to ensure data consistency
+  db.beginTransaction((err) => {
+      if (err) return res.status(500).send(err);
+
+      // 1. Insert or retrieve the supplier ID
+      const supplierQuery = 'INSERT INTO supplier (supplierName) VALUES (?) ON DUPLICATE KEY UPDATE supplierID=LAST_INSERT_ID(supplierID)';
+      db.query(supplierQuery, [supplierName], (err, supplierResult) => {
+          if (err) {
+              return db.rollback(() => {
+                  res.status(500).send(err);
+              });
+          }
+
+          const supplierID = supplierResult.insertId;
+
+          // 2. Insert into the purchaseorder table
+          const purchaseOrderQuery = `
+              INSERT INTO purchaseorder 
+              (supplierID, employeeID, quantityOrdered, actualQuantity, pricePerUnit, stockInDate, expiryDate) 
+              VALUES (?, ?, ?, ?, ?, ?, ?)`;
+
+          db.query(purchaseOrderQuery, [supplierID, employeeID, quantityOrdered, actualQuantity, pricePerUnit, stockInDate, expiryDate], (err, purchaseOrderResult) => {
+              if (err) {
+                  return db.rollback(() => {
+                      res.status(500).send(err);
+                  });
+              }
+
+              const purchaseOrderID = purchaseOrderResult.insertId;
+
+              // 3. Insert into the subinventory table
+              const subinventoryQuery = 'INSERT INTO subinventory (inventoryID, purchaseOrderID, quantityRemaining) VALUES (?, ?, ?)';
+
+              db.query(subinventoryQuery, [inventoryID, purchaseOrderID, actualQuantity], (err, subinventoryResult) => {
+                  if (err) {
+                      return db.rollback(() => {
+                          res.status(500).send(err);
+                      });
+                  }
+
+                  const subinventoryID = subinventoryResult.insertId;
+
+                  // Commit the transaction
+                  db.commit((err) => {
+                      if (err) {
+                          return db.rollback(() => {
+                              res.status(500).send(err);
+                          });
+                      }
+
+                      // Send response
+                      res.status(201).send({
+                          message: 'Product stocked in successfully',
+                          supplierID,
+                          purchaseOrderID,
+                          subinventoryID
+                      });
+                  });
+              });
+          });
+      });
+  });
+});
+
+
+
+
+
+
+
+
+
+
+
+
 
 module.exports = router;
