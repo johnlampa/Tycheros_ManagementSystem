@@ -67,6 +67,9 @@ const OrderCard: React.FC<OrderCardProps> = ({
                 quantityModalIsVisible={quantityModalIsVisible}
                 setQuantityModalVisibility={setQuantityModalVisibility}
                 previousQuantity={quantity}
+                type="edit"
+                cartState={cart}
+                setCartState={setCart}
               ></QuantityModal>
             </div>
           );

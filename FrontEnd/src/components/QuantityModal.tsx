@@ -10,23 +10,52 @@ const QuantityModal: React.FC<QuantityModalProps> = ({
   quantityModalIsVisible,
   setQuantityModalVisibility,
   previousQuantity,
+  type,
+  cartState,
+  setCartState,
 }) => {
   const { cart, setCart } = useCartContext();
 
   const [quantity, setQuantity] = useState(0);
 
   const handleSave = () => {
-    let newOrderItem: [number, number] | null = null;
+    if (type === "edit") {
+      if (productToAdd.productId) {
+        // Find the index of the order item with the same productId
+        const itemIndex = cartState?.orderItems?.findIndex(
+          (item) => item[0] === productToAdd.productId // Access the productId directly
+        );
 
-    if (productToAdd.productId) {
-      newOrderItem = [productToAdd.productId, quantity];
-    }
+        // If the item is found, update its quantity
+        if (itemIndex !== undefined && itemIndex !== -1) {
+          const updatedOrderItems = [...(cartState?.orderItems || [])];
+          updatedOrderItems[itemIndex][1] = quantity; // Update the quantity
 
-    if (newOrderItem) {
-      // Ensure orderItems is always an array
-      const updatedOrderItems = [...(cart.orderItems || []), newOrderItem];
-      setCart({ ...cart, orderItems: updatedOrderItems }); // Use setCart to update state
-      console.log("Updated cart: ", { ...cart, orderItems: updatedOrderItems });
+          if (setCartState) {
+            setCartState({ ...cart, orderItems: updatedOrderItems });
+            console.log("Updated cart: ", {
+              ...cart,
+              orderItems: updatedOrderItems,
+            });
+          }
+        }
+      }
+    } else {
+      let newOrderItem: [number, number] | null = null;
+
+      if (productToAdd.productId) {
+        newOrderItem = [productToAdd.productId, quantity];
+      }
+
+      if (newOrderItem) {
+        // Ensure orderItems is always an array
+        const updatedOrderItems = [...(cart.orderItems || []), newOrderItem];
+        setCart({ ...cart, orderItems: updatedOrderItems });
+        console.log("Updated cart: ", {
+          ...cart,
+          orderItems: updatedOrderItems,
+        });
+      }
     }
 
     // Close the modal after saving
