@@ -8,6 +8,7 @@ interface InventoryItem {
   inventoryName: string;
   reorderPoint: number;
   unitOfMeasure: string;
+  purchaseOrderID: number;
   totalQuantity: number;
   quantityRemaining: number;
   pricePerUnit: number;
@@ -261,6 +262,9 @@ export default function InventoryManagementPage() {
                 Unit of Measure
               </th>
               <th style={{ border: '1px solid black', padding: '10px' }}>
+                Purchase Order ID
+              </th>
+              <th style={{ border: '1px solid black', padding: '10px' }}>
                 Total Quantity
               </th>
               <th style={{ border: '1px solid black', padding: '10px' }}>
@@ -297,6 +301,9 @@ export default function InventoryManagementPage() {
                 </td>
                 <td style={{ border: '1px solid black', padding: '10px' }}>
                   {item.unitOfMeasure}
+                </td>
+                <td style={{ border: '1px solid black', padding: '10px' }}>
+                  {item.purchaseOrderID}
                 </td>
                 <td style={{ border: '1px solid black', padding: '10px' }}>
                   {item.totalQuantity}
