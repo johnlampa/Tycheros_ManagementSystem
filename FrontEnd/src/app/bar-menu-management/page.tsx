@@ -10,7 +10,7 @@ import { useEffect } from "react";
 export default function Page() {
   const [MenuData, setMenuData] = useState<ProductDataTypes[]>([
     {
-      productId: 1,
+      productID: 1,
       productName: "Matcha",
       categoryName: "Milk Tea",
       sellingPrice: 90.0,
@@ -21,7 +21,7 @@ export default function Page() {
       ],
     },
     {
-      productId: 2,
+      productID: 2,
       productName: "Chocolate",
       categoryName: "Milk Tea",
       sellingPrice: 90.0,
@@ -32,7 +32,7 @@ export default function Page() {
       ],
     },
     {
-      productId: 3,
+      productID: 3,
       productName: "San Mig",
       categoryName: "Beer",
       sellingPrice: 90.0,
@@ -45,7 +45,7 @@ export default function Page() {
   ]);
 
   const [menuProductHolder, setMenuProductHolder] = useState<ProductDataTypes>({
-    productId: 3,
+    productID: 3,
     productName: "Strawberry",
     categoryName: "Milk Tea",
     sellingPrice: 90.0,

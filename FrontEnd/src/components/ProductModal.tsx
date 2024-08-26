@@ -56,7 +56,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
 
     if (type === "edit") {
       const updatedProduct: ProductDataTypes = {
-        productId: menuProductToEdit?.productId,
+        productID: menuProductToEdit?.productID,
         productName: formJson.productName as string,
         sellingPrice: parseInt(formJson.sellingPrice as string),
         categoryName: categoryName,
@@ -77,7 +77,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
 
   function handleDelete() {
     const updatedMenuData = menuData.filter(
-      (product) => product.productId !== menuProductToEdit?.productId
+      (product) => product.productID !== menuProductToEdit?.productID
     );
     setMenuData(updatedMenuData);
     setProductModalVisibility(false);

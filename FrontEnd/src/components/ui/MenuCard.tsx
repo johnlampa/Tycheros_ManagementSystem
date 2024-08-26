@@ -31,6 +31,7 @@ const MenuCard: React.FC<MenuCardProps> = ({
           onClick={() => {
             setQuantityModalVisibility(true);
             setProductToAdd(product);
+            console.log("product to add: ", product);
           }}
         >
           Add Item
