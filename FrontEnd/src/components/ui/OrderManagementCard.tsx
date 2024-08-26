@@ -1,18 +1,14 @@
 "use client";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { OrderManagementCardProps } from "../../../lib/types/props/OrderManagementCardProps";
 import Link from "next/link";
 import { Order } from "../../../lib/types/OrderDataTypes";
 
-const OrderManagementCard: React.FC<OrderManagementCardProps> = ({
-  order,
-  menuData,
-  orders,
-  setOrders,
-}) => {
+const OrderManagementCard: React.FC<OrderManagementCardProps> = React.memo(({ order, menuData, orders, setOrders }) => {
   const [total, setTotal] = useState(0);
 
   useEffect(() => {
+    // Calculate total price
     const calculatedTotal = order.orderItems?.reduce(
       (acc, { productID, quantity }) => {
         const product = menuData.find((item) => item.productID === productID);
@@ -23,41 +19,31 @@ const OrderManagementCard: React.FC<OrderManagementCardProps> = ({
     setTotal(calculatedTotal || 0);
   }, [order, menuData]);
 
-  const handleConfirmPayment = () => {
-    // Update the order status
+  const handleConfirmPayment = useCallback(() => {
     const updatedOrder: Order = {
       ...order,
-      status: "pending",
+      status: "Pending",
     };
 
-    // Update the orders array
     const updatedOrders: Order[] = orders.map((o) =>
       o.orderID === order.orderID ? updatedOrder : o
     );
 
-    // Update the state
-    if (setOrders) {
-      setOrders(updatedOrders);
-    }
-  };
+    setOrders?.(updatedOrders);
+  }, [order, orders, setOrders]);
 
-  const handleCompleteOrder = () => {
-    // Update the order status
+  const handleCompleteOrder = useCallback(() => {
     const updatedOrder: Order = {
       ...order,
-      status: "completed",
+      status: "Completed",
     };
 
-    // Update the orders array
     const updatedOrders: Order[] = orders.map((o) =>
       o.orderID === order.orderID ? updatedOrder : o
     );
 
-    // Update the state
-    if (setOrders) {
-      setOrders(updatedOrders);
-    }
-  };
+    setOrders?.(updatedOrders);
+  }, [order, orders, setOrders]);
 
   return (
     <>
@@ -65,12 +51,8 @@ const OrderManagementCard: React.FC<OrderManagementCardProps> = ({
         <div className="grid grid-cols-[2fr_1fr_1fr_1fr] gap-2 font-semibold mb-3">
           <div className="flex items-center justify-center text-sm">Name</div>
           <div className="flex items-center justify-center text-sm">Price</div>
-          <div className="flex items-center justify-center text-sm">
-            Quantity
-          </div>
-          <div className="flex items-center justify-center text-sm">
-            Subtotal
-          </div>
+          <div className="flex items-center justify-center text-sm">Quantity</div>
+          <div className="flex items-center justify-center text-sm">Subtotal</div>
         </div>
 
         {order.orderItems?.map(({ productID, quantity }, itemIndex) => {
@@ -80,16 +62,9 @@ const OrderManagementCard: React.FC<OrderManagementCardProps> = ({
           const subtotal = product.sellingPrice * quantity;
 
           return (
-            <div
-              key={itemIndex}
-              className="grid grid-cols-[2fr_1fr_1fr_1fr] gap-2"
-            >
-              <div className="flex justify-center items-center text-sm">
-                {product.productName}
-              </div>
-              <div className="flex justify-center items-center">
-                {product.sellingPrice}
-              </div>
+            <div key={itemIndex} className="grid grid-cols-[2fr_1fr_1fr_1fr] gap-2">
+              <div className="flex justify-center items-center text-sm">{product.productName}</div>
+              <div className="flex justify-center items-center">{product.sellingPrice}</div>
               <div className="flex justify-center items-center">{quantity}</div>
               <div className="flex justify-center items-center">{subtotal}</div>
             </div>
@@ -101,52 +76,33 @@ const OrderManagementCard: React.FC<OrderManagementCardProps> = ({
         <div>{total}</div>
       </div>
 
-      {order.status === "unpaid" && (
+      {order.status === "Unpaid" && (
         <div className="ml-[190.57px]">
-          <Link
-            href={{
-              pathname: "/payment-details",
-              query: { order: JSON.stringify(order) },
-            }}
-          >
-            <button
-              className="border border-black px-2 py-1 rounded-md mt-1 text-sm"
-              onClick={(e) => {
-                handleConfirmPayment();
-              }}
-            >
+          <Link href={{ pathname: "/payment-details", query: { order: JSON.stringify(order) } }}>
+            <button className="border border-black px-2 py-1 rounded-md mt-1 text-sm" onClick={handleConfirmPayment}>
               Confirm Payment
             </button>
           </Link>
         </div>
       )}
 
-      {order.status === "pending" && (
+      {order.status === "Pending" && (
         <div className="ml-[198.77px]">
-          <button
-            className="border border-black px-2 py-1 rounded-md mt-1 text-sm"
-            onClick={(e) => {
-              e.preventDefault(); // Prevent navigation
-              handleCompleteOrder();
-            }}
-          >
+          <button className="border border-black px-2 py-1 rounded-md mt-1 text-sm" onClick={handleCompleteOrder}>
             Complete Order
           </button>
         </div>
       )}
 
-      {order.status === "completed" && (
+      {order.status === "Completed" && (
         <div className="ml-[231.21px]">
-          <button
-            className="border border-black px-2 py-1 rounded-md mt-1 text-sm"
-            disabled
-          >
+          <button className="border border-black px-2 py-1 rounded-md mt-1 text-sm" disabled>
             Completed
           </button>
         </div>
       )}
     </>
   );
-};
+});
 
 export default OrderManagementCard;

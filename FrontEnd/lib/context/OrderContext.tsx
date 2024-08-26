@@ -12,9 +12,9 @@ const OrderContext = createContext<OrderContext | undefined>(undefined);
 
 export const OrderProvider = ({ children }: { children: ReactNode }) => {
   const [order, setOrder] = useState<Order>({
-    employeeId: 1,
+    employeeID: 1,
     date: new Date().toISOString(),
-    status: "unpaid",
+    status: "Unpaid",
     orderItems: [],
   });
 

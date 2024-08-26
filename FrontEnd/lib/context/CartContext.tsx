@@ -11,9 +11,9 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [cart, setCart] = useState<Order>({
-    employeeId: 1,
+    employeeID: 1,
     date: new Date().toISOString(),
-    status: "unpaid",
+    status: "Unpaid",
     orderItems: [],
   });
 
