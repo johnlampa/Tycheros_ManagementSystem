@@ -15,7 +15,7 @@ const OrderCard: React.FC<OrderCardProps> = ({
   setSubtotal,
 }) => {
   const [productToAdd, setProductToAdd] = useState<ProductDataTypes>({
-    productId: 1,
+    productID: 1,
     productName: "Matcha",
     categoryName: "Milk Tea",
     sellingPrice: 90.0,
@@ -25,8 +25,8 @@ const OrderCard: React.FC<OrderCardProps> = ({
   // Update subtotal whenever cart or menuData changes
   useEffect(() => {
     const newSubtotal = cart.orderItems?.reduce(
-      (acc, [productId, quantity]) => {
-        const product = menuData.find((p) => p.productId === productId);
+      (acc, [productID, quantity]) => {
+        const product = menuData.find((p) => p.productID === productID);
         return acc + (product?.sellingPrice || 0) * quantity;
       },
       0
@@ -50,8 +50,8 @@ const OrderCard: React.FC<OrderCardProps> = ({
         </div>
 
         <div className="flex flex-col gap-3 items-center justify-center">
-          {cart?.orderItems?.map(([productId, quantity], index) => {
-            const product = menuData.find((p) => p.productId === productId);
+          {cart?.orderItems?.map(([productID, quantity], index) => {
+            const product = menuData.find((p) => p.productID === productID);
 
             return (
               <div
@@ -65,7 +65,7 @@ const OrderCard: React.FC<OrderCardProps> = ({
                       setProductToAdd(product);
                       setQuantityModalVisibility(true);
                     } else {
-                      console.warn("Product not found for ID:", productId);
+                      console.warn("Product not found for ID:", productID);
                     }
                   }}
                 >

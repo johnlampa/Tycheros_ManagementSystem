@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useCartContext } from "../../../lib/context/CartContext";
 
 import MenuCard from "@/components/ui/MenuCard";
@@ -10,60 +10,45 @@ import { Order } from "../../../lib/types/OrderDataTypes";
 import { ProductDataTypes } from "../../../lib/types/ProductDataTypes";
 import Link from "next/link";
 
-const MenuData = [
-  {
-    productId: 1,
-    productName: "Matcha",
-    categoryName: "Milk Tea",
-    sellingPrice: 90.0,
-    imageUrl: "/assets/images/MilkTea.jpg",
-  },
-  {
-    productId: 2,
-    productName: "Match",
-    categoryName: "Milk Tea",
-    sellingPrice: 90.0,
-    imageUrl: "/assets/images/MilkTea.jpg",
-  },
-  {
-    productId: 3,
-    productName: "Matc",
-    categoryName: "Milk Tea",
-    sellingPrice: 90.0,
-    imageUrl: "/assets/images/MilkTea.jpg",
-  },
-];
-
 const categories: CategoriesDataTypes[] = [
   {
-    categoryId: 1,
+    categoryId: 7,
     categoryName: "Milk Tea",
   },
   {
-    categoryId: 2,
+    categoryId: 8,
     categoryName: "Beer",
   },
   {
-    categoryId: 3,
+    categoryId: 9,
     categoryName: "Coffee",
   },
   {
-    categoryId: 4,
+    categoryId: 10,
     categoryName: "Whiskey",
   },
   {
-    categoryId: 5,
+    categoryId: 11,
     categoryName: "Frappe",
   },
   {
-    categoryId: 6,
+    categoryId: 12,
     categoryName: "Tea",
   },
 ];
 
 export default function Page() {
+  const [menuData, setMenuData] = useState<ProductDataTypes[]>([]);
+
+  useEffect(() => {
+    fetch("http://localhost:8081/ordering/getCustomerMenu")
+      .then((response) => response.json())
+      .then((data) => setMenuData(data))
+      .catch((error) => console.error("Error fetching menu data:", error));
+  }, []);
+
   const [productToAdd, setProductToAdd] = useState<ProductDataTypes>({
-    productId: 1,
+    productID: 1,
     productName: "Matcha",
     categoryName: "Milk Tea",
     sellingPrice: 90.0,
@@ -71,20 +56,6 @@ export default function Page() {
   });
 
   const { cart, setCart } = useCartContext();
-
-  // const [cart, setCart] = useState<Order>({
-  //   employeeId: 1,
-  //   date: Date(),
-  //   status: "unpaid",
-  //   orderItems: [],
-  // });
-
-  const [confirmedOrder, setConfirmedOrder] = useState<Order>({
-    employeeId: 1,
-    date: Date(),
-    status: "unpaid",
-    orderItems: [],
-  });
 
   const [quantityModalVisibility, setQuantityModalVisibility] = useState(false);
 
@@ -110,18 +81,18 @@ export default function Page() {
           <div key={category.categoryName} className="mb-8">
             <p className="font-semibold text-lg">{category.categoryName}</p>
             <div className="grid grid-cols-2 gap-x-6 gap-y-3">
-              {MenuData.filter(
-                (item) => item.categoryName === category.categoryName
-              ).map((item, index) => (
-                <div key={index}>
-                  <MenuCard
-                    product={item}
-                    setProductToAdd={setProductToAdd}
-                    quantityModalIsVisible={quantityModalVisibility}
-                    setQuantityModalVisibility={setQuantityModalVisibility}
-                  />
-                </div>
-              ))}
+              {menuData
+                .filter((item) => item.categoryName === category.categoryName)
+                .map((item, index) => (
+                  <div key={index}>
+                    <MenuCard
+                      product={item}
+                      setProductToAdd={setProductToAdd}
+                      quantityModalIsVisible={quantityModalVisibility}
+                      setQuantityModalVisibility={setQuantityModalVisibility}
+                    />
+                  </div>
+                ))}
             </div>
           </div>
         ))}

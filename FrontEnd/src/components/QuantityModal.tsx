@@ -20,10 +20,10 @@ const QuantityModal: React.FC<QuantityModalProps> = ({
 
   const handleSave = () => {
     if (type === "edit") {
-      if (productToAdd.productId) {
-        // Find the index of the order item with the same productId
+      if (productToAdd.productID) {
+        // Find the index of the order item with the same productID
         const itemIndex = cartState?.orderItems?.findIndex(
-          (item) => item[0] === productToAdd.productId // Access the productId directly
+          (item) => item[0] === productToAdd.productID // Access the productID directly
         );
 
         // If the item is found, update its quantity
@@ -45,9 +45,9 @@ const QuantityModal: React.FC<QuantityModalProps> = ({
         }
       }
     } else {
-      if (quantity > 0 && productToAdd.productId) {
+      if (quantity > 0 && productToAdd.productID) {
         const newOrderItem: [number, number] = [
-          productToAdd.productId,
+          productToAdd.productID,
           quantity,
         ];
 
