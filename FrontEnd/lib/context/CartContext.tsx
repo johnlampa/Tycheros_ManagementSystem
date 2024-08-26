@@ -1,13 +1,13 @@
+"use client";
 import { createContext, useContext, useState, ReactNode } from "react";
-
 import { Order } from "../types/OrderDataTypes";
 
-type CartContext = {
+type CartContextType = {
   cart: Order;
   setCart: React.Dispatch<React.SetStateAction<Order>>;
 };
 
-const CartContext = createContext<CartContext | undefined>(undefined);
+const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [cart, setCart] = useState<Order>({

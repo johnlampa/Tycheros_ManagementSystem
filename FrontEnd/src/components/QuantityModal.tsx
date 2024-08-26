@@ -1,7 +1,7 @@
 import { useState } from "react";
+import { useCartContext } from "../../lib/context/CartContext";
 
 import { QuantityModalProps } from "../../lib/types/props/QuantityModalProps";
-import { useCartContext } from "../../lib/context/CartContext";
 
 import Modal from "@/components/ui/Modal";
 
@@ -9,6 +9,7 @@ const QuantityModal: React.FC<QuantityModalProps> = ({
   productToAdd,
   quantityModalIsVisible,
   setQuantityModalVisibility,
+  previousQuantity,
 }) => {
   const { cart, setCart } = useCartContext();
 
@@ -21,16 +22,16 @@ const QuantityModal: React.FC<QuantityModalProps> = ({
       newOrderItem = [productToAdd.productId, quantity];
     }
 
-    if (cart.orderItems && newOrderItem) {
-      cart.orderItems = [...cart.orderItems, newOrderItem];
+    if (newOrderItem) {
+      // Ensure orderItems is always an array
+      const updatedOrderItems = [...(cart.orderItems || []), newOrderItem];
+      setCart({ ...cart, orderItems: updatedOrderItems }); // Use setCart to update state
+      console.log("Updated cart: ", { ...cart, orderItems: updatedOrderItems });
     }
 
     // Close the modal after saving
     setQuantityModalVisibility(false);
-
     setQuantity(0);
-
-    console.log(cart);
   };
 
   return (
