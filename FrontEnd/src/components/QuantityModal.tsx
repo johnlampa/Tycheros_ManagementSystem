@@ -29,7 +29,11 @@ const QuantityModal: React.FC<QuantityModalProps> = ({
         // If the item is found, update its quantity
         if (itemIndex !== undefined && itemIndex !== -1) {
           const updatedOrderItems = [...(cartState?.orderItems || [])];
-          updatedOrderItems[itemIndex][1] = quantity; // Update the quantity
+          if (quantity > 0) {
+            updatedOrderItems[itemIndex][1] = quantity; // Update the quantity
+          } else {
+            updatedOrderItems.splice(itemIndex, 1); // Remove the item if quantity is 0
+          }
 
           if (setCartState) {
             setCartState({ ...cart, orderItems: updatedOrderItems });
@@ -41,13 +45,12 @@ const QuantityModal: React.FC<QuantityModalProps> = ({
         }
       }
     } else {
-      let newOrderItem: [number, number] | null = null;
+      if (quantity > 0 && productToAdd.productId) {
+        const newOrderItem: [number, number] = [
+          productToAdd.productId,
+          quantity,
+        ];
 
-      if (productToAdd.productId) {
-        newOrderItem = [productToAdd.productId, quantity];
-      }
-
-      if (newOrderItem) {
         // Ensure orderItems is always an array
         const updatedOrderItems = [...(cart.orderItems || []), newOrderItem];
         setCart({ ...cart, orderItems: updatedOrderItems });

@@ -64,10 +64,20 @@ export default function Page() {
 
   const [quantityModalVisibility, setQuantityModalVisibility] = useState(false);
 
+  const [subtotal, setSubtotal] = useState(0);
+
+  const handleClick = () => {
+    setOrder(cart);
+  };
+
+  useEffect(() => {
+    console.log("Updated order: ", order);
+  }, [order]);
+
   return (
     <>
       <div className="w-full flex justify-center items-center">
-        <div className="w-[360px] flex flex-col justify-center items-center gap-3 border border-black">
+        <div className="w-[360px] flex flex-col justify-center items-center gap-3 py-3 border border-black">
           <div className="font-semibold text-2xl">Order Summary</div>
           <OrderCard
             cart={cart}
@@ -76,7 +86,19 @@ export default function Page() {
             menuData={MenuData}
             quantityModalIsVisible={quantityModalVisibility}
             setQuantityModalVisibility={setQuantityModalVisibility}
+            subtotal={subtotal}
+            setSubtotal={setSubtotal}
           />
+          <div className="flex gap-[168px] rounded-lg border border-black w-[320px] px-2">
+            <div>Subtotal</div>
+            <div>{subtotal}</div>
+          </div>
+          <button
+            className="rounded-lg border border-black w-[320px] px-2"
+            onClick={handleClick}
+          >
+            I am Ready To Order
+          </button>
         </div>
       </div>
     </>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { OrderCardProps } from "../../lib/types/props/OrderCardProps";
 import { ProductDataTypes } from "../../lib/types/ProductDataTypes";
 
@@ -11,8 +11,9 @@ const OrderCard: React.FC<OrderCardProps> = ({
   menuData,
   quantityModalIsVisible,
   setQuantityModalVisibility,
+  subtotal,
+  setSubtotal,
 }) => {
-  console.log("OrderCard: ", cart);
   const [productToAdd, setProductToAdd] = useState<ProductDataTypes>({
     productId: 1,
     productName: "Matcha",
@@ -20,60 +21,78 @@ const OrderCard: React.FC<OrderCardProps> = ({
     sellingPrice: 90.0,
     imageUrl: "/assets/images/MilkTea.jpg",
   });
+
+  // Update subtotal whenever cart or menuData changes
+  useEffect(() => {
+    const newSubtotal = cart.orderItems?.reduce(
+      (acc, [productId, quantity]) => {
+        const product = menuData.find((p) => p.productId === productId);
+        return acc + (product?.sellingPrice || 0) * quantity;
+      },
+      0
+    );
+
+    setSubtotal(newSubtotal || 0); // Ensure subtotal is always set correctly
+  }, [cart, menuData, setSubtotal]); // Ensure useEffect re-runs when these dependencies change
+
   return (
     <>
-      <div className="w-[320px] rounded-sm p-2 grid grid-cols-[1fr_1fr_1fr_2fr]">
-        <div className="flex items-center justify-center text-sm">Quantity</div>
-        <div className="flex items-center justify-center text-sm">Name</div>
-        <div className="flex items-center justify-center text-sm">Price</div>
-        <div className="flex items-center justify-center text-sm">
-          Product Total
+      <div className="rounded-lg border border-black">
+        <div className="w-[320px] rounded-sm p-2 grid grid-cols-[1fr_1fr_1fr_2fr]">
+          <div className="flex items-center justify-center text-sm">
+            Quantity
+          </div>
+          <div className="flex items-center justify-center text-sm">Name</div>
+          <div className="flex items-center justify-center text-sm">Price</div>
+          <div className="flex items-center justify-center text-sm">
+            Product Total
+          </div>
         </div>
-      </div>
 
-      <div className="flex flex-col gap-3 items-center justify-center">
-        {cart?.orderItems?.map(([productId, quantity], index) => {
-          const product = menuData.find((p) => p.productId === productId);
+        <div className="flex flex-col gap-3 items-center justify-center">
+          {cart?.orderItems?.map(([productId, quantity], index) => {
+            const product = menuData.find((p) => p.productId === productId);
 
-          return (
-            <div
-              key={index}
-              className="grid grid-cols-[1fr_1fr_1fr_2fr] w-[320px] rounded-sm p-2"
-            >
-              <button
-                className="px-1 py-1 rounded-full border border-black text-gray-400 text-sm bg-white hover:bg-gray-50 hover:text-gray-600"
-                onClick={() => {
-                  if (product) {
-                    setProductToAdd(product);
-                    setQuantityModalVisibility(true);
-                  } else {
-                    console.warn("Product not found for ID:", productId);
-                  }
-                }}
+            return (
+              <div
+                key={index}
+                className="grid grid-cols-[1fr_1fr_1fr_2fr] w-[320px] rounded-sm p-2"
               >
-                {quantity}
-              </button>
-              <div className="flex items-center justify-center text-sm">
-                {product?.productName || "Unknown"}
+                <button
+                  className="px-1 py-1 rounded-full border border-black text-gray-400 text-sm bg-white hover:bg-gray-50 hover:text-gray-600"
+                  onClick={() => {
+                    if (product) {
+                      setProductToAdd(product);
+                      setQuantityModalVisibility(true);
+                    } else {
+                      console.warn("Product not found for ID:", productId);
+                    }
+                  }}
+                >
+                  {quantity}
+                </button>
+                <div className="flex items-center justify-center text-sm">
+                  {product?.productName || "Unknown"}
+                </div>
+                <div className="flex items-center justify-center text-sm">
+                  {product?.sellingPrice || "Unknown"}
+                </div>
+                <div className="flex items-center justify-center text-sm">
+                  {product ? product.sellingPrice * quantity : "N/A"}
+                </div>
+                <QuantityModal
+                  productToAdd={productToAdd}
+                  quantityModalIsVisible={quantityModalIsVisible}
+                  setQuantityModalVisibility={setQuantityModalVisibility}
+                  previousQuantity={quantity}
+                  type="edit"
+                  cartState={cart}
+                  setCartState={setCart}
+                ></QuantityModal>
               </div>
-              <div className="flex items-center justify-center text-sm">
-                {product?.sellingPrice || "Unknown"}
-              </div>
-              <div className="flex items-center justify-center text-sm">
-                {product ? product.sellingPrice * quantity : "N/A"}
-              </div>
-              <QuantityModal
-                productToAdd={productToAdd}
-                quantityModalIsVisible={quantityModalIsVisible}
-                setQuantityModalVisibility={setQuantityModalVisibility}
-                previousQuantity={quantity}
-                type="edit"
-                cartState={cart}
-                setCartState={setCart}
-              ></QuantityModal>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
     </>
   );

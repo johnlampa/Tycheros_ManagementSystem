@@ -8,4 +8,7 @@ export type OrderCardProps = {
     menuData: ProductDataTypes[];
     quantityModalIsVisible: boolean;
     setQuantityModalVisibility: React.Dispatch<React.SetStateAction<boolean>>;
+
+    subtotal: number;
+    setSubtotal: React.Dispatch<React.SetStateAction<number>>;
 }
