@@ -4,9 +4,9 @@ export type OrderItemDataTypes = {
 }
 
 export type Order = {
-    orderId?: number,
-    paymentId?: number,
-    employeeId: number,
+    orderID?: number,
+    paymentID?: number,
+    employeeID: number,
     date: string,
     status: "unpaid" | "pending" | "completed",
     amount?: number

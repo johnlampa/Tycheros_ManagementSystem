@@ -72,8 +72,8 @@ const QuantityModal: React.FC<QuantityModalProps> = ({
         setModalVisibility={setQuantityModalVisibility}
       >
         <div className="flex flex-col gap-3 justify-center items-center">
-          <div className="font-bold text-2xl">{productToAdd.productName}</div>
-          <div>Enter Quantity</div>
+          <div className="font-bold text-2xl text-black">{productToAdd.productName}</div>
+          <div className="text-black">Enter Quantity</div>
           <div className="flex justify-center items-center">
             <button
               className="px-3 py-1 rounded-full border border-black text-gray-400 text-sm bg-white hover:bg-gray-50 hover:text-gray-600"
@@ -83,7 +83,7 @@ const QuantityModal: React.FC<QuantityModalProps> = ({
             >
               -
             </button>
-            <div className="flex flex-col items-center justify-center mx-3">
+            <div className="text-black flex flex-col items-center justify-center mx-3">
               {quantity}
             </div>
             <button
@@ -96,7 +96,7 @@ const QuantityModal: React.FC<QuantityModalProps> = ({
             </button>
           </div>
           <button
-            className="px-3 py-1 rounded-full border border-black text-gray-400 text-sm bg-white hover:bg-gray-50 hover:text-gray-600"
+            className="px-3 py-1 rounded-full border border-black text-black text-sm bg-white hover:bg-gray-100"
             onClick={handleSave}
           >
             Confirm

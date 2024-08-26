@@ -32,7 +32,7 @@ const OrderManagementCard: React.FC<OrderManagementCardProps> = ({
 
     // Update the orders array
     const updatedOrders: Order[] = orders.map((o) =>
-      o.orderId === order.orderId ? updatedOrder : o
+      o.orderID === order.orderID ? updatedOrder : o
     );
 
     // Update the state
@@ -50,7 +50,7 @@ const OrderManagementCard: React.FC<OrderManagementCardProps> = ({
 
     // Update the orders array
     const updatedOrders: Order[] = orders.map((o) =>
-      o.orderId === order.orderId ? updatedOrder : o
+      o.orderID === order.orderID ? updatedOrder : o
     );
 
     // Update the state

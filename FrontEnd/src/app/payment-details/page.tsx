@@ -16,7 +16,7 @@ function PaymentDetailsPage() {
   }, []);
 
   const [order, setOrder] = useState<Order>({
-    employeeId: 1,
+    employeeID: 1,
     date: new Date().toISOString(),
     status: "unpaid",
     orderItems: [],
