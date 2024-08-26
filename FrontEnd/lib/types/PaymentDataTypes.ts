@@ -1,6 +1,8 @@
 export type Payment = {
-    paymentId?: number,
+    paymentID?: number,
     amount: number,
     method: string,
-    referenceNumber: string
+    referenceNumber: string,
+    discount: string,
+    discountAmount: number
 }

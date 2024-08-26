@@ -19,17 +19,37 @@ const OrderManagementCard: React.FC<OrderManagementCardProps> = React.memo(({ or
     setTotal(calculatedTotal || 0);
   }, [order, menuData]);
 
+  const updateOrderStatus = async (newStatus: string) => {
+    try {
+      const response = await fetch("http://localhost:8081/orderManagement/updateOrderStatus", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          orderID: order.orderID,
+          newStatus,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update order status");
+      }
+
+      alert(`Order status updated to ${newStatus}`);
+    } catch (error) {
+      console.error("Error updating order status:", error);
+      alert("Error updating order status");
+    }
+  };
+
   const handleConfirmPayment = useCallback(() => {
     const updatedOrder: Order = {
       ...order,
       status: "Pending",
     };
 
-    const updatedOrders: Order[] = orders.map((o) =>
-      o.orderID === order.orderID ? updatedOrder : o
-    );
-
-    setOrders?.(updatedOrders);
+    setOrders?.(orders.map((o) => (o.orderID === order.orderID ? updatedOrder : o)));
   }, [order, orders, setOrders]);
 
   const handleCompleteOrder = useCallback(() => {
@@ -38,11 +58,8 @@ const OrderManagementCard: React.FC<OrderManagementCardProps> = React.memo(({ or
       status: "Completed",
     };
 
-    const updatedOrders: Order[] = orders.map((o) =>
-      o.orderID === order.orderID ? updatedOrder : o
-    );
-
-    setOrders?.(updatedOrders);
+    setOrders?.(orders.map((o) => (o.orderID === order.orderID ? updatedOrder : o)));
+    updateOrderStatus("Completed");
   }, [order, orders, setOrders]);
 
   return (

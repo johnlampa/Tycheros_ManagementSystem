@@ -129,5 +129,74 @@ router.get('/getMenuData', (req, res) => {
   });
 });
 
+// POST /processPayment endpoint
+router.post('/processPayment', (req, res) => {
+  const { orderID, amount, method, referenceNumber, discount, discountAmount } = req.body;
+
+  // Start a transaction
+  db.beginTransaction(err => {
+    if (err) return res.status(500).json({ error: "Transaction error" });
+
+    // Insert into Payment table
+    const insertPaymentQuery = `
+      INSERT INTO payment (amount, method, referenceNumber, discount, discountAmount)
+      VALUES (?, ?, ?, ?, ?)`;
+    db.query(insertPaymentQuery, [amount, method, referenceNumber, discount, discountAmount], (err, results) => {
+      if (err) {
+        return db.rollback(() => res.status(500).json({ error: "Failed to insert payment" }));
+      }
+
+      const paymentID = results.insertId;
+      console.log("discountAmount:", discountAmount);
+
+      // Update the Order table with paymentID
+      const updateOrderQuery = `
+        UPDATE \`order\` 
+        SET paymentID = ?, status = 'Pending'
+        WHERE orderID = ?`;
+      db.query(updateOrderQuery, [paymentID, orderID], (err) => {
+        if (err) {
+          return db.rollback(() => res.status(500).json({ error: "Failed to update order" }));
+        }
+
+        // Commit the transaction
+        db.commit(err => {
+          if (err) {
+            return db.rollback(() => res.status(500).json({ error: "Failed to commit transaction" }));
+          }
+          res.status(200).json({ message: "Payment processed successfully" });
+        });
+      });
+    });
+  });
+});
+
+// PUT /updateOrderStatus endpoint
+router.put('/updateOrderStatus', (req, res) => {
+  const { orderID, newStatus } = req.body;
+
+  if (!orderID || !newStatus) {
+    return res.status(400).json({ error: 'OrderID and newStatus are required' });
+  }
+
+  const updateOrderQuery = `
+    UPDATE \`order\`
+    SET status = ?
+    WHERE orderID = ?
+  `;
+
+  db.query(updateOrderQuery, [newStatus, orderID], (err, result) => {
+    if (err) {
+      console.error("Error updating order status:", err);
+      return res.status(500).json({ error: 'Internal Server Error' });
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Order not found' });
+    }
+
+    res.status(200).json({ message: 'Order status updated successfully' });
+  });
+});
 
 module.exports = router;
