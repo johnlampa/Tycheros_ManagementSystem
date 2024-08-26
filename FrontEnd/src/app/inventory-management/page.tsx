@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
+import { format } from 'date-fns';
 
 interface InventoryItem {
   inventoryID: number;
@@ -156,6 +157,14 @@ export default function InventoryManagementPage() {
     return <p>Error: {error.message}</p>;
   }
 
+  const formatDate = (dateString?: string | null) => {
+    if (!dateString) {
+      return '';
+    }
+    const date = new Date(dateString);
+    return isNaN(date.getTime()) ? '' : format(date, 'yyyy-MM-dd');
+  };
+
   return (
     <div
       style={{
@@ -299,10 +308,10 @@ export default function InventoryManagementPage() {
                   {item.pricePerUnit}
                 </td>
                 <td style={{ border: '1px solid black', padding: '10px' }}>
-                  {item.stockInDate}
+                  {formatDate(item.stockInDate)}
                 </td>
                 <td style={{ border: '1px solid black', padding: '10px' }}>
-                  {item.expiryDate}
+                  {formatDate(item.expiryDate)}
                 </td>
                 <td style={{ border: '1px solid black', padding: '10px' }}>
                   {item.supplierName}
