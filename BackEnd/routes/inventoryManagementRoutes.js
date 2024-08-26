@@ -203,8 +203,8 @@ router.post('/stockInSubitem', async (req, res) => {
 });
 
 
-//STOCK OUT :3
-router.post('/stockoutSubitem', async (req, res) => {
+//STOCK OUT 
+router.post('/stockOutSubitem', async (req, res) => {
   const { purchaseOrderID, quantity, reason } = req.body; // Assume purchaseOrderID is provided
   const date = new Date();
 
