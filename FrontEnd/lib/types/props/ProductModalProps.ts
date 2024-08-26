@@ -1,5 +1,5 @@
-import { ProductDataTypes } from "./ProductDataTypes";
-import { InventoryDataTypes } from "./InventoryDataTypes";
+import { ProductDataTypes } from "../ProductDataTypes";
+import { InventoryDataTypes } from "../InventoryDataTypes";
 
 export type ProductModalProps = {
   productModalIsVisible: boolean;

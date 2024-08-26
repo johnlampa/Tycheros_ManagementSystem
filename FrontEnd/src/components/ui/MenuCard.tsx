@@ -1,14 +1,14 @@
 import Image from "next/image";
 import React from "react";
 
-import type { ProductDataTypes } from "../../../lib/types/ProductDataTypes";
+import { MenuCardProps } from "../../../lib/types/props/MenuCardProps";
+import { ProductDataTypes } from "../../../lib/types/ProductDataTypes";
 
-const MenuCard: React.FC<ProductDataTypes> = ({
-  productId,
-  productName,
-  categoryName,
-  sellingPrice,
-  imageUrl,
+const MenuCard: React.FC<MenuCardProps> = ({
+  product,
+  setProductToAdd,
+  quantityModalIsVisible,
+  setQuantityModalVisibility,
 }) => {
   return (
     <>
@@ -17,16 +17,23 @@ const MenuCard: React.FC<ProductDataTypes> = ({
           <Image
             draggable={false}
             fill
-            src={imageUrl}
+            src={product.imageUrl}
             className="rounded-card object-cover object-center"
             alt="/"
           />
         </div>
         <div className="ml-5 my-2">
-          <p>{productName}</p>
-          <p>{sellingPrice}</p>
+          <p>{product.productName}</p>
+          <p>{product.sellingPrice}</p>
         </div>
-        <button className="border bg-[#5A3714] text-white mx-2">
+        <button
+          className="bg-[#5A3714] border-[#5A3714] border text-white mx-1 rounded-md hover:bg-white hover:border-[#5A3714] hover:text-[#5A3714] duration-200"
+          onClick={() => {
+            setQuantityModalVisibility(true);
+            setProductToAdd(product);
+            console.log("product to add: ", product);
+          }}
+        >
           Add Item
         </button>
       </div>
