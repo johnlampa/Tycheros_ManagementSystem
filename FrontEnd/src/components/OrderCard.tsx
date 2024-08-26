@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { OrderCardProps } from "../../lib/types/props/OrderCardProps";
 import { ProductDataTypes } from "../../lib/types/ProductDataTypes";
-
 import QuantityModal from "@/components/QuantityModal";
 
 const OrderCard: React.FC<OrderCardProps> = ({
@@ -24,13 +23,12 @@ const OrderCard: React.FC<OrderCardProps> = ({
 
   // Update subtotal whenever cart or menuData changes
   useEffect(() => {
-    const newSubtotal = cart.orderItems?.reduce(
-      (acc, [productID, quantity]) => {
-        const product = menuData.find((p) => p.productID === productID);
-        return acc + (product?.sellingPrice || 0) * quantity;
-      },
-      0
-    );
+    const newSubtotal = cart.orderItems?.reduce((acc, item) => {
+      // Ensure item is of type OrderItemDataTypes
+      const { productID, quantity } = item;
+      const product = menuData.find((p) => p.productID === productID);
+      return acc + (product?.sellingPrice || 0) * quantity;
+    }, 0);
 
     setSubtotal(newSubtotal || 0); // Ensure subtotal is always set correctly
   }, [cart, menuData, setSubtotal]); // Ensure useEffect re-runs when these dependencies change
@@ -50,7 +48,9 @@ const OrderCard: React.FC<OrderCardProps> = ({
         </div>
 
         <div className="flex flex-col gap-3 items-center justify-center">
-          {cart?.orderItems?.map(([productID, quantity], index) => {
+          {cart?.orderItems?.map((item, index) => {
+            // Ensure item is of type OrderItemDataTypes
+            const { productID, quantity } = item;
             const product = menuData.find((p) => p.productID === productID);
 
             return (
@@ -88,7 +88,7 @@ const OrderCard: React.FC<OrderCardProps> = ({
                   type="edit"
                   cartState={cart}
                   setCartState={setCart}
-                ></QuantityModal>
+                />
               </div>
             );
           })}
