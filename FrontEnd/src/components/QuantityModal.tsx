@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { useCartContext } from "../../lib/context/CartContext";
-
 import { QuantityModalProps } from "../../lib/types/props/QuantityModalProps";
-
 import Modal from "@/components/ui/Modal";
+import { OrderItemDataTypes } from "../../lib/types/OrderDataTypes";
 
 const QuantityModal: React.FC<QuantityModalProps> = ({
   productToAdd,
@@ -16,21 +15,21 @@ const QuantityModal: React.FC<QuantityModalProps> = ({
 }) => {
   const { cart, setCart } = useCartContext();
 
-  const [quantity, setQuantity] = useState(0);
+  const [quantity, setQuantity] = useState(previousQuantity || 0); // Initialize with previous quantity if available
 
   const handleSave = () => {
     if (type === "edit") {
       if (productToAdd.productID) {
         // Find the index of the order item with the same productID
         const itemIndex = cartState?.orderItems?.findIndex(
-          (item) => item[0] === productToAdd.productID // Access the productID directly
+          (item) => item.productID === productToAdd.productID
         );
 
         // If the item is found, update its quantity
         if (itemIndex !== undefined && itemIndex !== -1) {
           const updatedOrderItems = [...(cartState?.orderItems || [])];
           if (quantity > 0) {
-            updatedOrderItems[itemIndex][1] = quantity; // Update the quantity
+            updatedOrderItems[itemIndex].quantity = quantity; // Update the quantity
           } else {
             updatedOrderItems.splice(itemIndex, 1); // Remove the item if quantity is 0
           }
@@ -46,10 +45,10 @@ const QuantityModal: React.FC<QuantityModalProps> = ({
       }
     } else {
       if (quantity > 0 && productToAdd.productID) {
-        const newOrderItem: [number, number] = [
-          productToAdd.productID,
+        const newOrderItem: OrderItemDataTypes = {
+          productID: productToAdd.productID,
           quantity,
-        ];
+        };
 
         // Ensure orderItems is always an array
         const updatedOrderItems = [...(cart.orderItems || []), newOrderItem];

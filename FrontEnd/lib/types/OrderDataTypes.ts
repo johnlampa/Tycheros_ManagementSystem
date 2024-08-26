@@ -1,3 +1,8 @@
+export type OrderItemDataTypes = {
+    productID: number,
+    quantity: number
+}
+
 export type Order = {
     orderId?: number,
     paymentId?: number,
@@ -5,5 +10,5 @@ export type Order = {
     date: string,
     status: "unpaid" | "pending" | "completed",
     amount?: number
-    orderItems?: [number, number][] //[productId, quantity]
+    orderItems?: OrderItemDataTypes[]
 }
