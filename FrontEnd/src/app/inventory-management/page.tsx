@@ -38,6 +38,85 @@ export default function InventoryManagementPage() {
   const [itemToEdit, setItemToEdit] = useState<InventoryItem | null>(null);
   const [itemToDelete, setItemToDelete] = useState<InventoryItem | null>(null);
 
+  const [showStockInOverlay, setShowStockInOverlay] = useState(false);
+  const [stockInData, setStockInData] = useState({
+    inventoryID: '',
+    supplierName: '',
+    employeeID: '',
+    quantityOrdered: '',
+    actualQuantity: '',
+    pricePerUnit: '',
+    stockInDate: '',
+    expiryDate: '',
+  });
+
+  const handleStockIn = async () => {
+    try {
+      const response = await fetch('http://localhost:8081/inventoryManagement/stockInSubitem', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...stockInData,
+          quantityOrdered: Number(stockInData.quantityOrdered),
+          actualQuantity: Number(stockInData.actualQuantity),
+          pricePerUnit: Number(stockInData.pricePerUnit),
+        }),
+      });
+  
+      if (!response.ok) {
+        throw new Error('Failed to stock in subitem');
+      }
+  
+      const updatedInventory = await fetch('http://localhost:8081/inventoryManagement/getSubitem').then((res) =>
+        res.json()
+      );
+      setInventoryData(updatedInventory);
+  
+      alert('Subitem stocked in successfully');
+    } catch (error) {
+      console.error('Error stocking in subitem:', error);
+    }
+  };
+  
+  const [showStockOutOverlay, setShowStockOutOverlay] = useState(false);
+  const [stockOutData, setStockOutData] = useState({
+    purchaseOrderID: '',
+    quantity: 0,
+    reason: ''
+  });
+
+  const handleStockOut = (purchaseOrderID: string) => {
+    setStockOutData({ ...stockOutData, purchaseOrderID });
+    setShowStockOutOverlay(true);
+  };
+
+  const handleStockOutSubmit = async () => {
+    try {
+      const response = await fetch('http://localhost:8081/inventoryManagement/stockOutSubitem', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(stockOutData),
+      });
+  
+      if (response.ok) {
+        alert('Stock-out recorded successfully');
+        window.location.reload();
+        // You might want to refresh the inventory list or update the UI here
+      } else {
+        const errorData = await response.json();
+        alert('Error: ' + errorData.message);
+      }
+    } catch (err) {
+      console.error('Error during stock-out:', err);
+      alert('Error during stock-out: ');
+    }
+  };
+  
+
   useEffect(() => {
     const fetchInventory = async () => {
       try {
@@ -230,10 +309,46 @@ export default function InventoryManagementPage() {
             borderRadius: '4px',
             border: 'none',
             cursor: 'pointer',
+            marginRight: '10px',
           }}
         >
           Delete Subitem
         </button>
+        <button
+          onClick={() => setShowStockInOverlay(true)}
+          style={{
+            backgroundColor: 'black',
+            color: 'white',
+            padding: '10px 20px',
+            borderRadius: '4px',
+            border: 'none',
+            cursor: 'pointer',
+            marginRight: '10px',
+          }}
+        >
+          Stock In
+        </button>
+        <button
+          onClick={() => {
+            const id = prompt('Enter Purchase Order ID to Stock Out:');
+            if (id) {
+              handleStockOut(id); // Pass the ID directly
+            }
+          }}
+          style={{
+            backgroundColor: 'black',
+            color: 'white',
+            padding: '10px 20px',
+            borderRadius: '4px',
+            border: 'none',
+            cursor: 'pointer',
+            marginRight: '10px',
+          }}
+        >
+          Stock Out
+        </button>
+
+
       </div>
 
       {inventoryData.length === 0 ? (
@@ -604,6 +719,278 @@ export default function InventoryManagementPage() {
           </div>
         </div>
       )}
+      {showStockInOverlay && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: 'white',
+              padding: '20px',
+              borderRadius: '8px',
+              width: '400px',
+            }}
+          >
+            <h2 style={{ color: 'black' }}>Stock In</h2>
+            <div>
+              <input
+                type="text"
+                placeholder="Inventory ID"
+                value={stockInData.inventoryID}
+                onChange={(e) =>
+                  setStockInData({ ...stockInData, inventoryID: e.target.value })
+                }
+                style={{
+                  marginBottom: '10px',
+                  padding: '8px',
+                  width: '100%',
+                  color: 'black',
+                }}
+              />
+              <input
+                type="text"
+                placeholder="Supplier Name"
+                value={stockInData.supplierName}
+                onChange={(e) =>
+                  setStockInData({ ...stockInData, supplierName: e.target.value })
+                }
+                style={{
+                  marginBottom: '10px',
+                  padding: '8px',
+                  width: '100%',
+                  color: 'black',
+                }}
+              />
+              <input
+                type="text"
+                placeholder="Employee ID"
+                value={stockInData.employeeID}
+                onChange={(e) =>
+                  setStockInData({ ...stockInData, employeeID: e.target.value })
+                }
+                style={{
+                  marginBottom: '10px',
+                  padding: '8px',
+                  width: '100%',
+                  color: 'black',
+                }}
+              />
+              <input
+                type="number"
+                placeholder="Quantity Ordered"
+                value={stockInData.quantityOrdered}
+                onChange={(e) =>
+                  setStockInData({
+                    ...stockInData,
+                    quantityOrdered: e.target.value,
+                  })
+                }
+                style={{
+                  marginBottom: '10px',
+                  padding: '8px',
+                  width: '100%',
+                  color: 'black',
+                }}
+              />
+              <input
+                type="number"
+                placeholder="Actual Quantity"
+                value={stockInData.actualQuantity}
+                onChange={(e) =>
+                  setStockInData({
+                    ...stockInData,
+                    actualQuantity: e.target.value,
+                  })
+                }
+                style={{
+                  marginBottom: '10px',
+                  padding: '8px',
+                  width: '100%',
+                  color: 'black',
+                }}
+              />
+              <input
+                type="number"
+                placeholder="Price Per Unit"
+                value={stockInData.pricePerUnit}
+                onChange={(e) =>
+                  setStockInData({
+                    ...stockInData,
+                    pricePerUnit: e.target.value,
+                  })
+                }
+                style={{
+                  marginBottom: '10px',
+                  padding: '8px',
+                  width: '100%',
+                  color: 'black',
+                }}
+              />
+              <input
+                type="date"
+                placeholder="Stock In Date"
+                value={stockInData.stockInDate}
+                onChange={(e) =>
+                  setStockInData({ ...stockInData, stockInDate: e.target.value })
+                }
+                style={{
+                  marginBottom: '10px',
+                  padding: '8px',
+                  width: '100%',
+                  color: 'black',
+                }}
+              />
+              <input
+                type="date"
+                placeholder="Expiry Date"
+                value={stockInData.expiryDate}
+                onChange={(e) =>
+                  setStockInData({ ...stockInData, expiryDate: e.target.value })
+                }
+                style={{
+                  marginBottom: '10px',
+                  padding: '8px',
+                  width: '100%',
+                  color: 'black',
+                }}
+              />
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <button
+                  onClick={async () => {
+                    await handleStockIn();
+                    setShowStockInOverlay(false);
+                  }}
+                  style={{
+                    backgroundColor: 'black',
+                    color: 'white',
+                    padding: '8px 16px',
+                    borderRadius: '4px',
+                    border: 'none',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Stock In
+                </button>
+                <button
+                  onClick={() => setShowStockInOverlay(false)}
+                  style={{
+                    backgroundColor: 'black',
+                    color: 'white',
+                    padding: '8px 16px',
+                    borderRadius: '4px',
+                    border: 'none',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}  
+      {showStockOutOverlay && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: 'white',
+              padding: '20px',
+              borderRadius: '8px',
+              width: '300px',
+            }}
+          >
+            <h2 style={{ color: 'black' }}>Stock Out Subitem</h2>
+            <div>
+              <input
+                type="number"
+                placeholder="Quantity"
+                value={stockOutData.quantity === 0 ? '' : stockOutData.quantity}
+                onChange={(e) =>
+                  setStockOutData({
+                    ...stockOutData,
+                    quantity: e.target.value === '' ? 0 : Number(e.target.value),
+                  })
+                }
+                style={{
+                  marginBottom: '10px',
+                  padding: '8px',
+                  width: '100%',
+                  color: 'black',
+                }}
+              />
+              <input
+                type="text"
+                placeholder="Reason"
+                value={stockOutData.reason}
+                onChange={(e) =>
+                  setStockOutData({ ...stockOutData, reason: e.target.value })
+                }
+                style={{
+                  marginBottom: '10px',
+                  padding: '8px',
+                  width: '100%',
+                  color: 'black',
+                }}
+              />
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <button
+                  onClick={async () => {
+                    await handleStockOutSubmit();
+                    setShowStockOutOverlay(false);
+                  }}
+                  style={{
+                    backgroundColor: 'black',
+                    color: 'white',
+                    padding: '8px 16px',
+                    borderRadius: '4px',
+                    border: 'none',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Save
+                </button>
+                <button
+                  onClick={() => setShowStockOutOverlay(false)}
+                  style={{
+                    backgroundColor: 'black',
+                    color: 'white',
+                    padding: '8px 16px',
+                    borderRadius: '4px',
+                    border: 'none',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+
     </div>
   );
 }
