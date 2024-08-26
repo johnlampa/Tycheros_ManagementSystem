@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
+import axios from "axios";
 import { ProductModalProps } from "../../lib/types/props/ProductModalProps";
 import Modal from "@/components/ui/Modal";
-import { ProductDataTypes } from "../../lib/types/ProductDataTypes";
+import { ProductDataTypes, SubitemDataTypes } from "../../lib/types/ProductDataTypes";
 
 const ProductModal: React.FC<ProductModalProps> = ({
   productModalIsVisible,
@@ -15,74 +16,77 @@ const ProductModal: React.FC<ProductModalProps> = ({
   menuData,
   setMenuData,
 }) => {
-  const [subitems, setSubitems] = useState<[number, number][]>([]);
 
+
+  // Define categoryMap with string index signature
+  const categoryMap: { [key: string]: number } = {
+    "Appetizers": 1,
+    "Entrees": 2,
+    "Snacks": 3,
+    "Combo Meals": 4,
+    "Wings": 5,
+    "Salads": 6,
+  };
+
+  const categoryID = categoryMap[categoryName] || 0; // Default to 0 if categoryName is not found
+
+
+  const [subitems, setSubitems] = useState<SubitemDataTypes[]>([]);
+  
   useEffect(() => {
     if (type === "edit" && menuProductToEdit?.subitems) {
       setSubitems(menuProductToEdit.subitems);
     }
-  }, [type, menuProductToEdit]);
+  }, [type, menuProductToEdit]);  
 
   const handleAddSubitem = () => {
-    setSubitems([...subitems, [0, 0]]); // Add a new subitem with default values
+    setSubitems([...subitems, { inventoryID: 0, quantityNeeded: 0 }]);
   };
 
-  function handleSubmit(e: { preventDefault: () => void; target: any }) {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setProductModalVisibility(false);
-
-    const form = e.target;
+  
+    const form = e.currentTarget;
     const formData = new FormData(form);
     const formJson = Object.fromEntries(formData.entries());
-    console.log(formJson);
-
-    if (type === "add") {
-      const newProduct: ProductDataTypes = {
-        productName: formJson.productName as string,
-        sellingPrice: parseInt(formJson.sellingPrice as string),
-        categoryName: categoryName,
-        imageUrl: "/assets/images/MilkTea.jpg", // Placeholder,
-        subitems: subitems.map((subitem, index) => [
-          parseInt(formJson[`subitem-${index}`] as string),
-          parseFloat(formJson[`quantity-${index}`] as string),
-        ]) as [number, number][],
-      };
-
-      console.log("new:", newProduct);
-      if (setMenuProductHolder) {
-        setMenuProductHolder(newProduct);
-      }
+  
+    const newProduct: ProductDataTypes = {
+      productName: formJson.productName as string,
+      sellingPrice: parseFloat(formJson.sellingPrice as string),
+      categoryID: categoryID, // categoryID should be a number
+      imageUrl: "/assets/images/MilkTea.jpg", // Placeholder image URL
+      subitems: subitems.map((subitem, index) => ({
+        inventoryID: parseInt(formJson[`subitem-${index}`] as string),
+        quantityNeeded: parseFloat(formJson[`quantityNeeded-${index}`] as string),
+      })),
+    };
+  
+    axios
+      .post("http://localhost:8081/menuManagement/postProduct", newProduct)
+      .then((response) => {
+        console.log("Product added:", response.data);
+        console.log("Added: ", newProduct);
+        form.reset(); // Optional: Clear the form after submission
+        // window.location.reload();
+      })
+      .catch((error) => {
+        console.error("Error adding product:", error);
+      });
+  
+    if (setMenuProductHolder) {
+      setMenuProductHolder(newProduct);
     }
+  };
 
-    if (type === "edit") {
-      const updatedProduct: ProductDataTypes = {
-        productID: menuProductToEdit?.productID,
-        productName: formJson.productName as string,
-        sellingPrice: parseInt(formJson.sellingPrice as string),
-        categoryName: categoryName,
-        imageUrl: "/assets/images/MilkTea.jpg", // Placeholder
-        subitems: subitems.map((subitem, index) => [
-          parseInt(formJson[`subitem-${index}`] as string),
-          parseFloat(formJson[`quantity-${index}`] as string),
-        ]) as [number, number][],
-      };
-
-      console.log("updated:", updatedProduct);
-
-      if (setMenuProductHolder) {
-        setMenuProductHolder(updatedProduct);
-      }
-    }
-  }
-
-  function handleDelete() {
+  const handleDelete = () => {
     const updatedMenuData = menuData.filter(
       (product) => product.productID !== menuProductToEdit?.productID
     );
     setMenuData(updatedMenuData);
     setProductModalVisibility(false);
-  }
-
+  };
+  
   return (
     <>
       <Modal
@@ -121,7 +125,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
             </div>
           )}
 
-          <div className="min-w-min grid grid-cols-[minmax(100px, 200px) gap-3">
+          <div className="min-w-min grid grid-cols-[minmax(100px, 200px)] gap-3">
             <div className="col-span-3">
               <label htmlFor="productName" className="block dark:text-black">
                 Product Name
@@ -133,7 +137,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
                 placeholder="Enter sumn"
                 className="dark:text-black border border-gray-200 rounded p-1 w-[264px]"
                 defaultValue={
-                  type === "edit" ? menuProductToEdit?.productName : undefined
+                  type === "edit" ? menuProductToEdit?.productName : ""
                 }
               />
             </div>
@@ -149,7 +153,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
                 placeholder="Enter sumn"
                 className="dark:text-black border border-gray-200 rounded p-1 w-[264px]"
                 defaultValue={
-                  type === "edit" ? menuProductToEdit?.sellingPrice : undefined
+                  type === "edit" ? menuProductToEdit?.sellingPrice : ""
                 }
               />
             </div>
@@ -157,37 +161,37 @@ const ProductModal: React.FC<ProductModalProps> = ({
             <div className="col-span-3 h-2"></div>
 
             <p className="col-span-3 dark:text-black">Subitems</p>
-            {subitems.map((subitem, index) => (
-              <div key={index} className="col-span-3 grid grid-cols-3 gap-3">
-                <div className="col-span-2">
-                  <select
-                    className="dark:text-black border border-gray-200 rounded h-9 w-[172px] bg-white text-sm "
-                    defaultValue={type === "edit" ? subitem[0] : ""}
-                    name={`subitem-${index}`}
-                    id={`subitem-${index}`}
-                  >
-                    <option value="" disabled>
-                      Choose
-                    </option>
-                    {inventoryData?.map((item) => (
-                      <option value={item.inventoryId} key={item.inventoryId}>
-                        {item.inventoryName + " (" + item.unitOfMeasure + ")"}
+              {subitems.map((subitem, index) => (
+                <div key={index} className="col-span-3 grid grid-cols-3 gap-3">
+                  <div className="col-span-2">
+                    <select
+                      className="dark:text-black border border-gray-200 rounded h-9 w-[172px] bg-white text-sm"
+                      defaultValue={type === "edit" ? subitem.inventoryID : ""}
+                      name={`subitem-${index}`}
+                      id={`subitem-${index}`}
+                    >
+                      <option value="" disabled>
+                        Choose
                       </option>
-                    ))}
-                  </select>
+                      {inventoryData?.map((item) => (
+                        <option value={item.inventoryID} key={item.inventoryID}>
+                          {item.inventoryName + " (" + item.unitOfMeasure + ")"}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="col-span-1">
+                    <input
+                      type="number"
+                      name={`quantityNeeded-${index}`}
+                      id={`quantityNeeded-${index}`}
+                      placeholder="Quantity Needed"
+                      className="dark:text-black border border-gray-200 rounded p-1 w-[80px]"
+                      defaultValue={subitem.quantityNeeded}
+                    />
+                  </div>
                 </div>
-                <div className="col-span-1">
-                  <input
-                    type="number"
-                    name={`quantity-${index}`}
-                    id={`quantity-${index}`}
-                    placeholder="Quantity"
-                    className="dark:text-black border border-gray-200 rounded p-1 w-[80px]"
-                    defaultValue={subitem[1]}
-                  />
-                </div>
-              </div>
-            ))}
+              ))}
 
             <button
               type="button"

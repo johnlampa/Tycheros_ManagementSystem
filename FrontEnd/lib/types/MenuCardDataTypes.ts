@@ -1,5 +1,5 @@
 export type MenuCardDataTypes = {
-    productId: number,
+    productID: number,
     productName: string,
     categoryName: string,
     sellingPrice: number,

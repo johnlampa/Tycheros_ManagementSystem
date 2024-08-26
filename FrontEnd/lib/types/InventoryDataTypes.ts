@@ -1,5 +1,5 @@
 export type InventoryDataTypes = {
-    inventoryId: number;
+    inventoryID: number;
     inventoryName: string;
     unitOfMeasure: string;
     reorderPoint: number;

@@ -12,7 +12,7 @@ export type ProductModalProps = {
 
   menuProductToEdit?: ProductDataTypes;
   
-  setMenuProductHolder?: React.Dispatch<React.SetStateAction<ProductDataTypes>>;
+  setMenuProductHolder?: React.Dispatch<React.SetStateAction<ProductDataTypes | null>>;
 
   menuData: ProductDataTypes[];
   setMenuData: React.Dispatch<React.SetStateAction<ProductDataTypes[]>>;

@@ -12,27 +12,27 @@ import Link from "next/link";
 
 const categories: CategoriesDataTypes[] = [
   {
-    categoryId: 7,
+    categoryID: 7,
     categoryName: "Milk Tea",
   },
   {
-    categoryId: 8,
+    categoryID: 8,
     categoryName: "Beer",
   },
   {
-    categoryId: 9,
+    categoryID: 9,
     categoryName: "Coffee",
   },
   {
-    categoryId: 10,
+    categoryID: 10,
     categoryName: "Whiskey",
   },
   {
-    categoryId: 11,
+    categoryID: 11,
     categoryName: "Frappe",
   },
   {
-    categoryId: 12,
+    categoryID: 12,
     categoryName: "Tea",
   },
 ];
@@ -51,6 +51,7 @@ export default function Page() {
     productID: 1,
     productName: "Matcha",
     categoryName: "Milk Tea",
+    categoryID: 7,
     sellingPrice: 90.0,
     imageUrl: "/assets/images/MilkTea.jpg",
   });

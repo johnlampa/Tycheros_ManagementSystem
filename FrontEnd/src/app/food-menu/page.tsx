@@ -12,27 +12,27 @@ import Link from "next/link";
 
 const categories: CategoriesDataTypes[] = [
   {
-    categoryId: 1,
+    categoryID: 1,
     categoryName: "Appetizer",
   },
   {
-    categoryId: 2,
+    categoryID: 2,
     categoryName: "Entrees",
   },
   {
-    categoryId: 3,
+    categoryID: 3,
     categoryName: "Snacks",
   },
   {
-    categoryId: 4,
+    categoryID: 4,
     categoryName: "Combo Meals",
   },
   {
-    categoryId: 5,
+    categoryID: 5,
     categoryName: "Wings",
   },
   {
-    categoryId: 6,
+    categoryID: 6,
     categoryName: "Salads",
   },
 ];
