@@ -26,6 +26,12 @@ const ProductModal: React.FC<ProductModalProps> = ({
     "Combo Meals": 4,
     "Wings": 5,
     "Salads": 6,
+    "Milk Tea": 7,
+    "Beer": 8,
+    "Coffee": 9,
+    "Whiskey": 10,
+    "Frappe": 11,
+    "Tea": 12,
   };
 
   const categoryID = categoryMap[categoryName] || 0; // Default to 0 if categoryName is not found
