@@ -6,7 +6,7 @@ const mysql = require('mysql2');
 const db = mysql.createConnection({
   host: "localhost",
   user: "root",
-  password: "AdDU2202201425196", // Change pw
+  password: "Fifteen15", // Change pw
   database: "tycherosdb"
 });
 
@@ -17,10 +17,21 @@ const db = mysql.createConnection({
 // GET MENU MANAGEMENT DATA ENDPOINT
 router.get('/getProduct', (req, res) => {
     const query = `
-      SELECT p.productID, p.productName, c.name as categoryName, pr.sellingPrice
-      FROM product p
-      JOIN category c ON p.categoryID = c.categoryID
-      JOIN price pr ON p.productID = pr.productID
+      SELECT 
+          p.productID, 
+          p.productName, 
+          c.categoryName, 
+          pr.sellingPrice
+      FROM 
+          product p
+      JOIN 
+          category c ON p.categoryID = c.categoryID
+      JOIN 
+          price pr ON p.productID = pr.productID
+      JOIN 
+          (SELECT productID, MAX(priceID) as maxPriceID FROM price GROUP BY productID) latestPrice 
+          ON pr.productID = latestPrice.productID AND pr.priceID = latestPrice.maxPriceID;
+
     `;
   
     db.query(query, (err, result) => {
@@ -31,7 +42,22 @@ router.get('/getProduct', (req, res) => {
       res.json(result);
     });
   });
-  
+
+  router.get('/getAllSubitems', (req, res) => {
+    const query = `
+      SELECT * FROM inventory;
+    `;
+
+    db.query(query, (err, result) => {
+      if (err) {
+        console.error("Error fetching subitem data:", err);
+        return res.status(500).json({ error: "Internal Server Error" });
+      }
+      res.json(result);
+    })
+  })
+
+
   
   //CREATE PRODUCT ENDPOINT //DONE
   router.post('/postProduct', (req, res) => {
@@ -40,7 +66,7 @@ router.get('/getProduct', (req, res) => {
     // Insert the product into the product table
     const product = {
       productName: productData.productName, 
-      imageUrl: productData.imageURL,
+      imageUrl: productData.imageUrl,
       categoryID: productData.categoryID,
     };
   
@@ -86,6 +112,33 @@ router.get('/getProduct', (req, res) => {
     });
   });
   
+
+  router.get('/getSpecificSubitems/:productID', (req, res) => {
+    const productID = req.params.productID;
+
+    const query = `
+        SELECT 
+            si.subitemID, 
+            si.inventoryID, 
+            si.quantityNeeded,
+            i.inventoryName,
+            i.unitOfMeasure
+        FROM 
+            subitem si
+        JOIN 
+            inventory i ON si.inventoryID = i.inventoryID
+        WHERE 
+            si.productID = ?
+    `;
+
+    db.query(query, [productID], (err, result) => {
+        if (err) {
+            console.error("Error fetching subitems:", err);
+            return res.status(500).json({ error: "Internal Server Error" });
+        }
+        res.json(result);
+    });
+});
   
   router.put('/putProduct/:productID', (req, res) => {
     const productID = req.params.productID;
@@ -155,5 +208,7 @@ router.get('/getProduct', (req, res) => {
       return res.json({ message: "Product updated, new price entry added, subitems updated successfully" });
     });
   });
+
+  
 
   module.exports = router;

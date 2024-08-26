@@ -1,112 +1,43 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import MenuManagementCard from "@/components/MenuManagementCard";
 import { ProductDataTypes } from "../../../lib/types/ProductDataTypes";
 import { InventoryDataTypes } from "../../../lib/types/InventoryDataTypes";
 import { CategoriesDataTypes } from "../../../lib/types/CategoriesDataTypes";
-
-import { useEffect } from "react";
+import axios from 'axios';
 
 export default function Page() {
-  const [MenuData, setMenuData] = useState<ProductDataTypes[]>([
-    {
-      productID: 1,
-      productName: "Matcha",
-      categoryName: "Milk Tea",
-      sellingPrice: 90.0,
-      imageUrl: "/assets/images/MilkTea.jpg",
-      subitems: [
-        [3, 50],
-        [1, 80],
-      ],
-    },
-    {
-      productID: 2,
-      productName: "Chocolate",
-      categoryName: "Milk Tea",
-      sellingPrice: 90.0,
-      imageUrl: "/assets/images/MilkTea.jpg",
-      subitems: [
-        [3, 50],
-        [2, 80],
-      ],
-    },
-    {
-      productID: 3,
-      productName: "San Mig",
-      categoryName: "Beer",
-      sellingPrice: 90.0,
-      imageUrl: "/assets/images/MilkTea.jpg",
-      subitems: [
-        [3, 50],
-        [2, 80],
-      ],
-    },
+  const [MenuData, setMenuData] = useState<ProductDataTypes[]>([]);
+  const [menuProductHolder, setMenuProductHolder] = useState<ProductDataTypes | null>(null);
+  const [InventoryData, setInventoryData] = useState<InventoryDataTypes[]>([]);
+  const [categories, setCategories] = useState<CategoriesDataTypes[]>([
+    { categoryID: 1, categoryName: "Appetizers" },
+    { categoryID: 2, categoryName: "Entrees" },
+    { categoryID: 3, categoryName: "Snacks" },
+    { categoryID: 4, categoryName: "Combo Meals" },
+    { categoryID: 5, categoryName: "Wings" },
+    { categoryID: 6, categoryName: "Salads" },
   ]);
-
-  const [menuProductHolder, setMenuProductHolder] = useState<ProductDataTypes>({
-    productID: 3,
-    productName: "Strawberry",
-    categoryName: "Milk Tea",
-    sellingPrice: 90.0,
-    imageUrl: "/assets/images/MilkTea.jpg",
-    subitems: [
-      [3, 50],
-      [2, 80],
-    ],
-  });
 
   useEffect(() => {
-    console.log("new/edited:", menuProductHolder);
-  }, [menuProductHolder]); // This effect runs whenever menuProductHolder changes
+    // Fetch Inventory Data
+    axios.get('http://localhost:8081/menuManagement/getAllSubitems')
+      .then(response => {
+        setInventoryData(response.data);
+      })
+      .catch(error => {
+        console.error("Error fetching inventory data:", error);
+      });
 
-  const [InventoryData, setInventoryData] = useState<InventoryDataTypes[]>([
-    {
-      inventoryId: 1,
-      inventoryName: "Matcha Powder",
-      unitOfMeasure: "grams",
-      reorderPoint: 500,
-    },
-    {
-      inventoryId: 2,
-      inventoryName: "Chocolate Powder",
-      unitOfMeasure: "grams",
-      reorderPoint: 500,
-    },
-    {
-      inventoryId: 3,
-      inventoryName: "Milk",
-      unitOfMeasure: "ml",
-      reorderPoint: 1000,
-    },
-  ]);
-
-  const categories: CategoriesDataTypes[] = [
-    {
-      categoryId: 1,
-      categoryName: "Appetizers",
-    },
-    {
-      categoryId: 2,
-      categoryName: "Entrees",
-    },
-    {
-      categoryId: 3,
-      categoryName: "Snacks",
-    },
-    {
-      categoryId: 4,
-      categoryName: "Combo Meals",
-    },
-    {
-      categoryId: 5,
-      categoryName: "Wings",
-    },
-    {
-      categoryId: 6,
-      categoryName: "Salads",
-    },
-  ];
+    // Fetch Menu Data (you might need to implement this endpoint)
+    axios.get('http://localhost:8081/menuManagement/getProduct')
+      .then(response => {
+        setMenuData(response.data);
+      })
+      .catch(error => {
+        console.error("Error fetching menu data:", error);
+      });
+  }, []);
 
   return (
     <>
