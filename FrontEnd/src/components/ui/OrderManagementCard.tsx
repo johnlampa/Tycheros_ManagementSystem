@@ -64,7 +64,7 @@ const OrderManagementCard: React.FC<OrderManagementCardProps> = React.memo(({ or
 
   return (
     <>
-      <div className="w-[320px] border border-black rounded-md p-3">
+      <div className="w-[320px] border border-white rounded-md p-3">
         <div className="grid grid-cols-[2fr_1fr_1fr_1fr] gap-2 font-semibold mb-3">
           <div className="flex items-center justify-center text-sm">Name</div>
           <div className="flex items-center justify-center text-sm">Price</div>
@@ -88,7 +88,7 @@ const OrderManagementCard: React.FC<OrderManagementCardProps> = React.memo(({ or
           );
         })}
       </div>
-      <div className="w-[320px] border border-black rounded-md p-1 mt-1 flex pl-10 gap-[185px]">
+      <div className="w-[320px] border border-white rounded-md p-1 mt-1 flex pl-10 gap-[185px]">
         <div>Total</div>
         <div>{total}</div>
       </div>
@@ -96,7 +96,7 @@ const OrderManagementCard: React.FC<OrderManagementCardProps> = React.memo(({ or
       {order.status === "Unpaid" && (
         <div className="ml-[190.57px]">
           <Link href={{ pathname: "/payment-details", query: { order: JSON.stringify(order) } }}>
-            <button className="border border-black px-2 py-1 rounded-md mt-1 text-sm" onClick={handleConfirmPayment}>
+            <button className="border border-white px-2 py-1 rounded-md mt-1 text-sm hover:bg-blue-600" onClick={handleConfirmPayment}>
               Confirm Payment
             </button>
           </Link>
@@ -105,7 +105,7 @@ const OrderManagementCard: React.FC<OrderManagementCardProps> = React.memo(({ or
 
       {order.status === "Pending" && (
         <div className="ml-[198.77px]">
-          <button className="border border-black px-2 py-1 rounded-md mt-1 text-sm" onClick={handleCompleteOrder}>
+          <button className="border border-white px-2 py-1 rounded-md mt-1 text-sm hover:bg-blue-600" onClick={handleCompleteOrder}>
             Complete Order
           </button>
         </div>
@@ -113,7 +113,7 @@ const OrderManagementCard: React.FC<OrderManagementCardProps> = React.memo(({ or
 
       {order.status === "Completed" && (
         <div className="ml-[231.21px]">
-          <button className="border border-black px-2 py-1 rounded-md mt-1 text-sm" disabled>
+          <button className="border border-white px-2 py-1 rounded-md mt-1 text-sm" disabled>
             Completed
           </button>
         </div>
