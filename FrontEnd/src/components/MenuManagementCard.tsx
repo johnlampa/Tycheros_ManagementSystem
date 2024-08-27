@@ -21,15 +21,21 @@ const MenuManagementCard: React.FC<MenuManagementCardProps> = ({
   const [menuProductToEdit, setMenuProductToEdit] =
     useState<ProductDataTypes>();
 
-  const toggleEdit = (index: number) => {
+  const toggleEdit = (productID?: number) => {
+    if (productID === undefined) {
+      console.error("Product ID is undefined");
+      return; // Early return or handle the case where productID is undefined
+    }
+
     setModalType("edit");
     setModalTitle("Edit Product");
 
     setProductModalVisibility(!productModalIsVisible);
 
-    const menuProduct = menuData[index];
+    const menuProduct = menuData.find((product) => product.productID === productID);
     setMenuProductToEdit(menuProduct);
   };
+
 
   const toggleAdd = () => {
     setModalType("add");
@@ -47,8 +53,8 @@ const MenuManagementCard: React.FC<MenuManagementCardProps> = ({
         </div>
         {menuData
           .filter((item) => item.categoryName === categoryName)
-          .map((item, index) => (
-            <div key={index} className="grid grid-cols-3 gap-2 mb-3">
+          .map((item) => (
+            <div key={item.productID} className="grid grid-cols-3 gap-2 mb-3">
               <p className="flex justify-center items-center">
                 {item.productName}
               </p>
@@ -56,7 +62,7 @@ const MenuManagementCard: React.FC<MenuManagementCardProps> = ({
                 {item.sellingPrice}
               </p>
               <button
-                onClick={() => toggleEdit(index)}
+                onClick={() => toggleEdit(item.productID)}
                 className="px-1 py-1 rounded-full border border-black text-gray-400 text-sm bg-white hover:bg-gray-50 hover:text-gray-600"
               >
                 Edit
