@@ -48,10 +48,10 @@ export default function Page() {
   }, []);
 
   const [productToAdd, setProductToAdd] = useState<ProductDataTypes>({
-    productID: 1,
-    productName: "Matcha",
-    categoryName: "Milk Tea",
-    sellingPrice: 90.0,
+    productID: 0,
+    productName: "",
+    categoryName: "",
+    sellingPrice: 0,
     imageUrl: "/assets/images/MilkTea.jpg",
   });
 

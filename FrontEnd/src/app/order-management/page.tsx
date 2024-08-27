@@ -9,8 +9,8 @@ import OrderManagementCard from "@/components/ui/OrderManagementCard";
 export default function Page() {
   const [orders, setOrders] = useState<Order[]>([
     {
-      orderId: 1,
-      employeeId: 1,
+      orderID: 1,
+      employeeID: 1,
       date: new Date().toISOString(),
       status: "unpaid",
       amount: 400,
@@ -22,8 +22,8 @@ export default function Page() {
       ],
     },
     {
-      orderId: 2,
-      employeeId: 1,
+      orderID: 2,
+      employeeID: 1,
       date: new Date().toISOString(),
       status: "unpaid",
       amount: 800,
@@ -35,8 +35,8 @@ export default function Page() {
       ],
     },
     {
-      orderId: 3,
-      employeeId: 1,
+      orderID: 3,
+      employeeID: 1,
       date: new Date().toISOString(),
       status: "unpaid",
       amount: 1200,

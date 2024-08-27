@@ -24,14 +24,13 @@ const OrderCard: React.FC<OrderCardProps> = ({
   // Update subtotal whenever cart or menuData changes
   useEffect(() => {
     const newSubtotal = cart.orderItems?.reduce((acc, item) => {
-      // Ensure item is of type OrderItemDataTypes
       const { productID, quantity } = item;
       const product = menuData.find((p) => p.productID === productID);
       return acc + (product?.sellingPrice || 0) * quantity;
     }, 0);
 
-    setSubtotal(newSubtotal || 0); // Ensure subtotal is always set correctly
-  }, [cart, menuData, setSubtotal]); // Ensure useEffect re-runs when these dependencies change
+    setSubtotal(newSubtotal || 0);
+  }, [cart, menuData, setSubtotal]);
 
   return (
     <>
@@ -49,7 +48,6 @@ const OrderCard: React.FC<OrderCardProps> = ({
 
         <div className="flex flex-col gap-3 items-center justify-center">
           {cart?.orderItems?.map((item, index) => {
-            // Ensure item is of type OrderItemDataTypes
             const { productID, quantity } = item;
             const product = menuData.find((p) => p.productID === productID);
 
