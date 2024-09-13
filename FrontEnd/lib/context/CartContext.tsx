@@ -13,7 +13,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [cart, setCart] = useState<Order>({
     employeeID: 1,
     date: new Date().toISOString(),
-    status: "unpaid",
+    status: "Unpaid",
     orderItems: [],
   });
 
