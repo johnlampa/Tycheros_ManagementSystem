@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import OrderCard from "@/components/OrderCard";
 import { Order } from "../../../lib/types/OrderDataTypes";
 import { ProductDataTypes } from "../../../lib/types/ProductDataTypes";
+import { format } from "date-fns";
 
 function OrderSummaryPage() {
   const [menuData, setMenuData] = useState<ProductDataTypes[]>([]);
@@ -26,24 +27,27 @@ function OrderSummaryPage() {
       .catch((error) => console.error("Error fetching menu data:", error));
   }, []);
 
-  useEffect(() => {
-    const cartParams = searchParams.get("cart");
-    if (cartParams) {
-      const cartHolder = JSON.parse(cartParams) as Order;
-      setOrder(cartHolder);
-    }
-  }, [searchParams]);
+  const [cart, setCart] = useState<Order>({
+    employeeID: 1,
+    date: format(new Date(), "yyyy-MM-dd"),
+    status: "Unpaid",
+    orderItems: [],
+  });
+  //useEffect here for populating cart data. @adgramirez
 
   // Function to create an order by sending data to the backend
   const createOrder = async () => {
     try {
-      const response = await fetch("http://localhost:8081/ordering/createOrder", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ orderitems: order.orderItems }),
-      });
+      const response = await fetch(
+        "http://localhost:8081/ordering/createOrder",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ orderitems: order.orderItems }),
+        }
+      );
 
       if (response.ok) {
         const data = await response.json();

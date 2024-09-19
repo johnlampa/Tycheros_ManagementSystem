@@ -2,45 +2,51 @@ import { useState } from "react";
 import { useCartContext } from "../../lib/context/CartContext";
 import { QuantityModalProps } from "../../lib/types/props/QuantityModalProps";
 import Modal from "@/components/ui/Modal";
+import { Order } from "../../lib/types/OrderDataTypes";
 import { OrderItemDataTypes } from "../../lib/types/OrderDataTypes";
+import { format } from "date-fns";
 
 const QuantityModal: React.FC<QuantityModalProps> = ({
   productToAdd,
   quantityModalIsVisible,
   setQuantityModalVisibility,
-  previousQuantity,
   type,
-  cartState,
-  setCartState,
 }) => {
-  const { cart, setCart } = useCartContext();
+  const [cart, setCart] = useState<Order>({
+    employeeID: 1,
+    date: format(new Date(), "yyyy-MM-dd"),
+    status: "Unpaid",
+    orderItems: [],
+  });
+  //add a useEffect hook here to populate cart data. @adgramirez
 
-  const [quantity, setQuantity] = useState(previousQuantity || 0); // Initialize with previous quantity if available
+  const [quantity, setQuantity] = useState(0);
 
   const handleSave = () => {
     if (type === "edit") {
       if (productToAdd.productID) {
         // Find the index of the order item with the same productID
-        const itemIndex = cartState?.orderItems?.findIndex(
-          (item) => item.productID === productToAdd.productID
-        );
+        const itemIndex =
+          cart?.orderItems?.findIndex(
+            (item) => item.productID === productToAdd.productID
+          ) || 0;
+
+        setQuantity(cart.orderItems?.[itemIndex]?.quantity || 0);
 
         // If the item is found, update its quantity
         if (itemIndex !== undefined && itemIndex !== -1) {
-          const updatedOrderItems = [...(cartState?.orderItems || [])];
+          const updatedOrderItems = [...(cart?.orderItems || [])];
           if (quantity > 0) {
             updatedOrderItems[itemIndex].quantity = quantity; // Update the quantity
           } else {
             updatedOrderItems.splice(itemIndex, 1); // Remove the item if quantity is 0
           }
 
-          if (setCartState) {
-            setCartState({ ...cart, orderItems: updatedOrderItems });
-            console.log("Updated cart: ", {
-              ...cart,
-              orderItems: updatedOrderItems,
-            });
-          }
+          setCart({ ...cart, orderItems: updatedOrderItems });
+          console.log("Updated cart: ", {
+            ...cart,
+            orderItems: updatedOrderItems,
+          });
         }
       }
     } else {
@@ -72,7 +78,9 @@ const QuantityModal: React.FC<QuantityModalProps> = ({
         setModalVisibility={setQuantityModalVisibility}
       >
         <div className="flex flex-col gap-3 justify-center items-center">
-          <div className="font-bold text-2xl text-black">{productToAdd.productName}</div>
+          <div className="font-bold text-2xl text-black">
+            {productToAdd.productName}
+          </div>
           <div className="text-black">Enter Quantity</div>
           <div className="flex justify-center items-center">
             <button
