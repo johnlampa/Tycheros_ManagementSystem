@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import OrderCard from "@/components/OrderCard";
-import { Order } from "../../../lib/types/OrderDataTypes";
+import { Order, OrderItemDataTypes } from "../../../lib/types/OrderDataTypes";
 import { ProductDataTypes } from "../../../lib/types/ProductDataTypes";
 import { format } from "date-fns";
 
@@ -27,13 +27,19 @@ function OrderSummaryPage() {
       .catch((error) => console.error("Error fetching menu data:", error));
   }, []);
 
-  const [cart, setCart] = useState<Order>({
-    employeeID: 1,
-    date: format(new Date(), "yyyy-MM-dd"),
-    status: "Unpaid",
-    orderItems: [],
-  });
-  //useEffect here for populating cart data. @adgramirez
+  const [cart, setCart] = useState<OrderItemDataTypes[]>([]);
+
+  // Load cart from localStorage on component mount
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const savedCart = localStorage.getItem("cart");
+      if (savedCart) {
+        setCart(JSON.parse(savedCart));
+      } else {
+        localStorage.setItem("cart", JSON.stringify([])); // Initialize empty cart
+      }
+    }
+  }, []);
 
   // Function to create an order by sending data to the backend
   const createOrder = async () => {
@@ -45,7 +51,7 @@ function OrderSummaryPage() {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ orderitems: order.orderItems }),
+          body: JSON.stringify({ orderitems: cart }),
         }
       );
 
@@ -59,6 +65,8 @@ function OrderSummaryPage() {
     } catch (error) {
       console.error("Error:", error);
     }
+
+    localStorage.removeItem("cart");
   };
 
   const handleClick = () => {
@@ -74,8 +82,8 @@ function OrderSummaryPage() {
       <div className="w-[360px] flex flex-col justify-center items-center gap-3 py-3 border border-black">
         <div className="font-semibold text-2xl">Order Summary</div>
         <OrderCard
-          cart={order}
-          setCart={setOrder}
+          cart={cart}
+          setCart={setCart}
           setOrder={setOrder}
           menuData={menuData}
           quantityModalIsVisible={quantityModalVisibility}

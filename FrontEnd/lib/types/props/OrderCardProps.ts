@@ -1,9 +1,9 @@
-import { Order } from "../OrderDataTypes"
+import { Order, OrderItemDataTypes } from "../OrderDataTypes"
 import { ProductDataTypes } from "../ProductDataTypes";
 
 export type OrderCardProps = {
-    cart: Order;
-    setCart: React.Dispatch<React.SetStateAction<Order>>;
+    cart: OrderItemDataTypes[];
+    setCart: React.Dispatch<React.SetStateAction<OrderItemDataTypes[]>>;
     setOrder: React.Dispatch<React.SetStateAction<Order>>;
     menuData: ProductDataTypes[];
     quantityModalIsVisible: boolean;

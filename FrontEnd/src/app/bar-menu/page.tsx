@@ -56,8 +56,6 @@ export default function Page() {
     imageUrl: "/assets/images/MilkTea.jpg",
   });
 
-  const { cart, setCart } = useCartContext();
-
   const [quantityModalVisibility, setQuantityModalVisibility] = useState(false);
 
   return (
@@ -70,7 +68,6 @@ export default function Page() {
         <Link
           href={{
             pathname: "/order-summary",
-            query: { cart: JSON.stringify(cart) }, // Pass cart items as a query parameter
           }}
         >
           <button className="absolute bottom-4 right-4 bg-blue-500 text-white py-2 px-4 rounded-lg shadow-lg hover:bg-blue-600">

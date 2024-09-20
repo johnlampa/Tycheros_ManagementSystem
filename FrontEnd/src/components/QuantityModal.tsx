@@ -1,10 +1,9 @@
-import { useState } from "react";
-import { useCartContext } from "../../lib/context/CartContext";
+"use client"; // This ensures the component is a client component
+
+import { useState, useEffect } from "react";
 import { QuantityModalProps } from "../../lib/types/props/QuantityModalProps";
 import Modal from "@/components/ui/Modal";
-import { Order } from "../../lib/types/OrderDataTypes";
 import { OrderItemDataTypes } from "../../lib/types/OrderDataTypes";
-import { format } from "date-fns";
 
 const QuantityModal: React.FC<QuantityModalProps> = ({
   productToAdd,
@@ -12,63 +11,68 @@ const QuantityModal: React.FC<QuantityModalProps> = ({
   setQuantityModalVisibility,
   type,
 }) => {
-  const [cart, setCart] = useState<Order>({
-    employeeID: 1,
-    date: format(new Date(), "yyyy-MM-dd"),
-    status: "Unpaid",
-    orderItems: [],
-  });
-  //add a useEffect hook here to populate cart data. @adgramirez
-
+  const [cart, setCart] = useState<OrderItemDataTypes[]>([]);
   const [quantity, setQuantity] = useState(0);
 
-  const handleSave = () => {
-    if (type === "edit") {
-      if (productToAdd.productID) {
-        // Find the index of the order item with the same productID
-        const itemIndex =
-          cart?.orderItems?.findIndex(
-            (item) => item.productID === productToAdd.productID
-          ) || 0;
-
-        setQuantity(cart.orderItems?.[itemIndex]?.quantity || 0);
-
-        // If the item is found, update its quantity
-        if (itemIndex !== undefined && itemIndex !== -1) {
-          const updatedOrderItems = [...(cart?.orderItems || [])];
-          if (quantity > 0) {
-            updatedOrderItems[itemIndex].quantity = quantity; // Update the quantity
-          } else {
-            updatedOrderItems.splice(itemIndex, 1); // Remove the item if quantity is 0
-          }
-
-          setCart({ ...cart, orderItems: updatedOrderItems });
-          console.log("Updated cart: ", {
-            ...cart,
-            orderItems: updatedOrderItems,
-          });
-        }
+  // Load cart from localStorage on component mount
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const savedCart = localStorage.getItem("cart");
+      if (savedCart) {
+        setCart(JSON.parse(savedCart));
+      } else {
+        localStorage.setItem("cart", JSON.stringify([])); // Initialize empty cart
       }
-    } else {
-      if (quantity > 0 && productToAdd.productID) {
+    }
+  }, []);
+
+  // Set quantity based on product being edited when modal is opened
+  useEffect(() => {
+    if (type === "edit" && quantityModalIsVisible && productToAdd.productID) {
+      const item = cart.find(
+        (item) => item.productID === productToAdd.productID
+      );
+      if (item) {
+        setQuantity(item.quantity); // Set the quantity if the product is in the cart
+      } else {
+        setQuantity(0); // If the product is not in the cart, set to 0
+      }
+    } else if (type !== "edit") {
+      setQuantity(0); // Reset quantity to 0 if adding a new product
+    }
+  }, [type, quantityModalIsVisible, productToAdd, cart]);
+
+  // Handle saving the product (either adding or editing)
+  const handleSave = () => {
+    if (productToAdd.productID) {
+      const itemIndex = cart.findIndex(
+        (item) => item.productID === productToAdd.productID
+      );
+
+      const updatedCart = [...cart];
+
+      if (itemIndex !== -1) {
+        if (type === "edit") {
+          updatedCart[itemIndex].quantity = quantity;
+        } else {
+          // If product exists in the cart, add the new quantity to the existing one
+          updatedCart[itemIndex].quantity += quantity;
+        }
+      } else {
+        // If product does not exist, add it to the cart
         const newOrderItem: OrderItemDataTypes = {
           productID: productToAdd.productID,
           quantity,
         };
-
-        // Ensure orderItems is always an array
-        const updatedOrderItems = [...(cart.orderItems || []), newOrderItem];
-        setCart({ ...cart, orderItems: updatedOrderItems });
-        console.log("Updated cart: ", {
-          ...cart,
-          orderItems: updatedOrderItems,
-        });
+        updatedCart.push(newOrderItem);
       }
+
+      setCart(updatedCart);
+      localStorage.setItem("cart", JSON.stringify(updatedCart));
     }
 
-    // Close the modal after saving
     setQuantityModalVisibility(false);
-    setQuantity(0);
+    setQuantity(0); // Reset the quantity after saving
   };
 
   return (
@@ -85,9 +89,7 @@ const QuantityModal: React.FC<QuantityModalProps> = ({
           <div className="flex justify-center items-center">
             <button
               className="px-3 py-1 rounded-full border border-black text-gray-400 text-sm bg-white hover:bg-gray-50 hover:text-gray-600"
-              onClick={() => {
-                if (quantity > 0) setQuantity(quantity - 1);
-              }}
+              onClick={() => setQuantity((prev) => Math.max(prev - 1, 0))}
             >
               -
             </button>
@@ -96,9 +98,7 @@ const QuantityModal: React.FC<QuantityModalProps> = ({
             </div>
             <button
               className="px-3 py-1 rounded-full border border-black text-gray-400 text-sm bg-white hover:bg-gray-50 hover:text-gray-600"
-              onClick={() => {
-                setQuantity(quantity + 1);
-              }}
+              onClick={() => setQuantity(quantity + 1)}
             >
               +
             </button>

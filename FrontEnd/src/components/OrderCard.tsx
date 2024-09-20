@@ -23,7 +23,7 @@ const OrderCard: React.FC<OrderCardProps> = ({
 
   // Update subtotal whenever cart or menuData changes
   useEffect(() => {
-    const newSubtotal = cart.orderItems?.reduce((acc, item) => {
+    const newSubtotal = cart.reduce((acc, item) => {
       const { productID, quantity } = item;
       const product = menuData.find((p) => p.productID === productID);
       return acc + (product?.sellingPrice || 0) * quantity;
@@ -47,7 +47,7 @@ const OrderCard: React.FC<OrderCardProps> = ({
         </div>
 
         <div className="flex flex-col gap-3 items-center justify-center">
-          {cart?.orderItems?.map((item, index) => {
+          {cart.map((item, index) => {
             const { productID, quantity } = item;
             const product = menuData.find((p) => p.productID === productID);
 
@@ -84,8 +84,8 @@ const OrderCard: React.FC<OrderCardProps> = ({
                   setQuantityModalVisibility={setQuantityModalVisibility}
                   previousQuantity={quantity}
                   type="edit"
-                  cartState={cart}
-                  setCartState={setCart}
+                  // cartState={cart}
+                  // setCartState={setCart}
                 />
               </div>
             );

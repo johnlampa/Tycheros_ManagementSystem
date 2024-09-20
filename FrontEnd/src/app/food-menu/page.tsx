@@ -55,8 +55,6 @@ export default function Page() {
     imageUrl: "/assets/images/MilkTea.jpg",
   });
 
-  const { cart, setCart } = useCartContext();
-
   const [quantityModalVisibility, setQuantityModalVisibility] = useState(false);
 
   return (
