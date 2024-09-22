@@ -1,68 +1,96 @@
-import { useState } from "react";
-import { useCartContext } from "../../lib/context/CartContext";
+"use client"; // This ensures the component is a client component
+
+import { useState, useEffect } from "react";
 import { QuantityModalProps } from "../../lib/types/props/QuantityModalProps";
 import Modal from "@/components/ui/Modal";
 import { OrderItemDataTypes } from "../../lib/types/OrderDataTypes";
+import { usePathname } from "next/navigation";
 
 const QuantityModal: React.FC<QuantityModalProps> = ({
   productToAdd,
   quantityModalIsVisible,
   setQuantityModalVisibility,
-  previousQuantity,
   type,
-  cartState,
-  setCartState,
 }) => {
-  const { cart, setCart } = useCartContext();
+  const [cart, setCart] = useState<OrderItemDataTypes[]>([]);
+  const [quantity, setQuantity] = useState(0);
 
-  const [quantity, setQuantity] = useState(previousQuantity || 0); // Initialize with previous quantity if available
+  // Load cart from localStorage on component mount
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const savedCart = localStorage.getItem("cart");
+      if (savedCart) {
+        setCart(JSON.parse(savedCart));
+      } else {
+        localStorage.setItem("cart", JSON.stringify([])); // Initialize empty cart
+      }
+    }
+  }, []);
 
+  // Set quantity based on product being edited when modal is opened
+  useEffect(() => {
+    if (type === "edit" && quantityModalIsVisible && productToAdd.productID) {
+      const item = cart.find(
+        (item) => item.productID === productToAdd.productID
+      );
+      if (item) {
+        setQuantity(item.quantity); // Set the quantity if the product is in the cart
+      } else {
+        setQuantity(0); // If the product is not in the cart, set to 0
+      }
+    } else if (type !== "edit") {
+      setQuantity(0); // Reset quantity to 0 if adding a new product
+    }
+  }, [type, quantityModalIsVisible, productToAdd, cart]);
+
+  let pathname = usePathname();
+
+  // Handle saving the product (either adding or editing)
   const handleSave = () => {
-    if (type === "edit") {
-      if (productToAdd.productID) {
-        // Find the index of the order item with the same productID
-        const itemIndex = cartState?.orderItems?.findIndex(
-          (item) => item.productID === productToAdd.productID
-        );
+    if (productToAdd.productID) {
+      const itemIndex = cart.findIndex(
+        (item) => item.productID === productToAdd.productID
+      );
 
-        // If the item is found, update its quantity
-        if (itemIndex !== undefined && itemIndex !== -1) {
-          const updatedOrderItems = [...(cartState?.orderItems || [])];
-          if (quantity > 0) {
-            updatedOrderItems[itemIndex].quantity = quantity; // Update the quantity
-          } else {
-            updatedOrderItems.splice(itemIndex, 1); // Remove the item if quantity is 0
+      const updatedCart = [...cart];
+
+      if (type === "edit") {
+        if (quantity === 0) {
+          // If quantity is 0 in edit mode, remove the product from the cart
+          if (itemIndex !== -1) {
+            updatedCart.splice(itemIndex, 1);
           }
-
-          if (setCartState) {
-            setCartState({ ...cart, orderItems: updatedOrderItems });
-            console.log("Updated cart: ", {
-              ...cart,
-              orderItems: updatedOrderItems,
-            });
+        } else if (itemIndex !== -1) {
+          // Update the product quantity in edit mode
+          updatedCart[itemIndex].quantity = quantity;
+        }
+      } else {
+        // Non-edit mode
+        if (quantity > 0) {
+          if (itemIndex !== -1) {
+            // Add the new quantity to the existing product
+            updatedCart[itemIndex].quantity += quantity;
+          } else {
+            // Add a new product if it doesn't exist in the cart
+            const newOrderItem: OrderItemDataTypes = {
+              productID: productToAdd.productID,
+              quantity,
+            };
+            updatedCart.push(newOrderItem);
           }
         }
       }
-    } else {
-      if (quantity > 0 && productToAdd.productID) {
-        const newOrderItem: OrderItemDataTypes = {
-          productID: productToAdd.productID,
-          quantity,
-        };
 
-        // Ensure orderItems is always an array
-        const updatedOrderItems = [...(cart.orderItems || []), newOrderItem];
-        setCart({ ...cart, orderItems: updatedOrderItems });
-        console.log("Updated cart: ", {
-          ...cart,
-          orderItems: updatedOrderItems,
-        });
-      }
+      setCart(updatedCart);
+      localStorage.setItem("cart", JSON.stringify(updatedCart));
     }
 
-    // Close the modal after saving
     setQuantityModalVisibility(false);
-    setQuantity(0);
+    setQuantity(0); // Reset the quantity after saving
+
+    if (pathname === "/order-summary") {
+      window.location.reload();
+    }
   };
 
   return (
@@ -72,14 +100,14 @@ const QuantityModal: React.FC<QuantityModalProps> = ({
         setModalVisibility={setQuantityModalVisibility}
       >
         <div className="flex flex-col gap-3 justify-center items-center">
-          <div className="font-bold text-2xl text-black">{productToAdd.productName}</div>
+          <div className="font-bold text-2xl text-black">
+            {productToAdd.productName}
+          </div>
           <div className="text-black">Enter Quantity</div>
           <div className="flex justify-center items-center">
             <button
               className="px-3 py-1 rounded-full border border-black text-gray-400 text-sm bg-white hover:bg-gray-50 hover:text-gray-600"
-              onClick={() => {
-                if (quantity > 0) setQuantity(quantity - 1);
-              }}
+              onClick={() => setQuantity((prev) => Math.max(prev - 1, 0))}
             >
               -
             </button>
@@ -88,9 +116,7 @@ const QuantityModal: React.FC<QuantityModalProps> = ({
             </div>
             <button
               className="px-3 py-1 rounded-full border border-black text-gray-400 text-sm bg-white hover:bg-gray-50 hover:text-gray-600"
-              onClick={() => {
-                setQuantity(quantity + 1);
-              }}
+              onClick={() => setQuantity(quantity + 1)}
             >
               +
             </button>

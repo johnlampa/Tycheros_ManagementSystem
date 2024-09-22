@@ -3,8 +3,9 @@
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import OrderCard from "@/components/OrderCard";
-import { Order } from "../../../lib/types/OrderDataTypes";
+import { Order, OrderItemDataTypes } from "../../../lib/types/OrderDataTypes";
 import { ProductDataTypes } from "../../../lib/types/ProductDataTypes";
+import { format } from "date-fns";
 
 function OrderSummaryPage() {
   const [menuData, setMenuData] = useState<ProductDataTypes[]>([]);
@@ -26,24 +27,33 @@ function OrderSummaryPage() {
       .catch((error) => console.error("Error fetching menu data:", error));
   }, []);
 
+  const [cart, setCart] = useState<OrderItemDataTypes[]>([]);
+
+  // Load cart from localStorage on component mount
   useEffect(() => {
-    const cartParams = searchParams.get("cart");
-    if (cartParams) {
-      const cartHolder = JSON.parse(cartParams) as Order;
-      setOrder(cartHolder);
+    if (typeof window !== "undefined") {
+      const savedCart = localStorage.getItem("cart");
+      if (savedCart) {
+        setCart(JSON.parse(savedCart));
+      } else {
+        localStorage.setItem("cart", JSON.stringify([])); // Initialize empty cart
+      }
     }
-  }, [searchParams]);
+  }, []);
 
   // Function to create an order by sending data to the backend
   const createOrder = async () => {
     try {
-      const response = await fetch("http://localhost:8081/ordering/createOrder", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ orderitems: order.orderItems }),
-      });
+      const response = await fetch(
+        "http://localhost:8081/ordering/createOrder",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ orderitems: cart }),
+        }
+      );
 
       if (response.ok) {
         const data = await response.json();
@@ -55,6 +65,8 @@ function OrderSummaryPage() {
     } catch (error) {
       console.error("Error:", error);
     }
+
+    localStorage.removeItem("cart");
   };
 
   const handleClick = () => {
@@ -70,8 +82,8 @@ function OrderSummaryPage() {
       <div className="w-[360px] flex flex-col justify-center items-center gap-3 py-3 border border-black">
         <div className="font-semibold text-2xl">Order Summary</div>
         <OrderCard
-          cart={order}
-          setCart={setOrder}
+          cart={cart}
+          setCart={setCart}
           setOrder={setOrder}
           menuData={menuData}
           quantityModalIsVisible={quantityModalVisibility}
