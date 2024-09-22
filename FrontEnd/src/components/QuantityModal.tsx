@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { QuantityModalProps } from "../../lib/types/props/QuantityModalProps";
 import Modal from "@/components/ui/Modal";
 import { OrderItemDataTypes } from "../../lib/types/OrderDataTypes";
+import { usePathname } from "next/navigation";
 
 const QuantityModal: React.FC<QuantityModalProps> = ({
   productToAdd,
@@ -42,6 +43,8 @@ const QuantityModal: React.FC<QuantityModalProps> = ({
     }
   }, [type, quantityModalIsVisible, productToAdd, cart]);
 
+  let pathname = usePathname();
+
   // Handle saving the product (either adding or editing)
   const handleSave = () => {
     if (productToAdd.productID) {
@@ -51,20 +54,31 @@ const QuantityModal: React.FC<QuantityModalProps> = ({
 
       const updatedCart = [...cart];
 
-      if (itemIndex !== -1) {
-        if (type === "edit") {
+      if (type === "edit") {
+        if (quantity === 0) {
+          // If quantity is 0 in edit mode, remove the product from the cart
+          if (itemIndex !== -1) {
+            updatedCart.splice(itemIndex, 1);
+          }
+        } else if (itemIndex !== -1) {
+          // Update the product quantity in edit mode
           updatedCart[itemIndex].quantity = quantity;
-        } else {
-          // If product exists in the cart, add the new quantity to the existing one
-          updatedCart[itemIndex].quantity += quantity;
         }
       } else {
-        // If product does not exist, add it to the cart
-        const newOrderItem: OrderItemDataTypes = {
-          productID: productToAdd.productID,
-          quantity,
-        };
-        updatedCart.push(newOrderItem);
+        // Non-edit mode
+        if (quantity > 0) {
+          if (itemIndex !== -1) {
+            // Add the new quantity to the existing product
+            updatedCart[itemIndex].quantity += quantity;
+          } else {
+            // Add a new product if it doesn't exist in the cart
+            const newOrderItem: OrderItemDataTypes = {
+              productID: productToAdd.productID,
+              quantity,
+            };
+            updatedCart.push(newOrderItem);
+          }
+        }
       }
 
       setCart(updatedCart);
@@ -73,6 +87,10 @@ const QuantityModal: React.FC<QuantityModalProps> = ({
 
     setQuantityModalVisibility(false);
     setQuantity(0); // Reset the quantity after saving
+
+    if (pathname === "/order-summary") {
+      window.location.reload();
+    }
   };
 
   return (
