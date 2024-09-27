@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
 
 import "@/styles/globals.css";
+import { pattaya, inter } from "@/styles/fonts";
 import { CartProvider } from "../../lib/context/CartContext";
 import { OrderProvider } from "../../lib/context/OrderContext";
 
@@ -15,8 +16,8 @@ interface RootLayoutProps {
 
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
-    <html lang="en">
-      <body>
+    <html lang="en" className={`${pattaya.variable} ${inter.variable}`}>
+      <body className={inter.className}>
         <CartProvider>
           <OrderProvider>{children}</OrderProvider>
         </CartProvider>

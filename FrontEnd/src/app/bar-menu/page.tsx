@@ -58,6 +58,13 @@ export default function Page() {
 
   const [quantityModalVisibility, setQuantityModalVisibility] = useState(false);
 
+  // Set previous page in localStorage when the component mounts
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("previousPage", "/bar-menu");
+    }
+  }, []); // Runs only on component mount
+
   return (
     <>
       <div className="w-[362px] min-h-screen p-6 border mx-auto relative">

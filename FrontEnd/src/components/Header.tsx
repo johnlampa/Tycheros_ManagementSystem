@@ -1,41 +1,49 @@
 import { cva, VariantProps } from "class-variance-authority";
-import { FC } from "react";
+import { FC, ReactNode } from "react";
 
 const headerStyles = cva("w-full h-[90px] flex justify-center items-center", {
   variants: {
-    bgColor: {
-      tealGreen: "bg-blue-500 text-white",
-      cream: "bg-gray-300 text-black",
+    color: {
+      tealGreen: "bg-[#59988D] text-white",
+      cream: "bg-[#EDE9D8] text-black",
     },
-    textColor: {
-      white: "text-sm",
-      brown: "text-lg",
-    },
-    textSize: {
-      md: "text-3xl",
-      lg: "text-4xl",
+    type: {
+      home: "text-3xl ml-[-25px]",
+      order_summary: "text-3xl ml-[-25px]",
+      checkout: "text-3xl ml-[40px]",
+      orders: "",
+      payment_details: "",
     },
   },
   defaultVariants: {
-    bgColor: "tealGreen",
-    textColor: "white",
+    color: "tealGreen",
   },
 });
 
 interface HeaderProps extends VariantProps<typeof headerStyles> {
   text: string;
+  children?: ReactNode;
 }
 
-const Header: FC<HeaderProps> = ({ text, bgColor, textColor }) => {
+const Header: FC<HeaderProps> = ({ text, color, type, children }) => {
+  const textContainerWidth = type === "home" ? "w-[200px] text-center" : "";
+
   return (
-    <header className={headerStyles({ bgColor, textColor })}>
-      <div className="">{text}</div>
+    <header className={headerStyles({ color })}>
+      <div className="w-[80px] flex items-center p-[20px] z-100">
+        <div className="rounded-full w-[40px] h-[40px] bg-black flex justify-center items-center z-10">
+          {children}
+        </div>
+      </div>
+      <div
+        className={`w-[250px] flex items-center justify-center font-pattaya z-0 text-pretty`}
+      >
+        <div className={`${headerStyles({ type })} ${textContainerWidth}`}>
+          <span className="drop-shadow-md">{text}</span>
+        </div>
+      </div>
     </header>
   );
 };
-
-//put children bec u need to insert a button inside the header.
-//header is a flexbox so allot a div where to put the button then format it to a size
-//since all buttons will have the same size
 
 export default Header;
