@@ -12,6 +12,14 @@ module.exports = {
         "gradient-conic":
           "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
       },
+      fontFamily: {
+        pattaya: ['var(--font-pattaya)'],
+        inter: ['var(--font-inter']
+      },
+    },
+    fontFamily: {
+      pattaya: ['var(--font-pattaya)'],
+      inter: ['var(--font-inter)']
     },
   },
   plugins: [],

@@ -6,6 +6,8 @@ import OrderCard from "@/components/OrderCard";
 import { Order, OrderItemDataTypes } from "../../../lib/types/OrderDataTypes";
 import { ProductDataTypes } from "../../../lib/types/ProductDataTypes";
 import { format } from "date-fns";
+import Header from "@/components/Header";
+import Link from "next/link";
 
 function OrderSummaryPage() {
   const [menuData, setMenuData] = useState<ProductDataTypes[]>([]);
@@ -17,6 +19,7 @@ function OrderSummaryPage() {
   });
   const [subtotal, setSubtotal] = useState(0);
   const [quantityModalVisibility, setQuantityModalVisibility] = useState(false);
+  const [previousPage, setPreviousPage] = useState("/"); // Default to root in case there's no previous page
 
   const searchParams = useSearchParams();
 
@@ -29,14 +32,20 @@ function OrderSummaryPage() {
 
   const [cart, setCart] = useState<OrderItemDataTypes[]>([]);
 
-  // Load cart from localStorage on component mount
+  // Load cart and previous page from localStorage on component mount
   useEffect(() => {
     if (typeof window !== "undefined") {
       const savedCart = localStorage.getItem("cart");
+      const storedPreviousPage = localStorage.getItem("previousPage");
+
       if (savedCart) {
         setCart(JSON.parse(savedCart));
       } else {
         localStorage.setItem("cart", JSON.stringify([])); // Initialize empty cart
+      }
+
+      if (storedPreviousPage) {
+        setPreviousPage(storedPreviousPage);
       }
     }
   }, []);
@@ -79,8 +88,12 @@ function OrderSummaryPage() {
 
   return (
     <div className="w-full flex justify-center items-center">
-      <div className="w-[360px] flex flex-col justify-center items-center gap-3 py-3 border border-black">
-        <div className="font-semibold text-2xl">Order Summary</div>
+      <div className="w-[360px] flex flex-col justify-center items-center gap-3 pb-3 border border-black bg-[#EDE9D8]">
+        <Header text="Order Summary" color={"tealGreen"} type={"order_summary"}>
+          <Link href={previousPage}>
+            <button>Back</button>
+          </Link>
+        </Header>
         <OrderCard
           cart={cart}
           setCart={setCart}
