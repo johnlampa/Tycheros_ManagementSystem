@@ -19,7 +19,7 @@ function OrderSummaryPage() {
   });
   const [subtotal, setSubtotal] = useState(0);
   const [quantityModalVisibility, setQuantityModalVisibility] = useState(false);
-  const [previousPage, setPreviousPage] = useState("/order-management"); // Default to root in case there's no previous page
+  const [previousPage, setPreviousPage] = useState("/"); // Default to root in case there's no previous page
 
   const searchParams = useSearchParams();
 

@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { ProductDataTypes } from "../../../lib/types/ProductDataTypes";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Header from "@/components/Header";
 
 function PaymentDetailsPage() {
   const [menuData, setMenuData] = useState<ProductDataTypes[]>([]);
@@ -54,36 +55,42 @@ function PaymentDetailsPage() {
 
     try {
       // Process payment
-      const paymentResponse = await fetch("http://localhost:8081/orderManagement/processPayment", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          orderID: order.orderID,
-          amount: finalAmount,
-          method: paymentMethod,
-          referenceNumber,
-          discount: discountType,
-          discountAmount: discountAmount,
-        }),
-      });
+      const paymentResponse = await fetch(
+        "http://localhost:8081/orderManagement/processPayment",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            orderID: order.orderID,
+            amount: finalAmount,
+            method: paymentMethod,
+            referenceNumber,
+            discount: discountType,
+            discountAmount: discountAmount,
+          }),
+        }
+      );
 
       if (!paymentResponse.ok) {
         throw new Error("Failed to process payment");
       }
 
       // Update order status
-      const statusResponse = await fetch("http://localhost:8081/orderManagement/updateOrderStatus", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          orderID: order.orderID,
-          newStatus: "Pending", // Set new status as needed
-        }),
-      });
+      const statusResponse = await fetch(
+        "http://localhost:8081/orderManagement/updateOrderStatus",
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            orderID: order.orderID,
+            newStatus: "Pending", // Set new status as needed
+          }),
+        }
+      );
 
       if (!statusResponse.ok) {
         throw new Error("Failed to update order status");
@@ -91,7 +98,6 @@ function PaymentDetailsPage() {
 
       alert("Payment processed and order status updated successfully");
       router.push("/order-management");
-
     } catch (error) {
       console.error("Error:", error);
       alert("Error processing payment or updating order status");
@@ -102,6 +108,11 @@ function PaymentDetailsPage() {
     <>
       <div className="w-full flex justify-center items-center">
         <div className="w-[360px] flex flex-col justify-center items-center gap-3 py-3 border border-white">
+          <Header
+            text="Payment Details"
+            color={"tealGreen"}
+            type={"payment_details"}
+          ></Header>
           <div className="text-2xl font-semibold mb-3">Payment</div>
           <div className="w-[320px] border border-black rounded-md flex flex-col justify-center items-center p-3">
             Vouchers and Discounts Type
@@ -130,7 +141,9 @@ function PaymentDetailsPage() {
                   className="mr-2 text-blue-600 border-gray-300 focus:ring-blue-500"
                   onChange={(e) => setPaymentMethod(e.target.value)}
                 />
-                <label htmlFor="gcash" className="text-gray-700">GCash</label>
+                <label htmlFor="gcash" className="text-gray-700">
+                  GCash
+                </label>
               </div>
 
               <div className="flex justify-center items-center">
@@ -142,7 +155,9 @@ function PaymentDetailsPage() {
                   className="mr-2 text-blue-600 border-gray-300 focus:ring-blue-500"
                   onChange={(e) => setPaymentMethod(e.target.value)}
                 />
-                <label htmlFor="card" className="text-gray-700">Card</label>
+                <label htmlFor="card" className="text-gray-700">
+                  Card
+                </label>
               </div>
 
               <div className="flex justify-center items-center">
@@ -154,7 +169,9 @@ function PaymentDetailsPage() {
                   className="mr-2 text-blue-600 border-gray-300 focus:ring-blue-500"
                   onChange={(e) => setPaymentMethod(e.target.value)}
                 />
-                <label htmlFor="cash" className="text-gray-700">Cash</label>
+                <label htmlFor="cash" className="text-gray-700">
+                  Cash
+                </label>
               </div>
 
               <div className="flex gap-4">
@@ -175,20 +192,33 @@ function PaymentDetailsPage() {
             <div className="mb-3 font-semibold text-lg">Order Summary</div>
             <div className="w-[320px] border border-black rounded-md p-3">
               <div className="grid grid-cols-[2fr_1fr_1fr_1fr] gap-2 font-semibold mb-3">
-                <div className="flex items-center justify-center text-sm">Name</div>
-                <div className="flex items-center justify-center text-sm">Price</div>
-                <div className="flex items-center justify-center text-sm">Quantity</div>
-                <div className="flex items-center justify-center text-sm">Subtotal</div>
+                <div className="flex items-center justify-center text-sm">
+                  Name
+                </div>
+                <div className="flex items-center justify-center text-sm">
+                  Price
+                </div>
+                <div className="flex items-center justify-center text-sm">
+                  Quantity
+                </div>
+                <div className="flex items-center justify-center text-sm">
+                  Subtotal
+                </div>
               </div>
 
               {order.orderItems?.map(({ productID, quantity }, itemIndex) => {
-                const product = menuData.find((item) => item.productID === productID);
+                const product = menuData.find(
+                  (item) => item.productID === productID
+                );
                 if (!product) return null;
 
                 const subtotal = product.sellingPrice * quantity;
 
                 return (
-                  <div key={itemIndex} className="grid grid-cols-[2fr_1fr_1fr_1fr] gap-2">
+                  <div
+                    key={itemIndex}
+                    className="grid grid-cols-[2fr_1fr_1fr_1fr] gap-2"
+                  >
                     <div className="flex justify-center items-center text-sm">
                       {product.productName}
                     </div>
