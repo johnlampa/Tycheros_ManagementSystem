@@ -103,6 +103,7 @@ function OrderSummaryPage() {
           setQuantityModalVisibility={setQuantityModalVisibility}
           subtotal={subtotal}
           setSubtotal={setSubtotal}
+          type={"summary"}
         />
         <div className="flex gap-[168px] rounded-lg border border-black w-[320px] px-2">
           <div>Subtotal</div>
