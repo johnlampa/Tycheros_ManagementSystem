@@ -13,7 +13,7 @@ import Link from "next/link";
 const categories: CategoriesDataTypes[] = [
   {
     categoryID: 1,
-    categoryName: "Appetizer",
+    categoryName: "Appetizers",
   },
   {
     categoryID: 2,
@@ -84,7 +84,7 @@ export default function Page() {
         {categories.map((category) => (
           <div key={category.categoryName} className="mb-8">
             <p className="font-semibold text-lg">{category.categoryName}</p>
-            <div className="grid grid-cols-2 gap-x-6 gap-y-3">
+            <div className="grid grid-cols-2 gap-x-6 gap-y-3 content-center">
               {menuData
                 .filter((item) => item.categoryName === category.categoryName)
                 .map((item, index) => (

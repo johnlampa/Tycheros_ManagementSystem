@@ -1,33 +1,35 @@
+
 import Image from "next/image";
 import React from "react";
 
 import { MenuCardProps } from "../../../lib/types/props/MenuCardProps";
-import { ProductDataTypes } from "../../../lib/types/ProductDataTypes";
 
 const MenuCard: React.FC<MenuCardProps> = ({
   product,
   setProductToAdd,
-  quantityModalIsVisible,
   setQuantityModalVisibility,
 }) => {
   return (
-    <>
-      <div className="flex flex-col bg-[#D1C198] py-3">
-        <div className="w-[135px] h-[98px] rounded-sm relative overflow-hidden mx-auto">
-          <Image
-            draggable={false}
-            fill
-            src={product.imageUrl}
-            className="rounded-card object-cover object-center"
-            alt="/"
-          />
-        </div>
-        <div className="ml-5 my-2">
-          <p>{product.productName}</p>
-          <p>{product.sellingPrice}</p>
-        </div>
+    <div className="flex flex-col bg-white border border-gray-300 rounded-md shadow-md overflow-hidden h-[300px]">
+      {/* Image Section */}
+      <div className="w-full h-[150px] relative">
+        <Image
+          draggable={false}
+          fill
+          src={product.imageUrl}
+          className="object-cover"
+          alt={product.productName}
+        />
+      </div>
+
+      {/* Product Info */}
+      <div className="flex flex-col p-3 flex-1">
+        <p className="text-sm font-extrabold">{product.productName}</p>
+        <p className="text-sm text-gray-500">₱{product.sellingPrice}</p>
+
+        {/* Button at the bottom */}
         <button
-          className="bg-[#5A3714] border-[#5A3714] border text-white mx-1 rounded-md hover:bg-white hover:border-[#5A3714] hover:text-[#5A3714] duration-200"
+          className="mt-auto bg-[#3E7363] text-white py-2 rounded-md hover:bg-[#30594f] duration-200"
           onClick={() => {
             setQuantityModalVisibility(true);
             setProductToAdd(product);
@@ -37,7 +39,7 @@ const MenuCard: React.FC<MenuCardProps> = ({
           Add Item
         </button>
       </div>
-    </>
+    </div>
   );
 };
 
