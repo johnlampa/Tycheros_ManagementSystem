@@ -12,9 +12,15 @@ import OrderButtonSection from "@/components/section/OrderButtonSection";
 
 function OrderSummaryPage() {
   const [menuData, setMenuData] = useState<ProductDataTypes[]>([]);
+  const date = new Date();
+  const time =
+    date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
+
+  const dateTime = date.toISOString() + " " + time;
+
   const [order, setOrder] = useState<Order>({
     employeeID: 1,
-    date: new Date().toISOString(),
+    date: dateTime, //still does not work as intended
     status: "Unpaid",
     orderItems: [],
   });
@@ -81,6 +87,12 @@ function OrderSummaryPage() {
 
   const handleClick = () => {
     createOrder(); // Call the function to create the order
+
+    if (typeof window !== "undefined") {
+      const savedCart = localStorage.getItem("cart");
+
+      if (savedCart) localStorage.setItem("order", savedCart);
+    }
   };
 
   useEffect(() => {
