@@ -7,6 +7,7 @@ import Link from "next/link";
 const OrderCard: React.FC<OrderCardProps> = ({
   cart,
   setCart,
+  order,
   setOrder,
   menuData,
   quantityModalIsVisible,
@@ -110,15 +111,19 @@ const OrderCard: React.FC<OrderCardProps> = ({
             );
           })}
         </div>
-        <div className="grid grid-cols-[1fr_1fr_1fr] w-[303.75px] mt-[10px]">
-          <Link href={"/"}>
-            <div className="flex justify-center items-center">
-              <span className="text-[11px] font-bold underline">
-                Add more items
-              </span>
-            </div>
-          </Link>
-        </div>
+        {type === "summary" ? (
+          <div className="grid grid-cols-[1fr_1fr_1fr] w-[303.75px] mt-[10px]">
+            <Link href={"/"}>
+              <div className="flex justify-center items-center">
+                <span className="text-[11px] font-bold underline">
+                  Add more items
+                </span>
+              </div>
+            </Link>
+          </div>
+        ) : (
+          ""
+        )}
       </div>
     </>
   );
