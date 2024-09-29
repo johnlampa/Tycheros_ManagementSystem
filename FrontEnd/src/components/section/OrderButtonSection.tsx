@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { OrderButtonSectionProps } from "../../../lib/types/props/OrderButtonSectionProps";
 
 const OrderButtonSection: React.FC<OrderButtonSectionProps> = ({
@@ -14,14 +15,16 @@ const OrderButtonSection: React.FC<OrderButtonSectionProps> = ({
           </div>
           <div className="font-bold text-[14px]">Php {subtotal}</div>
         </div>
-        <button
-          className="w-[320px] h-[39px] bg-tealGreen rounded-md"
-          onClick={handleClick}
-        >
-          <span className="font-pattaya text-[20px] text-white">
-            I&apos;m Ready to Order
-          </span>
-        </button>
+        <Link href={"/checkout"}>
+          <button
+            className="w-[320px] h-[39px] bg-tealGreen rounded-md"
+            onClick={handleClick}
+          >
+            <span className="font-pattaya text-[20px] text-white">
+              I&apos;m Ready to Order
+            </span>
+          </button>
+        </Link>
       </div>
     </>
   );

@@ -30,6 +30,8 @@ function OrderSummaryPage() {
 
   const searchParams = useSearchParams();
 
+  const [orderID, setOrderID] = useState(-1);
+
   useEffect(() => {
     fetch("http://localhost:8081/ordering/getCustomerMenu")
       .then((response) => response.json())
@@ -58,6 +60,7 @@ function OrderSummaryPage() {
   }, []);
 
   // Function to create an order by sending data to the backend
+  // Function to create an order by sending data to the backend
   const createOrder = async () => {
     try {
       const response = await fetch(
@@ -74,7 +77,13 @@ function OrderSummaryPage() {
       if (response.ok) {
         const data = await response.json();
         console.log("Order created:", data);
-        // Handle success (e.g., navigate to a success page, clear cart, etc.)
+        // Set the orderID and save it to localStorage
+        setOrderID(data.orderID);
+
+        // Now, save the orderID to localStorage after the state has been updated
+        if (typeof window !== "undefined") {
+          localStorage.setItem("orderID", data.orderID.toString());
+        }
       } else {
         console.error("Failed to create order");
       }
@@ -82,17 +91,12 @@ function OrderSummaryPage() {
       console.error("Error:", error);
     }
 
+    // Remove the cart after the order is created
     localStorage.removeItem("cart");
   };
 
   const handleClick = () => {
     createOrder(); // Call the function to create the order
-
-    if (typeof window !== "undefined") {
-      const savedCart = localStorage.getItem("cart");
-
-      if (savedCart) localStorage.setItem("order", savedCart);
-    }
   };
 
   useEffect(() => {

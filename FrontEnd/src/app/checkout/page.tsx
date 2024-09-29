@@ -7,6 +7,7 @@ import { ProductDataTypes } from "../../../lib/types/ProductDataTypes";
 import Header from "@/components/Header";
 import Link from "next/link";
 import OrderButtonSection from "@/components/section/OrderButtonSection";
+import OrderDetailsSection from "@/components/section/OrderDetailsSection";
 
 function OrderSummaryPage() {
   const [quantityModalVisibility, setQuantityModalVisibility] = useState(false);
@@ -35,6 +36,21 @@ function OrderSummaryPage() {
         if (!response.ok) throw new Error("Failed to fetch orders");
         const data = await response.json();
         setOrders(data);
+
+        // Retrieve orderID from localStorage
+        const storedOrderID = localStorage.getItem("orderID");
+        if (storedOrderID) {
+          // Find the order with the matching orderID
+          const matchingOrder = data.find(
+            (order: Order) => order.orderID === parseInt(storedOrderID)
+          );
+          if (matchingOrder) {
+            setOrder(matchingOrder); // Set the matching order in the state
+          } else {
+            console.warn("No order found with the given ID.");
+            console.log(order.orderID);
+          }
+        }
       } catch (error) {
         console.error("Error fetching orders:", error);
         setError("Error fetching orders");
@@ -78,7 +94,7 @@ function OrderSummaryPage() {
           </Link>
         </Header>
         <OrderCard
-          cart={cart}
+          cart={order.orderItems || cart}
           setOrder={setOrder}
           menuData={menuData}
           quantityModalIsVisible={quantityModalVisibility}
@@ -87,6 +103,11 @@ function OrderSummaryPage() {
           setSubtotal={setSubtotal}
           type={"checkout"}
         />
+        <OrderDetailsSection
+          orderID={order.orderID || -1}
+          date={order.date}
+          subtotal={subtotal}
+        ></OrderDetailsSection>
         <div className="w-[360px] h-[105px] mt-[50px] p-5 rounded-xl bg-cream drop-shadow-[0_-5px_3px_rgba(0,0,0,0.15)] drop">
           <div className="flex justify-center items-center w-[315px] ml-[2.5px] mb-2">
             <span className="text-[20px] text-primaryBrown font-semibold text-center">
