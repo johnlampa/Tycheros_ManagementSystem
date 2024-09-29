@@ -99,8 +99,8 @@ const QuantityModal: React.FC<QuantityModalProps> = ({
         modalIsVisible={quantityModalIsVisible}
         setModalVisibility={setQuantityModalVisibility}
       >
-        <div className="flex flex-col gap-3 justify-center items-center">
-          <div className="font-bold text-2xl text-black">
+        <div className="flex flex-col gap-3 justify-center items-center h-[40px] ">
+          <div className="font-bold text-2xl text-black mt-20">
             {productToAdd.productName}
           </div>
           <div className="text-black">Enter Quantity</div>
