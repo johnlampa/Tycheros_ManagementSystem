@@ -8,6 +8,7 @@ import { ProductDataTypes } from "../../../lib/types/ProductDataTypes";
 import { format } from "date-fns";
 import Header from "@/components/Header";
 import Link from "next/link";
+import OrderButtonSection from "@/components/section/OrderButtonSection";
 
 function OrderSummaryPage() {
   const [menuData, setMenuData] = useState<ProductDataTypes[]>([]);
@@ -88,7 +89,7 @@ function OrderSummaryPage() {
 
   return (
     <div className="w-full flex justify-center items-center">
-      <div className="w-[360px] flex flex-col justify-center items-center gap-3 pb-3 border border-black bg-[#EDE9D8]">
+      <div className="w-[360px] flex flex-col justify-center items-center gap-3 bg-[#EDE9D8]">
         <Header text="Order Summary" color={"tealGreen"} type={"order_summary"}>
           <Link href={previousPage}>
             <button>Back</button>
@@ -105,16 +106,10 @@ function OrderSummaryPage() {
           setSubtotal={setSubtotal}
           type={"summary"}
         />
-        <div className="flex gap-[168px] rounded-lg border border-black w-[320px] px-2">
-          <div>Subtotal</div>
-          <div>{subtotal}</div>
-        </div>
-        <button
-          className="rounded-lg border border-black w-[320px] px-2"
-          onClick={handleClick}
-        >
-          I AM READY TO ORDER!
-        </button>
+        <OrderButtonSection
+          subtotal={subtotal}
+          handleClick={handleClick}
+        ></OrderButtonSection>
       </div>
     </div>
   );

@@ -21,6 +21,13 @@ module.exports = {
       pattaya: ['var(--font-pattaya)'],
       inter: ['var(--font-inter)']
     },
+    colors: {
+      cream: "#EDE9D8",
+      white: "#FFFFFF", 
+      black: "#000000",
+      tealGreen: "#59988D",
+      gray: "#B2AB99",
+    }
   },
   plugins: [],
 };
