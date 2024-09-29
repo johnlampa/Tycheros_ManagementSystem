@@ -3,7 +3,8 @@ import { ProductDataTypes } from "../ProductDataTypes";
 
 export type OrderCardProps = {
     cart: OrderItemDataTypes[];
-    setCart: React.Dispatch<React.SetStateAction<OrderItemDataTypes[]>>;
+    setCart?: React.Dispatch<React.SetStateAction<OrderItemDataTypes[]>>;
+    order?: Order;
     setOrder: React.Dispatch<React.SetStateAction<Order>>;
     menuData: ProductDataTypes[];
     quantityModalIsVisible: boolean;
@@ -13,4 +14,5 @@ export type OrderCardProps = {
     setSubtotal: React.Dispatch<React.SetStateAction<number>>;
 
     type: String;
+    
 }
