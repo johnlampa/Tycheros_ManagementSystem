@@ -76,9 +76,12 @@ export default function Page() {
             pathname: "/order-summary",
           }}
         >
-          <button className="absolute bottom-4 right-4 bg-blue-500 text-white py-2 px-4 rounded-lg shadow-lg hover:bg-blue-600">
-            Check Order
-          </button>
+          <div className="absolute bottom-4 right-4 w-min h-min">
+            <button className="border border-black rounded-full h-[62px] w-[62px] bg-blue-500 text-white py-2 px-4 shadow-lg hover:bg-blue-600"></button>
+            <div className="mt-[3px] flex justify-center items-center">
+              <span className="text-[10px] font-semibold">Check Order</span>
+            </div>
+          </div>
         </Link>
 
         {categories.map((category) => (
