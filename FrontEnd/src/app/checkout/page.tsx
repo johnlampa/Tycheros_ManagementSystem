@@ -35,6 +35,21 @@ function OrderSummaryPage() {
         if (!response.ok) throw new Error("Failed to fetch orders");
         const data = await response.json();
         setOrders(data);
+
+        // Retrieve orderID from localStorage
+        const storedOrderID = localStorage.getItem("orderID");
+        if (storedOrderID) {
+          // Find the order with the matching orderID
+          const matchingOrder = data.find(
+            (order: Order) => order.orderID === parseInt(storedOrderID)
+          );
+          if (matchingOrder) {
+            setOrder(matchingOrder); // Set the matching order in the state
+          } else {
+            console.warn("No order found with the given ID.");
+            console.log(order.orderID);
+          }
+        }
       } catch (error) {
         console.error("Error fetching orders:", error);
         setError("Error fetching orders");
@@ -78,7 +93,7 @@ function OrderSummaryPage() {
           </Link>
         </Header>
         <OrderCard
-          cart={cart}
+          cart={order.orderItems || cart}
           setOrder={setOrder}
           menuData={menuData}
           quantityModalIsVisible={quantityModalVisibility}
