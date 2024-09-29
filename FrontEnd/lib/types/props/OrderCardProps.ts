@@ -11,4 +11,6 @@ export type OrderCardProps = {
 
     subtotal: number;
     setSubtotal: React.Dispatch<React.SetStateAction<number>>;
+
+    type: String;
 }
