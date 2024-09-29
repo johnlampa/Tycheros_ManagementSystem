@@ -7,6 +7,7 @@ import { ProductDataTypes } from "../../../lib/types/ProductDataTypes";
 import Header from "@/components/Header";
 import Link from "next/link";
 import OrderButtonSection from "@/components/section/OrderButtonSection";
+import OrderDetailsSection from "@/components/section/OrderDetailsSection";
 
 function OrderSummaryPage() {
   const [quantityModalVisibility, setQuantityModalVisibility] = useState(false);
@@ -102,6 +103,11 @@ function OrderSummaryPage() {
           setSubtotal={setSubtotal}
           type={"checkout"}
         />
+        <OrderDetailsSection
+          orderID={order.orderID || -1}
+          date={order.date}
+          subtotal={subtotal}
+        ></OrderDetailsSection>
         <div className="w-[360px] h-[105px] mt-[50px] p-5 rounded-xl bg-cream drop-shadow-[0_-5px_3px_rgba(0,0,0,0.15)] drop">
           <div className="flex justify-center items-center w-[315px] ml-[2.5px] mb-2">
             <span className="text-[20px] text-primaryBrown font-semibold text-center">
