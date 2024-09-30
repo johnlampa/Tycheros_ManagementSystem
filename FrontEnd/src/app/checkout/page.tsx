@@ -90,15 +90,15 @@ function OrderSummaryPage() {
     <div className="w-full flex justify-center items-center">
       <div className="w-[360px] flex flex-col justify-center items-center gap-3 bg-white">
         <Header text="Checkout" color={"tealGreen"} type={"checkout"}>
-          <Link 
+          <Link
             href={{
-              pathname: "/order-summary",
+              pathname: "/",
             }}
           >
-              <button className="mr-3 border border-white rounded-full h-[40px] w-[40px] bg-white text-white shadow-lg flex items-center justify-center overflow-hidden hover:bg-tealGreen group">
-                <FaArrowLeft className="text-tealGreen group-hover:text-white transition-colors duration-300" />
-              </button>
-            </Link>
+            <button className="mr-3 border border-white rounded-full h-[40px] w-[40px] bg-white text-white shadow-lg flex items-center justify-center overflow-hidden hover:bg-tealGreen group">
+              <FaArrowLeft className="text-tealGreen group-hover:text-white transition-colors duration-300" />
+            </button>
+          </Link>
         </Header>
         <OrderCard
           cart={order.orderItems || cart}
