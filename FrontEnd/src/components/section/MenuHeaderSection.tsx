@@ -16,7 +16,13 @@ const MenuHeaderSection: React.FC<MenuHeaderSectionProps> = ({
 
   return (
     <>
-      <Header text={text} type={"menu"} color={"cream"}></Header>
+      <Header text={text} type={"menu"} color={"cream"}>
+        <Link href={"/"} className="z-100">
+          <button>
+            <span className="text-white">Back</span>
+          </button>
+        </Link>
+      </Header>
       <div className="h-[68px] border-x-0 border-y-[1px] border-primaryBrown bg-tealGreen flex justify-center items-center">
         <div className="w-max grid grid-cols-3 gap-x-5 gap-y-2">
           {categories.map((category) => (
