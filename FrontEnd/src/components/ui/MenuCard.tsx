@@ -1,4 +1,3 @@
-
 import Image from "next/image";
 import React from "react";
 
@@ -10,7 +9,7 @@ const MenuCard: React.FC<MenuCardProps> = ({
   setQuantityModalVisibility,
 }) => {
   return (
-    <div className="flex flex-col bg-white border border-gray-300 rounded-md shadow-md overflow-hidden h-[300px]">
+    <div className="flex flex-col bg-cream border border-gray-300 rounded-md shadow-md overflow-hidden h-[300px]">
       {/* Image Section */}
       <div className="w-full h-[150px] relative">
         <Image
@@ -29,7 +28,7 @@ const MenuCard: React.FC<MenuCardProps> = ({
 
         {/* Button at the bottom */}
         <button
-          className="mt-auto bg-[#3E7363] text-white py-2 rounded-md hover:bg-[#30594f] duration-200"
+          className="mt-auto bg-tealGreen text-white py-2 rounded-md hover:bg-[#30594f] duration-200 font-semibold"
           onClick={() => {
             setQuantityModalVisibility(true);
             setProductToAdd(product);

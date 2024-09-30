@@ -1,9 +1,16 @@
-import { Pattaya, Inter } from 'next/font/google';
+import { Pattaya, Inter, Pacifico } from 'next/font/google';
 
 export const pattaya = Pattaya({
     weight: '400',
     subsets: ['latin'],
     variable: '--font-pattaya',
+});
+
+export const pacifico = Pacifico({
+    weight: '400',
+    subsets: ['latin'],
+    variable: '--font-pacifico',
+    display: "swap",
 });
 
 export const inter = Inter({
