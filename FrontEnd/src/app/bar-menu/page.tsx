@@ -9,6 +9,7 @@ import { CategoriesDataTypes } from "../../../lib/types/CategoriesDataTypes";
 import { Order } from "../../../lib/types/OrderDataTypes";
 import { ProductDataTypes } from "../../../lib/types/ProductDataTypes";
 import Link from "next/link";
+import MenuHeaderSection from "@/components/section/MenuHeaderSection";
 
 const categories: CategoriesDataTypes[] = [
   {
@@ -67,43 +68,49 @@ export default function Page() {
 
   return (
     <>
-      <div className="w-[362px] min-h-screen p-6 border mx-auto relative">
-        <div className="flex items-center justify-center font-bold text-2xl mb-5">
-          Bar Menu
+      <div className="w-[362px] min-h-screen border mx-auto relative bg-white">
+        <MenuHeaderSection
+          menuType="bar"
+          categories={categories}
+        ></MenuHeaderSection>
+        <div className="p-6">
+          <Link
+            href={{
+              pathname: "/order-summary",
+            }}
+          >
+            <div className="absolute bottom-4 right-4 w-min h-min">
+              <button className="border border-black rounded-full h-[62px] w-[62px] bg-blue-500 text-white py-2 px-4 shadow-lg hover:bg-blue-600"></button>
+              <div className="mt-[3px] flex justify-center items-center">
+                <span className="text-[10px] font-semibold">Check Order</span>
+              </div>
+            </div>
+          </Link>
+
+          {categories.map((category) => (
+            <div
+              key={category.categoryName}
+              id={category.categoryName}
+              className="mb-8"
+            >
+              <p className="font-pattaya text-2xl">{category.categoryName}</p>
+              <div className="grid grid-cols-2 gap-x-6 gap-y-3 content-center">
+                {menuData
+                  .filter((item) => item.categoryName === category.categoryName)
+                  .map((item, index) => (
+                    <div key={index}>
+                      <MenuCard
+                        product={item}
+                        setProductToAdd={setProductToAdd}
+                        quantityModalIsVisible={quantityModalVisibility}
+                        setQuantityModalVisibility={setQuantityModalVisibility}
+                      />
+                    </div>
+                  ))}
+              </div>
+            </div>
+          ))}
         </div>
-
-        <Link
-          href={{
-            pathname: "/order-summary",
-          }}
-        >
-          <div className="absolute bottom-4 right-4 w-min h-min">
-            <button className="border border-black rounded-full h-[62px] w-[62px] bg-blue-500 text-white py-2 px-4 shadow-lg hover:bg-blue-600"></button>
-            <div className="mt-[3px] flex justify-center items-center">
-              <span className="text-[10px] font-semibold">Check Order</span>
-            </div>
-          </div>
-        </Link>
-
-        {categories.map((category) => (
-          <div key={category.categoryName} className="mb-8">
-            <p className="font-semibold text-lg">{category.categoryName}</p>
-            <div className="grid grid-cols-2 gap-x-6 gap-y-3">
-              {menuData
-                .filter((item) => item.categoryName === category.categoryName)
-                .map((item, index) => (
-                  <div key={index}>
-                    <MenuCard
-                      product={item}
-                      setProductToAdd={setProductToAdd}
-                      quantityModalIsVisible={quantityModalVisibility}
-                      setQuantityModalVisibility={setQuantityModalVisibility}
-                    />
-                  </div>
-                ))}
-            </div>
-          </div>
-        ))}
       </div>
       <div className="w-[312px] p-4">
         <QuantityModal

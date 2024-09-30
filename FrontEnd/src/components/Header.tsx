@@ -13,6 +13,7 @@ const headerStyles = cva("w-full h-[90px] flex justify-center items-center", {
       checkout: "text-3xl ml-[-60px]",
       orders: "text-3xl ml-[-60px]",
       payment_details: "text-3xl ml-[-25px]",
+      menu: "text-5xl ml-[-25px]",
     },
   },
   defaultVariants: {
@@ -27,6 +28,7 @@ interface HeaderProps extends VariantProps<typeof headerStyles> {
 
 const Header: FC<HeaderProps> = ({ text, color, type, children }) => {
   const textContainerWidth = type === "home" ? "w-[190px] text-center" : "";
+  const fontFamily = type === "menu" ? "font-pacifico" : "font-pattaya";
 
   return (
     <header className={headerStyles({ color })}>
@@ -36,9 +38,11 @@ const Header: FC<HeaderProps> = ({ text, color, type, children }) => {
         </div>
       </div>
       <div
-        className={`w-[250px] flex items-center justify-center font-pattaya z-0 text-pretty`}
+        className={`w-[250px] flex items-center justify-center z-0 text-pretty ${fontFamily}`}
       >
-        <div className={`${headerStyles({ type })} ${textContainerWidth}`}>
+        <div
+          className={`${headerStyles({ type, color })} ${textContainerWidth}`}
+        >
           <span className="drop-shadow-md">{text}</span>
         </div>
       </div>
