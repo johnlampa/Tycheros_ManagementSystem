@@ -24,8 +24,8 @@ const MenuCard: React.FC<MenuCardProps> = ({
 
       {/* Product Info */}
       <div className="flex flex-col p-3 flex-1">
-        <p className="text-sm font-extrabold">{product.productName}</p>
-        <p className="text-sm text-gray-500">₱{product.sellingPrice}</p>
+        <p className="text-sm font-extrabold text-black">{product.productName}</p>
+        <p className="text-sm text-gray-500 text-black">₱{product.sellingPrice}</p>
 
         {/* Button at the bottom */}
         <button
