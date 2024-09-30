@@ -28,7 +28,7 @@ const MenuHeaderSection: React.FC<MenuHeaderSectionProps> = ({
           {categories.map((category) => (
             <Link key={category.categoryID} href={`#${category.categoryName}`}>
               <div
-                className={`w-[88px] h-[25px] rounded-sm border border-lightTealGreen flex justify-center items-center ${
+                className={`w-[88px] h-[25px] rounded-sm border border-lightTealGreen flex justify-center items-center shadow-xl ${
                   category.categoryID === 4 ? "text-md" : "text-lg"
                 }  font-pattaya text-white`}
               >
