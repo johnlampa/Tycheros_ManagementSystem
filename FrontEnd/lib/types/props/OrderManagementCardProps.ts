@@ -6,4 +6,7 @@ export type OrderManagementCardProps = {
     menuData: ProductDataTypes[],
     orders: Order[],
     setOrders: React.Dispatch<React.SetStateAction<Order[]>>;
+
+    type: string,
+    discountAmount?: number
 }
