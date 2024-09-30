@@ -93,6 +93,7 @@ export default function Page() {
               menuData={menuData}
               orders={orders}
               setOrders={setOrders}
+              type={"management"}
             />
           </div>
         ))}

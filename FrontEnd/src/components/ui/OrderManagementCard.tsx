@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Order } from "../../../lib/types/OrderDataTypes";
 
 const OrderManagementCard: React.FC<OrderManagementCardProps> = React.memo(
-  ({ order, menuData, orders, setOrders }) => {
+  ({ order, menuData, orders, setOrders, type, discountAmount }) => {
     const [total, setTotal] = useState(0);
 
     useEffect(() => {
@@ -13,7 +13,13 @@ const OrderManagementCard: React.FC<OrderManagementCardProps> = React.memo(
       const calculatedTotal = order.orderItems?.reduce(
         (acc, { productID, quantity }) => {
           const product = menuData.find((item) => item.productID === productID);
-          return product ? acc + product.sellingPrice * quantity : acc;
+          if (discountAmount) {
+            return product
+              ? acc + product.sellingPrice * quantity - discountAmount
+              : acc;
+          } else {
+            return product ? acc + product.sellingPrice * quantity : acc;
+          }
         },
         0
       );
@@ -124,6 +130,18 @@ const OrderManagementCard: React.FC<OrderManagementCardProps> = React.memo(
               );
             })}
           </div>
+
+          {type === "payment" && (
+            <div className="w-[320px] bg-cream rounded-md mt-1 px-3 py-1 grid grid-cols-[2fr_1fr_1fr_1fr] gap-2">
+              <div className="text-sm">Discount</div>
+              <div></div>
+              <div></div>
+              <div className="flex justify-center items-center text-sm">
+                {discountAmount}
+              </div>
+            </div>
+          )}
+
           <div className="w-[320px] bg-cream rounded-md mt-1 px-3 py-1 grid grid-cols-[2fr_1fr_1fr_1fr] gap-2">
             <div className="text-sm">Total</div>
             <div></div>
@@ -133,47 +151,51 @@ const OrderManagementCard: React.FC<OrderManagementCardProps> = React.memo(
             </div>
           </div>
 
-          {order.status === "Unpaid" && (
-            <div className="grid grid-cols-[2fr_1fr_1fr_1fr] gap-2">
-              <div></div>
-              <div></div>
-              <div></div>
-              <Link
-                href={{
-                  pathname: "/payment-details",
-                  query: { order: JSON.stringify(order) },
-                }}
-              >
-                <button
-                  className="px-2 py-1 rounded-md mt-1 text-xs w-[130px] font-semibold bg-tealGreen text-white"
-                  onClick={handleConfirmPayment}
-                >
-                  Confirm Payment
-                </button>
-              </Link>
-            </div>
-          )}
+          {type === "management" && (
+            <>
+              {order.status === "Unpaid" && (
+                <div className="grid grid-cols-[2fr_1fr_1fr_1fr] gap-2">
+                  <div></div>
+                  <div></div>
+                  <div></div>
+                  <Link
+                    href={{
+                      pathname: "/payment-details",
+                      query: { order: JSON.stringify(order) },
+                    }}
+                  >
+                    <button
+                      className="px-2 py-1 rounded-md mt-1 text-xs w-[130px] font-semibold bg-tealGreen text-white"
+                      onClick={handleConfirmPayment}
+                    >
+                      Confirm Payment
+                    </button>
+                  </Link>
+                </div>
+              )}
 
-          {order.status === "Pending" && (
-            <div className="ml-[198.77px]">
-              <button
-                className="border border-black px-2 py-1 rounded-md mt-1 text-xs"
-                onClick={handleCompleteOrder}
-              >
-                Complete Order
-              </button>
-            </div>
-          )}
+              {order.status === "Pending" && (
+                <div className="ml-[198.77px]">
+                  <button
+                    className="border border-black px-2 py-1 rounded-md mt-1 text-xs"
+                    onClick={handleCompleteOrder}
+                  >
+                    Complete Order
+                  </button>
+                </div>
+              )}
 
-          {order.status === "Completed" && (
-            <div className="ml-[231.21px]">
-              <button
-                className="border border-black px-2 py-1 rounded-md mt-1 text-xs"
-                disabled
-              >
-                Completed
-              </button>
-            </div>
+              {order.status === "Completed" && (
+                <div className="ml-[231.21px]">
+                  <button
+                    className="border border-black px-2 py-1 rounded-md mt-1 text-xs"
+                    disabled
+                  >
+                    Completed
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </div>
       </>

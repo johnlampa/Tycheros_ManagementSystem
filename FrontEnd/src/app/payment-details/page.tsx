@@ -6,6 +6,8 @@ import { ProductDataTypes } from "../../../lib/types/ProductDataTypes";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Header from "@/components/Header";
+import OrderCard from "@/components/OrderCard";
+import OrderManagementCard from "@/components/ui/OrderManagementCard";
 
 function PaymentDetailsPage() {
   const [menuData, setMenuData] = useState<ProductDataTypes[]>([]);
@@ -21,14 +23,47 @@ function PaymentDetailsPage() {
   const [discountType, setDiscountType] = useState("");
   const [discountAmount, setDiscountAmount] = useState(0);
 
+  const [orders, setOrders] = useState<Order[]>([]); //for component purposes. to remove when OrderManagementCard is refactored
+
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
   const searchParams = useSearchParams();
   const router = useRouter();
 
   useEffect(() => {
-    fetch("http://localhost:8081/ordering/getCustomerMenu")
-      .then((response) => response.json())
-      .then((data) => setMenuData(data))
-      .catch((error) => console.error("Error fetching menu data:", error));
+    const fetchOrders = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:8081/orderManagement/getOrders"
+        );
+        if (!response.ok) throw new Error("Failed to fetch orders");
+        const data = await response.json();
+        setOrders(data);
+      } catch (error) {
+        console.error("Error fetching orders:", error);
+        setError("Error fetching orders");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const fetchMenuData = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:8081/orderManagement/getMenuData"
+        );
+        if (!response.ok) throw new Error("Failed to fetch menu data");
+        const data = await response.json();
+        setMenuData(data);
+      } catch (error) {
+        console.error("Error fetching menu data:", error);
+        setError("Error fetching menu data");
+      }
+    };
+
+    fetchOrders();
+    fetchMenuData();
   }, []);
 
   useEffect(() => {
@@ -113,154 +148,124 @@ function PaymentDetailsPage() {
             color={"tealGreen"}
             type={"payment_details"}
           ></Header>
-          <div className="w-[320px] bg-cream rounded-md p-3">
-            <p className="font-semibold">Vouchers and Discounts</p>
-            <div className="flex justify-center items-center ">
-              <input
-                className="text-black rounded-md w-full my-1 text-sm py-1 px-2"
-                placeholder="Enter Voucher or Discount Code Here"
-                value={discountType}
-                onChange={(e) => setDiscountType(e.target.value)}
-              />
-            </div>
-          </div>
-
-          <div className="w-[320px] bg-cream rounded-md p-3">
-            <p className="font-semibold">Payment Method</p>
-            <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <div>
-                  <input
-                    type="radio"
-                    id="gcash"
-                    name="paymentMethod"
-                    value="GCash"
-                    className="mr-2 text-blue-600 border-gray-300 focus:ring-blue-500"
-                    onChange={(e) => setPaymentMethod(e.target.value)}
-                  />
-                  <label htmlFor="gcash" className="text-gray-700">
-                    GCash
-                  </label>
-                </div>
-                <div>
-                  <span>Php </span>
-                  {total}
-                </div>
-              </div>
-
-              <div className="flex justify-between items-center">
-                <div>
-                  <input
-                    type="radio"
-                    id="card"
-                    name="paymentMethod"
-                    value="Card"
-                    className="mr-2 text-blue-600 border-gray-300 focus:ring-blue-500"
-                    onChange={(e) => setPaymentMethod(e.target.value)}
-                  />
-                  <label htmlFor="card" className="text-gray-700">
-                    Card
-                  </label>
-                </div>
-                <div>
-                  <span>Php </span>
-                  {total}
-                </div>
-              </div>
-
-              <div className="flex justify-between items-center">
-                <div>
-                  <input
-                    type="radio"
-                    id="cash"
-                    name="paymentMethod"
-                    value="Cash"
-                    className="mr-2 text-blue-600 border-gray-300 focus:ring-blue-500"
-                    onChange={(e) => setPaymentMethod(e.target.value)}
-                  />
-                  <label htmlFor="cash" className="text-gray-700">
-                    Cash
-                  </label>
-                </div>
-                <div>
-                  <span>Php </span>
-                  {total}
-                </div>
-              </div>
-
-              <div className="flex gap-4">
-                <div className="flex flex-col text-xs font-semibold">
-                  <div>Enter Reference Number:</div>
-                  <div>(for GCash or Card)</div>
-                </div>
+          <div className="w-[320px]">
+            <div className="w-full bg-cream rounded-md p-3 mb-4">
+              <p className="font-semibold">Vouchers and Discounts</p>
+              <div className="flex justify-center items-center ">
                 <input
-                  className="w-[100px] border border-black text-black"
-                  value={referenceNumber}
-                  onChange={(e) => setReferenceNumber(e.target.value)}
+                  className="text-black rounded-md w-full my-1 text-xs py-1 px-2"
+                  placeholder="Enter Voucher or Discount Code Here"
+                  value={discountType}
+                  onChange={(e) => setDiscountType(e.target.value)}
                 />
               </div>
             </div>
-          </div>
 
-          <div className="w-[320px] flex flex-col justify-center items-center p-3">
-            <div className="mb-3 font-semibold text-lg">Order Summary</div>
-            <div className="w-[320px] border border-black rounded-md p-3">
-              <div className="grid grid-cols-[2fr_1fr_1fr_1fr] gap-2 font-semibold mb-3">
-                <div className="flex items-center justify-center text-sm">
-                  Name
+            <div className="w-full bg-cream rounded-md p-3 mb-7">
+              <p className="font-semibold">Payment Method</p>
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <input
+                      type="radio"
+                      id="gcash"
+                      name="paymentMethod"
+                      value="GCash"
+                      className="mr-2 text-blue-600 border-gray-300 focus:ring-blue-500"
+                      onChange={(e) => setPaymentMethod(e.target.value)}
+                    />
+                    <label htmlFor="gcash" className="text-gray-700">
+                      GCash
+                    </label>
+                  </div>
+                  <div>
+                    <span>Php </span>
+                    {total}
+                  </div>
                 </div>
-                <div className="flex items-center justify-center text-sm">
-                  Price
+
+                <div className="flex justify-between items-center">
+                  <div>
+                    <input
+                      type="radio"
+                      id="card"
+                      name="paymentMethod"
+                      value="Card"
+                      className="mr-2 text-blue-600 border-gray-300 focus:ring-blue-500"
+                      onChange={(e) => setPaymentMethod(e.target.value)}
+                    />
+                    <label htmlFor="card" className="text-gray-700">
+                      Card
+                    </label>
+                  </div>
+                  <div>
+                    <span>Php </span>
+                    {total}
+                  </div>
                 </div>
-                <div className="flex items-center justify-center text-sm">
-                  Quantity
+
+                <div className="flex justify-between items-center">
+                  <div>
+                    <input
+                      type="radio"
+                      id="cash"
+                      name="paymentMethod"
+                      value="Cash"
+                      className="mr-2 text-blue-600 border-gray-300 focus:ring-blue-500"
+                      onChange={(e) => setPaymentMethod(e.target.value)}
+                    />
+                    <label htmlFor="cash" className="text-gray-700">
+                      Cash
+                    </label>
+                  </div>
+                  <div>
+                    <span>Php </span>
+                    {total}
+                  </div>
                 </div>
-                <div className="flex items-center justify-center text-sm">
-                  Subtotal
+
+                <div className="flex gap-3 mt-3">
+                  <div className="flex flex-col ">
+                    <div className="text-xs font-semibold w-max">
+                      Enter Reference Number:
+                    </div>
+                    <div className="text-xs">(for GCash or Card)</div>
+                  </div>
+                  <input
+                    className="text-black rounded-md w-full my-1 text-xs py-1 px-2"
+                    value={referenceNumber}
+                    onChange={(e) => setReferenceNumber(e.target.value)}
+                    placeholder="Reference"
+                  />
                 </div>
               </div>
-
-              {order.orderItems?.map(({ productID, quantity }, itemIndex) => {
-                const product = menuData.find(
-                  (item) => item.productID === productID
-                );
-                if (!product) return null;
-
-                const subtotal = product.sellingPrice * quantity;
-
-                return (
-                  <div
-                    key={itemIndex}
-                    className="grid grid-cols-[2fr_1fr_1fr_1fr] gap-2"
-                  >
-                    <div className="flex justify-center items-center text-sm">
-                      {product.productName}
-                    </div>
-                    <div className="flex justify-center items-center">
-                      {product.sellingPrice}
-                    </div>
-                    <div className="flex justify-center items-center">
-                      {quantity}
-                    </div>
-                    <div className="flex justify-center items-center">
-                      {subtotal}
-                    </div>
-                  </div>
-                );
-              })}
             </div>
-            <div className="w-[320px] border border-black rounded-md p-1 mt-1 flex pl-10 gap-[185px]">
-              <div>Total</div>
-              <div>{total}</div>
+
+            <div className="w-full flex flex-col">
+              <div className="mb-3 font-semibold text-lg">Order Summary</div>
+              <OrderManagementCard
+                menuData={menuData}
+                order={order}
+                orders={orders}
+                setOrders={setOrders}
+                type={"payment"}
+                discountAmount={discountAmount}
+              ></OrderManagementCard>
+            </div>
+
+            <div className="mt-5">
+              <Link href={"order-management"}>
+                <button
+                  className="w-full h-[39px] bg-tealGreen rounded-md p-3 flex justify-center items-center"
+                  onClick={handleCompleteOrder}
+                >
+                  <span className="font-pattaya text-[20px] text-white">
+                    Confirm Payment
+                  </span>
+                </button>
+              </Link>
             </div>
           </div>
-
-          <button
-            className="w-[320px] border border-white rounded-md p-3 flex justify-center items-center font-semibold"
-            onClick={handleCompleteOrder}
-          >
-            Complete Payment
-          </button>
         </div>
       </div>
     </>
