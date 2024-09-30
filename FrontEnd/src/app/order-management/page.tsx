@@ -5,6 +5,7 @@ import OrderManagementCard from "@/components/ui/OrderManagementCard";
 import { Order } from "../../../lib/types/OrderDataTypes";
 import { ProductDataTypes } from "../../../lib/types/ProductDataTypes";
 import Header from "@/components/Header";
+import Link from "next/link";
 
 export default function Page() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -57,9 +58,35 @@ export default function Page() {
 
   return (
     <div className="flex justify-center items-center w-full">
-      <div className="w-[360px] flex flex-col gap-3 justify-center items-center">
-        <Header text="Orders" color={"tealGreen"} type={"orders"}></Header>
-        {orders.map((order, orderIndex) => (
+      <div className="w-[360px] flex flex-col justify-center items-center bg-white">
+        <Header text="Orders" color={"cream"} type={"orders"}></Header>
+        <div className="h-[68px] w-full border-x-0 border-y-[1px] border-primaryBrown bg-tealGreen flex justify-center items-center">
+          <div className="w-max grid grid-cols-3 gap-x-5 gap-y-2">
+            {/* edit href */}
+            <Link href={""}>
+              <div
+                className={`w-[88px] h-[25px] rounded-sm border border-white flex justify-center items-center font-pattaya text-white`}
+              >
+                Unpaid
+              </div>
+            </Link>
+            <Link href={""}>
+              <div
+                className={`w-[88px] h-[25px] rounded-sm border border-white flex justify-center items-center font-pattaya text-white`}
+              >
+                Pending
+              </div>
+            </Link>
+            <Link href={""}>
+              <div
+                className={`w-[88px] h-[25px] rounded-sm border border-white flex justify-center items-center font-pattaya text-white`}
+              >
+                Completed
+              </div>
+            </Link>
+          </div>
+        </div>
+        {orders.toReversed().map((order, orderIndex) => (
           <div key={orderIndex} className="mb-7">
             <OrderManagementCard
               order={order}
