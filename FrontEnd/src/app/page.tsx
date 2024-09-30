@@ -6,7 +6,7 @@ export default function Home() {
   return (
     <>
       <div className="w-full flex justify-center items-center min-h-screen">
-        <div className="flex flex-col items-center w-[360px] h-screen relative">
+        <div className="flex flex-col items-center w-[360px] h-screen relative bg-cream">
           <Header
             text="Tycheros World Cafe and Bar"
             color={"tealGreen"}
@@ -23,15 +23,22 @@ export default function Home() {
               Bar Menu
             </div>
           </Link>
+
           <Link
             href={{
               pathname: "/order-summary",
             }}
           >
-            <div className="absolute bottom-4 right-4 w-min h-min">
-              <button className="border border-black rounded-full h-[62px] w-[62px] bg-blue-500 text-white py-2 px-4 shadow-lg hover:bg-blue-600"></button>
+            <div className="absolute bottom-4 mr-5 ml-auto right-0 w-min h-min">
+              <button className="border border-black rounded-full h-[62px] w-[62px] bg-blue-500 text-white shadow-lg hover:bg-blue-600 flex items-center justify-center overflow-hidden">
+                <img
+                  src="/assets/images/CheckOrder.png"  // Replace with your image path
+                  alt="Check Order"
+                  className="h-full w-full object-cover"  // Image fully covers the button without overflow
+                />
+              </button>
               <div className="mt-[3px] flex justify-center items-center">
-                <span className="text-[10px] font-semibold">Check Order</span>
+                <span className="text-[10px] font-semibold text-black">Check Order</span>
               </div>
             </div>
           </Link>

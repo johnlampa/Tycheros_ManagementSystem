@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { ProductModalProps } from "../../lib/types/props/ProductModalProps";
 import Modal from "@/components/ui/Modal";
+import { ProductModalProps } from "../../lib/types/props/ProductModalProps";
 import { ProductDataTypes, SubitemDataTypes } from "../../lib/types/ProductDataTypes";
 
 const ProductModal: React.FC<ProductModalProps> = ({
@@ -16,7 +16,6 @@ const ProductModal: React.FC<ProductModalProps> = ({
   menuData,
   setMenuData,
 }) => {
-
   const categoryMap: { [key: string]: number } = {
     "Appetizers": 1,
     "Entrees": 2,
@@ -31,7 +30,6 @@ const ProductModal: React.FC<ProductModalProps> = ({
     "Frappe": 11,
     "Tea": 12,
   };
-
   const categoryID = categoryMap[categoryName] || 0;
 
   const [subitems, setSubitems] = useState<SubitemDataTypes[]>([]);
@@ -65,11 +63,11 @@ const ProductModal: React.FC<ProductModalProps> = ({
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setProductModalVisibility(false);
-  
+
     const form = e.currentTarget;
     const formData = new FormData(form);
     const formJson = Object.fromEntries(formData.entries());
-  
+
     const updatedProduct: ProductDataTypes = {
       productName: formJson.productName as string,
       sellingPrice: parseFloat(formJson.sellingPrice as string),
@@ -80,13 +78,12 @@ const ProductModal: React.FC<ProductModalProps> = ({
         quantityNeeded: parseFloat(formJson[`quantityNeeded-${index}`] as string),
       })),
     };
-  
+
     if (type === "edit" && menuProductToEdit?.productID) {
       axios
         .put(`http://localhost:8081/menuManagement/putProduct/${menuProductToEdit.productID}`, updatedProduct)
         .then((response) => {
           console.log("Product updated:", updatedProduct);
-          // Check if setMenuProductHolder is defined before calling it
           if (setMenuProductHolder) {
             setMenuProductHolder(updatedProduct);
           }
@@ -97,12 +94,10 @@ const ProductModal: React.FC<ProductModalProps> = ({
           console.error("Error updating product:", error);
         });
     } else {
-      // Handle adding a new product if needed
       axios
         .post("http://localhost:8081/menuManagement/postProduct", updatedProduct)
         .then((response) => {
           console.log("Product added:", updatedProduct);
-          // Check if setMenuProductHolder is defined before calling it
           if (setMenuProductHolder) {
             setMenuProductHolder(updatedProduct);
           }
@@ -114,22 +109,16 @@ const ProductModal: React.FC<ProductModalProps> = ({
         });
     }
   };
-  
 
   const handleDelete = () => {
     if (menuProductToEdit?.productID) {
-      const confirmDelete = window.confirm(
-        "Are you sure you want to delete this product? This action cannot be undone."
-      );
-  
+      const confirmDelete = window.confirm("Are you sure you want to delete this product? This action cannot be undone.");
       if (confirmDelete) {
         axios
           .delete(`http://localhost:8081/menuManagement/deleteProduct/${menuProductToEdit.productID}`)
           .then((response) => {
             console.log("Product deleted:", response.data);
-            const updatedMenuData = menuData.filter(
-              (product) => product.productID !== menuProductToEdit.productID
-            );
+            const updatedMenuData = menuData.filter((product) => product.productID !== menuProductToEdit.productID);
             setMenuData(updatedMenuData);
             setProductModalVisibility(false);
           })
@@ -139,115 +128,92 @@ const ProductModal: React.FC<ProductModalProps> = ({
       }
     }
   };
-  
 
   return (
-    <Modal
-      modalIsVisible={productModalIsVisible}
-      setModalVisibility={setProductModalVisibility}
-    >
-      <form id="productForm" onSubmit={handleSubmit}>
-        <p className="text-black dark:text-black flex justify-center items-center mb-4 text-xl font-bold">
-          {modalTitle}
-        </p>
-        <div className="absolute bottom-6 right-6 flex flex-col gap-y-2">
-          <button
-            type="submit"
-            className="px-5 rounded-lg border border-black text-gray-400 text-sm bg-white hover:bg-gray-50 hover:text-gray-600"
-          >
-            Save
-          </button>
-          <button
-            onClick={() => {
-              setProductModalVisibility(false);
-            }}
-            className="px-5 rounded-lg border border-black text-gray-400 text-sm bg-white hover:bg-gray-50 hover:text-gray-600"
-          >
-            Cancel
-          </button>
+    <Modal modalIsVisible={productModalIsVisible} setModalVisibility={setProductModalVisibility}>
+      <form id="productForm" onSubmit={handleSubmit} className="w-[340px] p-6 mx-auto"> {/* Added padding to the form */}
+        <p className="text-center text-xl font-bold text-black mb-4">{modalTitle}</p>
+
+        <div className="flex justify-between items-center mb-4 text-black">
+          <label htmlFor="productName" className="pr-4"> {/* Padding added to label */}
+            Product Name
+          </label>
+          <button type="button" className="px-4 py-2 bg-gray-300">Insert Image</button>
         </div>
 
+        <input
+          type="text"
+          name="productName"
+          id="productName"
+          placeholder="Enter product name"
+          className="border border-gray-300 rounded w-full p-3 mb-4 text-black placeholder-gray-400"
+          defaultValue={type === "edit" ? menuProductToEdit?.productName : ""}
+        />
+
+        <label htmlFor="price" className="block mb-2 text-black">Price</label>
+        <input
+          type="number"
+          name="sellingPrice"
+          id="sellingPrice"
+          placeholder="Enter price"
+          className="border border-gray-300 rounded w-full p-3 mb-4 text-black placeholder-gray-400"
+          defaultValue={type === "edit" ? menuProductToEdit?.sellingPrice : ""}
+        />
+
+        <label className="block mb-2 text-black">Subitems</label>
+        {subitems.map((subitem, index) => (
+          <div key={index} className="flex justify-between items-center mb-4">
+            <select
+              className="border border-gray-300 rounded w-[60%] p-3 text-black" 
+              defaultValue={subitem.inventoryID}
+              name={`subitem-${index}`}
+              id={`subitem-${index}`}
+            >
+              <option value="" disabled>Choose</option>
+              {inventoryData?.map((item) => (
+                <option value={item.inventoryID} key={item.inventoryID}>
+                  {item.inventoryName} ({item.unitOfMeasure})
+                </option>
+              ))}
+            </select>
+
+            <input
+              type="number"
+              name={`quantityNeeded-${index}`}
+              id={`quantityNeeded-${index}`}
+              placeholder="Quantity"
+              className="border border-gray-300 rounded w-[30%] p-3 text-black placeholder-gray-400"
+              defaultValue={subitem.quantityNeeded}
+            />
+          </div>
+        ))}
+
+        <button type="button" onClick={handleAddSubitem} className="border border-black rounded px-4 py-2 w-full mb-4 text-black">
+          Add Subitem
+        </button>
+      
         {type === "edit" && (
-          <div className="absolute bottom-6 left-6">
             <button
               onClick={handleDelete}
-              className="px-3 rounded-lg border border-black text-black text-sm bg-red-400 hover:bg-white hover:text-red-400"
+              className="border border-black px-1 py-2 rounded bg-red-400 text-black hover:bg-red-500 mb-4" 
             >
               Remove Product
             </button>
-          </div>
-        )}
+          )}
 
-        <div className="min-w-min grid grid-cols-[minmax(100px, 200px)] gap-3">
-          <div className="col-span-3">
-            <label htmlFor="productName" className="block dark:text-black">
-              Product Name
-            </label>
-            <input
-              type="text"
-              name="productName"
-              id="productName"
-              placeholder="Enter product name"
-              className="dark:text-black border border-gray-200 rounded p-1 w-[264px]"
-              defaultValue={type === "edit" ? menuProductToEdit?.productName : ""}
-            />
-          </div>
-
-          <div className="col-span-3">
-            <label htmlFor="price" className="block dark:text-black">
-              Price
-            </label>
-            <input
-              type="number"
-              name="sellingPrice"
-              id="sellingPrice"
-              placeholder="Enter price"
-              className="dark:text-black border border-gray-200 rounded p-1 w-[264px]"
-              defaultValue={type === "edit" ? menuProductToEdit?.sellingPrice : ""}
-            />
-          </div>
-
-          <div className="col-span-3 h-2"></div>
-
-          <p className="col-span-3 dark:text-black">Subitems</p>
-          {subitems.map((subitem, index) => (
-            <div key={index} className="col-span-3 grid grid-cols-3 gap-3">
-              <div className="col-span-2">
-                <select
-                  className="dark:text-black border border-gray-200 rounded h-9 w-[172px] bg-white text-sm"
-                  defaultValue={subitem.inventoryID}
-                  name={`subitem-${index}`}
-                  id={`subitem-${index}`}
-                >
-                  <option value="" disabled>
-                    Choose
-                  </option>
-                  {inventoryData?.map((item) => (
-                    <option value={item.inventoryID} key={item.inventoryID}>
-                      {item.inventoryName + " (" + item.unitOfMeasure + ")"}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="col-span-1">
-                <input
-                  type="number"
-                  name={`quantityNeeded-${index}`}
-                  id={`quantityNeeded-${index}`}
-                  placeholder="Quantity Needed"
-                  className="dark:text-black border border-gray-200 rounded p-1 w-[80px]"
-                  defaultValue={subitem.quantityNeeded}
-                />
-              </div>
-            </div>
-          ))}
+        <div className="flex justify-between">
+          <button
+            type="submit"
+            className="border border-black px-6 py-3 rounded bg-gray-300 hover:bg-gray-400 text-black" 
+          >
+            Save
+          </button>
 
           <button
-            type="button"
-            onClick={handleAddSubitem}
-            className="col-span-3 mt-2 px-3 py-1 rounded-lg border border-black text-gray-400 bg-white hover:bg-gray-50 hover:text-gray-600"
+            onClick={() => setProductModalVisibility(false)}
+            className="border border-black px-6 py-3 rounded bg-gray-300 hover:bg-gray-400 text-black" 
           >
-            Add Subitem
+            Cancel
           </button>
         </div>
       </form>
