@@ -107,75 +107,89 @@ function PaymentDetailsPage() {
   return (
     <>
       <div className="w-full flex justify-center items-center">
-        <div className="w-[360px] flex flex-col justify-center items-center gap-3 py-3 border border-white">
+        <div className="w-[360px] flex flex-col justify-center items-center gap-3 pb-3 border bg-white">
           <Header
             text="Payment Details"
             color={"tealGreen"}
             type={"payment_details"}
           ></Header>
-          <div className="text-2xl font-semibold mb-3">Payment</div>
-          <div className="w-[320px] border border-black rounded-md flex flex-col justify-center items-center p-3">
-            Vouchers and Discounts Type
-            <input
-              className="border border-black text-black"
-              value={discountType}
-              onChange={(e) => setDiscountType(e.target.value)}
-            />
-            Amount
-            <input
-              className="border border-black text-black"
-              value={discountAmount}
-              onChange={(e) => setDiscountAmount(parseFloat(e.target.value))}
-            />
+          <div className="w-[320px] bg-cream rounded-md p-3">
+            <p className="font-semibold">Vouchers and Discounts</p>
+            <div className="flex justify-center items-center ">
+              <input
+                className="text-black rounded-md w-full my-1 text-sm py-1 px-2"
+                placeholder="Enter Voucher or Discount Code Here"
+                value={discountType}
+                onChange={(e) => setDiscountType(e.target.value)}
+              />
+            </div>
           </div>
 
-          <div className="w-[320px] border border-black rounded-md flex flex-col justify-center items-center p-3">
-            Payment Method
+          <div className="w-[320px] bg-cream rounded-md p-3">
+            <p className="font-semibold">Payment Method</p>
             <div className="space-y-2">
-              <div className="flex justify-center items-center">
-                <input
-                  type="radio"
-                  id="gcash"
-                  name="paymentMethod"
-                  value="GCash"
-                  className="mr-2 text-blue-600 border-gray-300 focus:ring-blue-500"
-                  onChange={(e) => setPaymentMethod(e.target.value)}
-                />
-                <label htmlFor="gcash" className="text-gray-700">
-                  GCash
-                </label>
+              <div className="flex justify-between items-center">
+                <div>
+                  <input
+                    type="radio"
+                    id="gcash"
+                    name="paymentMethod"
+                    value="GCash"
+                    className="mr-2 text-blue-600 border-gray-300 focus:ring-blue-500"
+                    onChange={(e) => setPaymentMethod(e.target.value)}
+                  />
+                  <label htmlFor="gcash" className="text-gray-700">
+                    GCash
+                  </label>
+                </div>
+                <div>
+                  <span>Php </span>
+                  {total}
+                </div>
               </div>
 
-              <div className="flex justify-center items-center">
-                <input
-                  type="radio"
-                  id="card"
-                  name="paymentMethod"
-                  value="Card"
-                  className="mr-2 text-blue-600 border-gray-300 focus:ring-blue-500"
-                  onChange={(e) => setPaymentMethod(e.target.value)}
-                />
-                <label htmlFor="card" className="text-gray-700">
-                  Card
-                </label>
+              <div className="flex justify-between items-center">
+                <div>
+                  <input
+                    type="radio"
+                    id="card"
+                    name="paymentMethod"
+                    value="Card"
+                    className="mr-2 text-blue-600 border-gray-300 focus:ring-blue-500"
+                    onChange={(e) => setPaymentMethod(e.target.value)}
+                  />
+                  <label htmlFor="card" className="text-gray-700">
+                    Card
+                  </label>
+                </div>
+                <div>
+                  <span>Php </span>
+                  {total}
+                </div>
               </div>
 
-              <div className="flex justify-center items-center">
-                <input
-                  type="radio"
-                  id="cash"
-                  name="paymentMethod"
-                  value="Cash"
-                  className="mr-2 text-blue-600 border-gray-300 focus:ring-blue-500"
-                  onChange={(e) => setPaymentMethod(e.target.value)}
-                />
-                <label htmlFor="cash" className="text-gray-700">
-                  Cash
-                </label>
+              <div className="flex justify-between items-center">
+                <div>
+                  <input
+                    type="radio"
+                    id="cash"
+                    name="paymentMethod"
+                    value="Cash"
+                    className="mr-2 text-blue-600 border-gray-300 focus:ring-blue-500"
+                    onChange={(e) => setPaymentMethod(e.target.value)}
+                  />
+                  <label htmlFor="cash" className="text-gray-700">
+                    Cash
+                  </label>
+                </div>
+                <div>
+                  <span>Php </span>
+                  {total}
+                </div>
               </div>
 
               <div className="flex gap-4">
-                <div className="flex flex-col text-xs">
+                <div className="flex flex-col text-xs font-semibold">
                   <div>Enter Reference Number:</div>
                   <div>(for GCash or Card)</div>
                 </div>
