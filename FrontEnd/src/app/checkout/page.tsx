@@ -8,6 +8,7 @@ import Header from "@/components/Header";
 import Link from "next/link";
 import OrderButtonSection from "@/components/section/OrderButtonSection";
 import OrderDetailsSection from "@/components/section/OrderDetailsSection";
+import { FaArrowLeft } from "react-icons/fa";
 
 function OrderSummaryPage() {
   const [quantityModalVisibility, setQuantityModalVisibility] = useState(false);
@@ -87,10 +88,16 @@ function OrderSummaryPage() {
 
   return (
     <div className="w-full flex justify-center items-center">
-      <div className="w-[360px] flex flex-col justify-center items-center gap-3 bg-[#EDE9D8]">
+      <div className="w-[360px] flex flex-col justify-center items-center gap-3 bg-white">
         <Header text="Checkout" color={"tealGreen"} type={"checkout"}>
-          <Link href={"/"}>
-            <button>Back</button>
+          <Link
+            href={{
+              pathname: "/",
+            }}
+          >
+            <button className="mr-3 border border-white rounded-full h-[40px] w-[40px] bg-white text-white shadow-lg flex items-center justify-center overflow-hidden hover:bg-tealGreen group">
+              <FaArrowLeft className="text-tealGreen group-hover:text-white transition-colors duration-300" />
+            </button>
           </Link>
         </Header>
         <OrderCard
@@ -108,9 +115,9 @@ function OrderSummaryPage() {
           date={order.date}
           subtotal={subtotal}
         ></OrderDetailsSection>
-        <div className="w-[360px] h-[105px] mt-[50px] p-5 rounded-xl bg-cream drop-shadow-[0_-5px_3px_rgba(0,0,0,0.15)] drop">
+        <div className="w-[360px] h-[105px] mt-[50px] p-5  bg-cream drop-shadow-[0_-5px_3px_rgba(0,0,0,0.15)] drop">
           <div className="flex justify-center items-center w-[315px] ml-[2.5px] mb-2">
-            <span className="text-[20px] text-primaryBrown font-semibold text-center">
+            <span className="text-[20px] text-black font-semibold text-center">
               Please proceed to counter to finalize payment
             </span>
           </div>

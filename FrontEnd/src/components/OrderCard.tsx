@@ -40,15 +40,17 @@ const OrderCard: React.FC<OrderCardProps> = ({
       <div className="rounded-lg mt-[25px]">
         <div className="w-[303.75px] rounded-md p-2 grid grid-cols-[1fr_2fr_1fr] bg-[#59988D] ">
           <div className="flex items-center justify-center">
-            <span className="text-[11px] text-white font-semibold">
+            <span className="text-[15px] text-white font-semibold">
               Quantity
             </span>
           </div>
           <div className="flex items-center justify-center">
-            <span className="text-[11px] text-white font-semibold">Name</span>
+            <span className="text-[15px] text-white font-semibold">
+              Name
+            </span>
           </div>
           <div className="flex items-center justify-center">
-            <span className="text-[11px] text-white font-semibold">
+            <span className="text-[15px] text-white font-semibold text-center">
               Product Total
             </span>
           </div>
@@ -82,17 +84,17 @@ const OrderCard: React.FC<OrderCardProps> = ({
                       </button>
                     </div>
                   ) : (
-                    <div className="text-black text-sm flex items-center justify-center">
+                    <div className="text-black text-sm flex items-center justify-center ">
                       <span className="text-[11px]">{quantity}</span>
                     </div>
                   )}
                   <div className="flex items-center justify-center text-sm italic text-[11px]">
-                    <span className="text-[11px]">
+                    <span className="text-[12px]">
                       {product?.productName || "Unknown"}
                     </span>
                   </div>
-                  <div className="flex items-center justify-center text-sm text-[11px]">
-                    <span className="text-[11px]">
+                  <div className="flex items-center justify-center text-sm text-[11px] font-bold">
+                    <span className="text-[12px]">
                       {product ? product.sellingPrice * quantity : "N/A"}
                     </span>
                   </div>

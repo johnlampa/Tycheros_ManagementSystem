@@ -8,18 +8,18 @@ const OrderDetailsSection: React.FC<OrderDetailsSectionProps> = ({
 }) => {
   return (
     <>
-      <div className="flex flex-col w-[200px] mt-[20px]">
+      <div className="flex flex-col w-[300px] mt-[20px]">
         <div className="flex justify-between">
-          <span className="text-[10px] font-bold">Order ID:</span>
-          <span className="text-[10px]">{orderID}</span>
+          <span className="text-[15px] font-bold text-black">Order ID:</span>
+          <span className="text-[15px] text-black">{orderID}</span>
         </div>
         <div className="flex justify-between">
-          <span className="text-[10px] font-bold">Date:</span>
-          <span className="text-[10px]">{date.substring(0, 10)}</span>
+          <span className="text-[15px] font-bold text-black">Date:</span>
+          <span className="text-[15px] text-black">{date.substring(0, 10)}</span>
         </div>
         <div className="flex justify-between">
-          <span className="text-[10px] font-bold">Subtotal:</span>
-          <span className="text-[10px]">{subtotal}</span>
+          <span className="text-[15px] font-bold text-black">Subtotal:</span>
+          <span className="text-[15px] text-black font-bold">{subtotal}</span>
         </div>
       </div>
     </>

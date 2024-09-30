@@ -33,12 +33,12 @@ const Header: FC<HeaderProps> = ({ text, color, type, children }) => {
   return (
     <header className={headerStyles({ color })}>
       <div className="w-[80px] flex items-center p-[20px] z-100">
-        <div className="rounded-full w-[40px] h-[40px] bg-black flex justify-center items-center z-10">
+        <div className="rounded-full w-[40px] h-[40px] flex justify-center items-center z-10">
           {children}
         </div>
       </div>
       <div
-        className={`w-[250px] flex items-center justify-center z-0 text-pretty ${fontFamily}`}
+        className={`w-[250px] flex items-center justify-center z-0 text-pretty mr-7 ${fontFamily}`}
       >
         <div
           className={`${headerStyles({ type, color })} ${textContainerWidth}`}

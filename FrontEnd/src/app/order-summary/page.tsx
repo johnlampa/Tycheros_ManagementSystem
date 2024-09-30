@@ -9,6 +9,7 @@ import { format } from "date-fns";
 import Header from "@/components/Header";
 import Link from "next/link";
 import OrderButtonSection from "@/components/section/OrderButtonSection";
+import { FaArrowLeft } from "react-icons/fa";
 
 function OrderSummaryPage() {
   const [menuData, setMenuData] = useState<ProductDataTypes[]>([]);
@@ -108,7 +109,9 @@ function OrderSummaryPage() {
       <div className="w-[360px] flex flex-col justify-center items-center gap-3 bg-white">
         <Header text="Order Summary" color={"tealGreen"} type={"order_summary"}>
           <Link href={previousPage}>
-            <button>Back</button>
+            <button className="mr-3 border border-white rounded-full h-[40px] w-[40px] bg-white text-white shadow-lg flex items-center justify-center overflow-hidden hover:bg-tealGreen group">
+              <FaArrowLeft className="text-tealGreen group-hover:text-white transition-colors duration-300" />
+            </button>
           </Link>
         </Header>
         <OrderCard
