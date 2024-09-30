@@ -32,7 +32,7 @@ const MenuHeaderSection: React.FC<MenuHeaderSectionProps> = ({
               <div
                 className={`w-[90px] h-[25px] rounded-sm border border-lightTealGreen border-2 flex justify-center items-center shadow-xl hover:bg-[#30594f] duration-200 hover:tracking-wide ${
                   category.categoryID === 4 ? "text-md" : "text-lg"
-                }   -pattaya text-white`}
+                }  font-pattaya text-white`}
               >
                 {category.categoryName}
               </div>
