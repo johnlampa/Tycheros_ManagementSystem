@@ -6,6 +6,7 @@ import { Order } from "../../../lib/types/OrderDataTypes";
 import { ProductDataTypes } from "../../../lib/types/ProductDataTypes";
 import Header from "@/components/Header";
 import Link from "next/link";
+import { FaArrowLeft } from "react-icons/fa";
 
 export default function Page() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -58,9 +59,15 @@ export default function Page() {
 
   return (
     <div className="flex justify-center items-center w-full pb-7">
-      <div className="w-[360px] flex flex-col justify-center items-center bg-white">
-        <Header text="Orders" color={"cream"} type={"orders"}></Header>
-        <div className="h-[68px] w-full border-x-0 border-y-[1px] border-primaryBrown bg-tealGreen flex justify-center items-center">
+      <div className="w-[360px] l-[100px] flex flex-col justify-center items-center bg-white ">
+        <Header text="Orders" color={"tealGreen"} type={"orders"}>
+        <Link href={"/"} className="z-100">
+            <button className="mr-3 border border-white rounded-full h-[40px] w-[40px] bg-white text-white shadow-lg flex items-center justify-center overflow-hidden hover:bg-tealGreen group">
+              <FaArrowLeft className="text-tealGreen group-hover:text-white transition-colors duration-300" />
+            </button>
+          </Link>
+        </Header>
+        <div className="h-[50px] w-full bg-tealGreen flex justify-center items-center">
           <div className="w-max grid grid-cols-3 gap-x-5 gap-y-2">
             {/* edit href */}
             <Link href={"/order-management/unpaid"}>

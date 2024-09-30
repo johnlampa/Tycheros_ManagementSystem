@@ -117,7 +117,7 @@ export default function Page() {
           </div>
         </Link>
       </div>
-      
+
       <div className="w-[312px] p-4">
         <QuantityModal
           productToAdd={productToAdd}

@@ -8,6 +8,7 @@ import Link from "next/link";
 import Header from "@/components/Header";
 import OrderCard from "@/components/OrderCard";
 import OrderManagementCard from "@/components/ui/OrderManagementCard";
+import { FaArrowLeft } from "react-icons/fa";
 
 function PaymentDetailsPage() {
   const [menuData, setMenuData] = useState<ProductDataTypes[]>([]);
@@ -147,8 +148,15 @@ function PaymentDetailsPage() {
             text="Payment Details"
             color={"tealGreen"}
             type={"payment_details"}
-          ></Header>
-          <div className="w-[320px]">
+          >
+            <Link href={"/order-management"} className="z-100">
+              <button className="mr-3 border border-white rounded-full h-[40px] w-[40px] bg-white text-white shadow-lg flex items-center justify-center overflow-hidden hover:bg-tealGreen group">
+                <FaArrowLeft className="text-tealGreen group-hover:text-white transition-colors duration-300" />
+              </button>
+            </Link>
+
+          </Header>
+          <div className="w-[320px] text-black">
             <div className="w-full bg-cream rounded-md p-3 mb-4">
               <p className="font-semibold">Vouchers and Discounts</p>
               <div className="flex justify-center items-center ">
@@ -242,7 +250,7 @@ function PaymentDetailsPage() {
             </div>
 
             <div className="w-full flex flex-col">
-              <div className="mb-3 font-semibold text-lg">Order Summary</div>
+              <div className="mb-3 font-semibold text-[25px]">Order Summary</div>
               <OrderManagementCard
                 menuData={menuData}
                 order={order}
