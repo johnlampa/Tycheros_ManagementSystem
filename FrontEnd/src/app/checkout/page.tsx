@@ -8,6 +8,7 @@ import Header from "@/components/Header";
 import Link from "next/link";
 import OrderButtonSection from "@/components/section/OrderButtonSection";
 import OrderDetailsSection from "@/components/section/OrderDetailsSection";
+import { FaArrowLeft } from "react-icons/fa";
 
 function OrderSummaryPage() {
   const [quantityModalVisibility, setQuantityModalVisibility] = useState(false);
@@ -87,11 +88,17 @@ function OrderSummaryPage() {
 
   return (
     <div className="w-full flex justify-center items-center">
-      <div className="w-[360px] flex flex-col justify-center items-center gap-3 bg-[#EDE9D8]">
+      <div className="w-[360px] flex flex-col justify-center items-center gap-3 bg-white">
         <Header text="Checkout" color={"tealGreen"} type={"checkout"}>
-          <Link href={"/"}>
-            <button>Back</button>
-          </Link>
+          <Link 
+            href={{
+              pathname: "/order-summary",
+            }}
+          >
+              <button className="mr-3 border border-white rounded-full h-[40px] w-[40px] bg-white text-white shadow-lg flex items-center justify-center overflow-hidden hover:bg-tealGreen group">
+                <FaArrowLeft className="text-tealGreen group-hover:text-white transition-colors duration-300" />
+              </button>
+            </Link>
         </Header>
         <OrderCard
           cart={order.orderItems || cart}

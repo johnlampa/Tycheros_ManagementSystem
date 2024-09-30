@@ -10,10 +10,10 @@ const OrderButtonSection: React.FC<OrderButtonSectionProps> = ({
       <div className="w-[360px] h-[105px] mt-[50px] p-5 rounded-xl bg-cream drop-shadow-[0_-5px_3px_rgba(0,0,0,0.15)] drop">
         <div className="flex justify-between items-center w-[315px] ml-[2.5px] mb-2">
           <div>
-            <span className="font-bold text-[14px]">Subtotal</span>
-            <span className="text-[10px] ml-[3px] text-gray">(incl. tax)</span>
+            <span className="font-bold text-[14px] text-black">Subtotal</span>
+            <span className="text-[10px] ml-[3px] text-primaryBrown">(incl. tax)</span>
           </div>
-          <div className="font-bold text-[14px]">Php {subtotal}</div>
+          <div className="font-bold text-[14px] text-black">Php {subtotal}</div>
         </div>
         <Link href={"/checkout"}>
           <button

@@ -1,6 +1,7 @@
 import React from "react";
 import Header from "@/components/Header";
 import Link from "next/link";
+import { GiHamburgerMenu } from "react-icons/gi";
 
 export default function Home() {
   return (
@@ -11,7 +12,11 @@ export default function Home() {
             text="Tycheros World Cafe and Bar"
             color={"tealGreen"}
             type={"home"}
-          ></Header>
+          > 
+            <button className="mr-5 mb-8 flex items-center justify-center overflow-hidden">
+              <GiHamburgerMenu style={{ color: 'tealGreen', fontSize: '30vh' }} />
+            </button>
+          </Header>
           <div className="w-[360px] h-[203px] bg-black rounded-full mt-[20px] mb-[30px]"></div>
           <Link href={"/food-menu"}>
             <div className="w-[220px] h-[100px] rounded-3xl border border-2 flex justify-center items-center mb-[15px]">
@@ -38,7 +43,7 @@ export default function Home() {
                 />
               </button>
               <div className="mt-[3px] flex justify-center items-center">
-                <span className="text-[10px] font-semibold text-black">Check Order</span>
+                <span className="text-[10px] font-semibold text-white">Check Order</span>
               </div>
             </div>
           </Link>
