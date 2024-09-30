@@ -72,93 +72,110 @@ const OrderManagementCard: React.FC<OrderManagementCardProps> = React.memo(
 
     return (
       <>
-        <div className="w-[320px] border border-black rounded-md p-3">
-          <div className="grid grid-cols-[2fr_1fr_1fr_1fr] gap-2 font-semibold mb-3">
-            <div className="flex items-center justify-center text-sm">Name</div>
-            <div className="flex items-center justify-center text-sm">
-              Price
+        <div className="w-[320px]">
+          <div className="flex justify-between p-1 text-sm">
+            <div>
+              <span className="font-semibold">Order ID: </span>
+              <span>{order.orderID}</span>
             </div>
-            <div className="flex items-center justify-center text-sm">
-              Quantity
-            </div>
-            <div className="flex items-center justify-center text-sm">
-              Subtotal
+            <div>
+              <span className="font-semibold">Date: </span>
+              <span>{order.date.substring(0, 10)}</span>
             </div>
           </div>
-
-          {order.orderItems?.map(({ productID, quantity }, itemIndex) => {
-            const product = menuData.find(
-              (item) => item.productID === productID
-            );
-            if (!product) return null;
-
-            const subtotal = product.sellingPrice * quantity;
-
-            return (
-              <div
-                key={itemIndex}
-                className="grid grid-cols-[2fr_1fr_1fr_1fr] gap-2"
-              >
-                <div className="flex justify-center items-center text-sm">
-                  {product.productName}
-                </div>
-                <div className="flex justify-center items-center">
-                  {product.sellingPrice}
-                </div>
-                <div className="flex justify-center items-center">
-                  {quantity}
-                </div>
-                <div className="flex justify-center items-center">
-                  {subtotal}
-                </div>
+          <div className="rounded-md p-3 bg-cream">
+            <div className="grid grid-cols-[2fr_1fr_1fr_1fr] gap-2 font-semibold mb-3">
+              <div className="text-xs">Name</div>
+              <div className="flex items-center justify-center text-xs">
+                Price
               </div>
-            );
-          })}
-        </div>
-        <div className="w-[320px] border border-black rounded-md p-1 mt-1 flex pl-10 gap-[185px]">
-          <div>Total</div>
-          <div>{total}</div>
-        </div>
+              <div className="flex items-center justify-center text-xs">
+                Quantity
+              </div>
+              <div className="flex items-center justify-center text-xs">
+                Subtotal
+              </div>
+            </div>
 
-        {order.status === "Unpaid" && (
-          <div className="ml-[190.57px]">
-            <Link
-              href={{
-                pathname: "/payment-details",
-                query: { order: JSON.stringify(order) },
-              }}
-            >
-              <button
-                className="border border-black px-2 py-1 rounded-md mt-1 text-sm"
-                onClick={handleConfirmPayment}
+            {order.orderItems?.map(({ productID, quantity }, itemIndex) => {
+              const product = menuData.find(
+                (item) => item.productID === productID
+              );
+              if (!product) return null;
+
+              const subtotal = product.sellingPrice * quantity;
+
+              return (
+                <div
+                  key={itemIndex}
+                  className="grid grid-cols-[2fr_1fr_1fr_1fr] gap-2"
+                >
+                  <div className="text-sm truncate">{product.productName}</div>
+                  <div className="flex justify-center items-center text-sm">
+                    {product.sellingPrice}
+                  </div>
+                  <div className="flex justify-center items-center text-sm">
+                    {quantity}
+                  </div>
+                  <div className="flex justify-center items-center text-sm">
+                    {subtotal}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          <div className="w-[320px] bg-cream rounded-md mt-1 px-3 py-1 grid grid-cols-[2fr_1fr_1fr_1fr] gap-2">
+            <div className="text-sm">Total</div>
+            <div></div>
+            <div></div>
+            <div className="flex justify-center items-center text-sm">
+              {total}
+            </div>
+          </div>
+
+          {order.status === "Unpaid" && (
+            <div className="grid grid-cols-[2fr_1fr_1fr_1fr] gap-2">
+              <div></div>
+              <div></div>
+              <div></div>
+              <Link
+                href={{
+                  pathname: "/payment-details",
+                  query: { order: JSON.stringify(order) },
+                }}
               >
-                Confirm Payment
+                <button
+                  className="px-2 py-1 rounded-md mt-1 text-xs w-[130px] font-semibold bg-tealGreen text-white"
+                  onClick={handleConfirmPayment}
+                >
+                  Confirm Payment
+                </button>
+              </Link>
+            </div>
+          )}
+
+          {order.status === "Pending" && (
+            <div className="ml-[198.77px]">
+              <button
+                className="border border-black px-2 py-1 rounded-md mt-1 text-xs"
+                onClick={handleCompleteOrder}
+              >
+                Complete Order
               </button>
-            </Link>
-          </div>
-        )}
+            </div>
+          )}
 
-        {order.status === "Pending" && (
-          <div className="ml-[198.77px]">
-            <button
-              className="border border-black px-2 py-1 rounded-md mt-1 text-sm"
-              onClick={handleCompleteOrder}
-            >
-              Complete Order
-            </button>
-          </div>
-        )}
-
-        {order.status === "Completed" && (
-          <div className="ml-[231.21px]">
-            <button
-              className="border border-black px-2 py-1 rounded-md mt-1 text-sm"
-              disabled
-            >
-              Completed
-            </button>
-          </div>
-        )}
+          {order.status === "Completed" && (
+            <div className="ml-[231.21px]">
+              <button
+                className="border border-black px-2 py-1 rounded-md mt-1 text-xs"
+                disabled
+              >
+                Completed
+              </button>
+            </div>
+          )}
+        </div>
       </>
     );
   }
