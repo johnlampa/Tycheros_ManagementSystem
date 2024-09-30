@@ -9,7 +9,7 @@ const MenuCard: React.FC<MenuCardProps> = ({
   setQuantityModalVisibility,
 }) => {
   return (
-    <div className="flex flex-col bg-cream border border-gray-300 rounded-md shadow-md overflow-hidden h-[300px]">
+    <div className="flex flex-col bg-cream border border-gray-300 rounded-md shadow-md overflow-hidden h-[280px]">
       {/* Image Section */}
       <div className="w-full h-[150px] relative">
         <Image
@@ -23,8 +23,8 @@ const MenuCard: React.FC<MenuCardProps> = ({
 
       {/* Product Info */}
       <div className="flex flex-col p-3 flex-1">
-        <p className="text-sm font-extrabold">{product.productName}</p>
-        <p className="text-sm text-gray-500">₱{product.sellingPrice}</p>
+        <p className="text-sm font-extrabold text-black">{product.productName}</p>
+        <p className="text-sm text-gray-500 text-black">₱{product.sellingPrice}</p>
 
         {/* Button at the bottom */}
         <button
