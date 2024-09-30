@@ -74,24 +74,11 @@ export default function Page() {
           categories={categories}
         ></MenuHeaderSection>
         <div className="p-6">
-          <Link
-            href={{
-              pathname: "/order-summary",
-            }}
-          >
-            <div className="absolute bottom-4 right-4 w-min h-min">
-              <button className="border border-black rounded-full h-[62px] w-[62px] bg-blue-500 text-white py-2 px-4 shadow-lg hover:bg-blue-600"></button>
-              <div className="mt-[3px] flex justify-center items-center">
-                <span className="text-[10px] font-semibold">Check Order</span>
-              </div>
-            </div>
-          </Link>
-
           {categories.map((category) => (
             <div
               key={category.categoryName}
               id={category.categoryName}
-              className="mb-8"
+              className="mb-8 text-black"
             >
               <p className="font-pattaya text-2xl">{category.categoryName}</p>
               <div className="grid grid-cols-2 gap-x-6 gap-y-3 content-center">
@@ -111,7 +98,26 @@ export default function Page() {
             </div>
           ))}
         </div>
+        <Link
+          href={{
+            pathname: "/order-summary",
+          }}
+        >
+          <div className="sticky bottom-4 mr-5 ml-auto right-0 w-min h-min">
+            <button className="border border-black rounded-full h-[62px] w-[62px] bg-blue-500 text-white shadow-lg hover:bg-blue-600 flex items-center justify-center overflow-hidden">
+              <img
+                src="/assets/images/CheckOrder.png"  // Replace with your image path
+                alt="Check Order"
+                className="h-full w-full object-cover"  // Image fully covers the button without overflow
+              />
+            </button>
+            <div className="mt-[3px] flex justify-center items-center">
+              <span className="text-[10px] font-semibold text-black">Check Order</span>
+            </div>
+          </div>
+        </Link>
       </div>
+      
       <div className="w-[312px] p-4">
         <QuantityModal
           productToAdd={productToAdd}

@@ -54,7 +54,7 @@ const OrderCard: React.FC<OrderCardProps> = ({
           </div>
         </div>
 
-        <div className="flex flex-col items-center justify-center">
+        <div className="flex flex-col items-center justify-center bg-cream text-black">
           {cart.map((item, index) => {
             const { productID, quantity } = item;
             const product = menuData.find((p) => p.productID === productID);
@@ -114,7 +114,7 @@ const OrderCard: React.FC<OrderCardProps> = ({
         {type === "summary" ? (
           <div className="grid grid-cols-[1fr_1fr_1fr] w-[303.75px] mt-[10px]">
             <Link href={"/"}>
-              <div className="flex justify-center items-center">
+              <div className="flex justify-center items-center text-black">
                 <span className="text-[11px] font-bold underline">
                   Add more items
                 </span>

@@ -105,7 +105,7 @@ function OrderSummaryPage() {
 
   return (
     <div className="w-full flex justify-center items-center">
-      <div className="w-[360px] flex flex-col justify-center items-center gap-3 bg-[#EDE9D8]">
+      <div className="w-[360px] flex flex-col justify-center items-center gap-3 bg-white">
         <Header text="Order Summary" color={"tealGreen"} type={"order_summary"}>
           <Link href={previousPage}>
             <button>Back</button>
