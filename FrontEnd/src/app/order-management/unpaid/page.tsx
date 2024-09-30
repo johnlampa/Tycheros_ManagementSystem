@@ -6,6 +6,7 @@ import { Order } from "../../../../lib/types/OrderDataTypes";
 import { ProductDataTypes } from "../../../../lib/types/ProductDataTypes";
 import Header from "@/components/Header";
 import Link from "next/link";
+import { FaArrowLeft } from "react-icons/fa";
 
 export default function Page() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -61,9 +62,11 @@ export default function Page() {
   return (
     <div className="flex justify-center items-center w-full pb-7">
       <div className="w-[360px] flex flex-col justify-center items-center bg-white">
-        <Header text="Unpaid" color={"cream"} type={"orders"}>
-          <Link href={"/order-management"}>
-            <button>Back</button>
+        <Header text="Unpaid" color={"tealGreen"} type={"orders"}>
+          <Link href={"/order-management"} className="z-100">
+            <button className="mr-3 border border-white rounded-full h-[40px] w-[40px] bg-white text-white shadow-lg flex items-center justify-center overflow-hidden hover:bg-tealGreen group">
+              <FaArrowLeft className="text-tealGreen group-hover:text-white transition-colors duration-300" />
+            </button>
           </Link>
         </Header>
 
