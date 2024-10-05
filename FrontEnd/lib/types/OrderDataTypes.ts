@@ -8,7 +8,7 @@ export type Order = {
     paymentID?: number,
     employeeID: number,
     date: string,
-    status: "Unpaid" | "Pending" | "Completed",
+    status: "Unpaid" | "Pending" | "Completed" | "Cancelled",
     amount?: number
     orderItems?: OrderItemDataTypes[]
 }
