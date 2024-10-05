@@ -3,7 +3,6 @@ import { MenuHeaderSectionProps } from "../../../lib/types/props/MenuHeaderSecti
 import Header from "@/components/Header";
 import { FaArrowLeft } from "react-icons/fa";
 
-
 const MenuHeaderSection: React.FC<MenuHeaderSectionProps> = ({
   menuType,
   categories,
@@ -30,7 +29,7 @@ const MenuHeaderSection: React.FC<MenuHeaderSectionProps> = ({
           {categories.map((category) => (
             <Link key={category.categoryID} href={`#${category.categoryName}`}>
               <div
-                className={`w-[90px] h-[25px] rounded-sm border border-lightTealGreen border-2 flex justify-center items-center shadow-xl hover:bg-[#30594f] duration-200 hover:tracking-wide ${
+                className={`w-[90px] h-[25px] rounded-sm border-lightTealGreen border-2 flex justify-center items-center shadow-xl hover:bg-[#30594f] duration-200 hover:scale-105 ${
                   category.categoryID === 4 ? "text-md" : "text-lg"
                 }  font-pattaya text-white`}
               >
