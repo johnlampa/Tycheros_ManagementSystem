@@ -61,14 +61,14 @@ export default function Page() {
     <div className="flex justify-center items-center w-full pb-7">
       <div className="w-[360px] l-[100px] flex flex-col justify-center items-center bg-white ">
         <Header text="Orders" color={"tealGreen"} type={"orders"}>
-        <Link href={"/employee-home"} className="z-100">
+          <Link href={"/employee-home"} className="z-100">
             <button className="border border-white rounded-full h-[40px] w-[40px] bg-white text-white shadow-lg flex items-center justify-center overflow-hidden hover:bg-tealGreen group">
               <FaArrowLeft className="text-tealGreen group-hover:text-white transition-colors duration-300" />
             </button>
           </Link>
         </Header>
-        <div className="h-[50px] w-full bg-tealGreen flex justify-center items-center">
-          <div className="w-max grid grid-cols-3 gap-x-5 gap-y-2">
+        <div className="h-[100px] w-full bg-tealGreen flex justify-center items-center">
+          <div className="w-max grid grid-cols-3 gap-x-5 gap-y-5">
             {/* edit href */}
             <Link href={"/order-management/unpaid"}>
               <div
@@ -89,6 +89,14 @@ export default function Page() {
                 className={`w-[88px] h-[25px] rounded-sm border border-white flex justify-center items-center font-pattaya text-white`}
               >
                 Completed
+              </div>
+            </Link>
+            <div></div>
+            <Link href={"/order-management/cancelled"}>
+              <div
+                className={`w-[88px] h-[25px] rounded-sm border border-white flex justify-center items-center font-pattaya text-white`}
+              >
+                Cancelled
               </div>
             </Link>
           </div>
