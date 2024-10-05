@@ -21,7 +21,7 @@ const OrderButtonSection: React.FC<OrderButtonSectionProps> = ({
             onClick={handleClick}
           >
             <span className="font-pattaya text-[20px] text-white">
-              I&apos;m Ready to Order
+              Place Order
             </span>
           </button>
         </Link>

@@ -115,7 +115,6 @@ export default function Page() {
               <span className="text-[10px] text-center font-semibold bg-lightTealGreen border w-[70px] rounded border">Check Order</span>
             </div>
           </div>
-
         </Link>
       </div>
       <div className="w-[312px] p-4">

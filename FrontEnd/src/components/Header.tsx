@@ -28,7 +28,7 @@ interface HeaderProps extends VariantProps<typeof headerStyles> {
 
 const Header: FC<HeaderProps> = ({ text, color, type, children }) => {
   const textContainerWidth = type === "home" ? "w-[190px] text-center" : "";
-  const fontFamily = type === "menu" ? "font-pacifico" : "font-pattaya";
+  const fontFamily = type === "menu" ? "font-pattaya" : "font-pattaya";
 
   return (
     <header className={headerStyles({ color })}>
