@@ -76,6 +76,18 @@ const OrderManagementCard: React.FC<OrderManagementCardProps> = React.memo(
       updateOrderStatus("Completed");
     }, [order, orders, setOrders]);
 
+    const handleCancelUnpaidOrder = useCallback(() => {
+      const updatedOrder: Order = {
+        ...order,
+        status: "Cancelled",
+      };
+
+      setOrders?.(
+        orders.map((o) => (o.orderID === order.orderID ? updatedOrder : o))
+      );
+      updateOrderStatus("Cancelled");
+    }, [order, orders, setOrders]);
+
     return (
       <>
         <div className="w-[320px]">
@@ -91,18 +103,14 @@ const OrderManagementCard: React.FC<OrderManagementCardProps> = React.memo(
           </div>
           <div className="rounded-md p-3 bg-cream text-black">
             <div className="grid grid-cols-[3fr_1fr_1fr_2fr] gap-2 font-semibold mb-3">
-              <div className="text-[15px] text-black">
-                Name
-              </div>
+              <div className="text-[15px] text-black">Name</div>
               <div className="flex items-center justify-center text-[15px]">
                 Price
               </div>
               <div className="flex items-center justify-center text-[15px]">
                 Qty
               </div>
-              <div className="text-right text-[15px]">
-                Subtotal
-              </div>
+              <div className="text-right text-[15px]">Subtotal</div>
             </div>
 
             {order.orderItems?.map(({ productID, quantity }, itemIndex) => {
@@ -126,7 +134,7 @@ const OrderManagementCard: React.FC<OrderManagementCardProps> = React.memo(
                     {quantity}
                   </div>
                   <div className="text-right text-[12px] font-bold">
-                  &#8369; {subtotal.toFixed(2)}
+                    &#8369; {subtotal.toFixed(2)}
                   </div>
                 </div>
               );
@@ -139,7 +147,7 @@ const OrderManagementCard: React.FC<OrderManagementCardProps> = React.memo(
               <div></div>
               <div></div>
               <div className="text-right text-[12px]">
-              &#8369; {discountAmount?.toFixed(2)}
+                &#8369; {discountAmount?.toFixed(2)}
               </div>
             </div>
           )}
@@ -156,30 +164,37 @@ const OrderManagementCard: React.FC<OrderManagementCardProps> = React.memo(
           {type === "management" && (
             <>
               {order.status === "Unpaid" && (
-                <div className="grid grid-cols-[2fr_1fr_1fr_1fr] gap-2 mb-6">
-                  <div></div>
-                  <div></div>
-                  <div></div>
-                  <Link
-                    href={{
-                      pathname: "/payment-details",
-                      query: { order: JSON.stringify(order) },
-                    }}
-                  >
-                    <button
-                      className="px-2 py-1 rounded-md mt-1 mb -5 float-right text-xs w-[130px] font-semibold bg-tealGreen text-white"
-                      onClick={handleConfirmPayment}
+                <div className="flex flex-col">
+                  <div>
+                    <Link
+                      href={{
+                        pathname: "/payment-details",
+                        query: { order: JSON.stringify(order) },
+                      }}
                     >
-                      Confirm Payment
+                      <button
+                        className="px-2 py-1 rounded-md mt-1 float-right text-xs w-[130px] h-[28px] font-semibold bg-tealGreen text-white hover:text-tealGreen hover:bg-white hover:border hover:border-tealGreen duration-200"
+                        onClick={handleConfirmPayment}
+                      >
+                        Confirm Payment
+                      </button>
+                    </Link>
+                  </div>
+                  <div>
+                    <button
+                      className="px-2 py-1 rounded-md mt-1 mb-5 float-right text-xs w-[130px] h-[28px] font-semibold border border-red bg-white text-red hover:text-white hover:bg-red hover:border duration-200"
+                      onClick={handleCancelUnpaidOrder}
+                    >
+                      Cancel Order
                     </button>
-                  </Link>
+                  </div>
                 </div>
               )}
 
               {order.status === "Pending" && (
                 <div className="ml-[198.77px]">
                   <button
-                    className="px-2 py-1 rounded-md mt-1 mb-5 float-right text-xs w-[130px] font-semibold bg-tealGreen text-white"
+                    className="px-2 py-1 rounded-md mt-1 mb-5 float-right text-xs w-[130px] h-[28px] font-semibold bg-tealGreen text-white"
                     onClick={handleCompleteOrder}
                   >
                     Complete Order
@@ -187,13 +202,14 @@ const OrderManagementCard: React.FC<OrderManagementCardProps> = React.memo(
                 </div>
               )}
 
-              {order.status === "Completed" && (
+              {(order.status === "Completed" ||
+                order.status === "Cancelled") && (
                 <div className="ml-[231.21px]">
                   <button
-                    className="px-2 py-1 rounded-md mt-1 mb-5 float-right text-xs w-[130px] font-semibold bg-tealGreen text-white justify-right"
+                    className="px-2 py-1 rounded-md mt-1 mb-5 float-right text-xs w-[130px] h-[28px] font-semibold bg-gray text-white justify-right"
                     disabled
                   >
-                    Completed
+                    {order.status}
                   </button>
                 </div>
               )}
