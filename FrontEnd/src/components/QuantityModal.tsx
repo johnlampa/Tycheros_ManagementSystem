@@ -28,7 +28,9 @@ const QuantityModal: React.FC<QuantityModalProps> = ({
 
   useEffect(() => {
     if (type === "edit" && quantityModalIsVisible && productToAdd.productID) {
-      const item = cart.find((item) => item.productID === productToAdd.productID);
+      const item = cart.find(
+        (item) => item.productID === productToAdd.productID
+      );
       if (item) {
         setQuantity(item.quantity);
       } else {
@@ -85,48 +87,47 @@ const QuantityModal: React.FC<QuantityModalProps> = ({
 
   return (
     <div className="w-full">
-  <Modal
-    modalIsVisible={quantityModalIsVisible}
-    setModalVisibility={setQuantityModalVisibility}
-  >
-    {/* Adjust the modal content to remove extra space */}
-    <div className="flex flex-col gap-3 justify-center items-center w-[250px] p-5 bg-white rounded-md shadow-lg m-0 border-black">
-      {/* Product Name */}
-      <div className="font-bold text-2xl text-black text-center">
-        {productToAdd.productName}
-      </div>
-
-      {/* Quantity Input */}
-      <div className="text-black text-center">Enter Quantity</div>
-      <div className="flex justify-center items-center">
-        <button
-          className="px-3 py-1 rounded-full border border-black text-black text-sm bg-white hover:bg-gray-50 hover:text-gray-600"
-          onClick={() => setQuantity((prev) => Math.max(prev - 1, 0))}
-        >
-          -
-        </button>
-        <div className="text-black flex flex-col items-center justify-center mx-3">
-          {quantity}
-        </div>
-        <button
-          className="px-3 py-1 rounded-full border border-black text-black text-sm bg-white hover:bg-gray-50 hover:text-gray-600"
-          onClick={() => setQuantity(quantity + 1)}
-        >
-          +
-        </button>
-      </div>
-
-      {/* Confirm Button */}
-      <button
-        className="px-4 py-2 mt-3 rounded-full border border-black text-black text-sm bg-tealGreen hover:bg-gray-500"
-        onClick={handleSave}
+      <Modal
+        modalIsVisible={quantityModalIsVisible}
+        setModalVisibility={setQuantityModalVisibility}
       >
-        Confirm
-      </button>
-    </div>
-  </Modal>
-</div>
+        {/* Adjust the modal content to remove extra space */}
+        <div className="flex flex-col gap-3 justify-center items-center w-[250px] p-5 bg-white rounded-md shadow-lg m-0 border-black">
+          {/* Product Name */}
+          <div className="font-bold text-2xl text-black text-center">
+            {productToAdd.productName}
+          </div>
 
+          {/* Quantity Input */}
+          <div className="text-black text-center">Select Quantity</div>
+          <div className="flex justify-center items-center">
+            <button
+              className="px-3 py-1 rounded-full text-black text-sm shadow-xl hover:scale-110 active:bg-secondaryBrown duration-200 bg-cream"
+              onClick={() => setQuantity((prev) => Math.max(prev - 1, 0))}
+            >
+              -
+            </button>
+            <div className="text-black flex flex-col items-center justify-center w-14 ">
+              {quantity}
+            </div>
+            <button
+              className="px-3 py-1 rounded-full text-black text-sm shadow-xl hover:scale-110 active:bg-secondaryBrown duration-200 bg-cream"
+              onClick={() => setQuantity(quantity + 1)}
+            >
+              +
+            </button>
+          </div>
+
+          {/* Confirm Button */}
+          <button
+            className="w-full px-4 py-2 mt-3 rounded-md font-semibold text-white text-sm bg-tealGreen hover:bg-gray-500"
+            onClick={handleSave}
+          >
+            Confirm
+          </button>
+        </div>
+      </Modal>
+    </div>
   );
 };
 
