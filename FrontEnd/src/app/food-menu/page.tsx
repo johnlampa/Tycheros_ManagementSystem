@@ -106,16 +106,17 @@ export default function Page() {
           <div className="sticky bottom-4 right-0 mr-5 ml-auto w-min h-min flex flex-col items-center">
             <button className="border border-black rounded-full h-[62px] w-[62px] bg-blue-500 text-white shadow-lg hover:bg-blue-600 flex items-center justify-center overflow-hidden">
               <img
-                src="/assets/images/CheckOrder.png"  // Replace with your image path
+                src="/assets/images/CheckOrder.png" // Replace with your image path
                 alt="Check Order"
                 className="h-full w-full object-cover"
               />
             </button>
             <div className="mt-[3px] flex justify-center items-center">
-              <span className="text-[10px] text-center font-semibold bg-lightTealGreen border w-[70px] rounded border">Check Order</span>
+              <span className="text-[10px] text-center font-semibold bg-lightTealGreen border w-[70px] rounded">
+                Check Order
+              </span>
             </div>
           </div>
-
         </Link>
       </div>
       <div className="w-[312px] p-4">
