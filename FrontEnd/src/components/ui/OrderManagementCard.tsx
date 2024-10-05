@@ -90,7 +90,7 @@ const OrderManagementCard: React.FC<OrderManagementCardProps> = React.memo(
             </div>
           </div>
           <div className="rounded-md p-3 bg-cream text-black">
-            <div className="grid grid-cols-[2fr_1fr_1fr_1fr] gap-2 font-semibold mb-3">
+            <div className="grid grid-cols-[3fr_1fr_1fr_2fr] gap-2 font-semibold mb-3">
               <div className="text-[15px] text-black">
                 Name
               </div>
@@ -98,9 +98,9 @@ const OrderManagementCard: React.FC<OrderManagementCardProps> = React.memo(
                 Price
               </div>
               <div className="flex items-center justify-center text-[15px]">
-                Quantity
+                Qty
               </div>
-              <div className="flex items-center justify-center text-[15px]">
+              <div className="text-right text-[15px]">
                 Subtotal
               </div>
             </div>
@@ -116,7 +116,7 @@ const OrderManagementCard: React.FC<OrderManagementCardProps> = React.memo(
               return (
                 <div
                   key={itemIndex}
-                  className="grid grid-cols-[2fr_1fr_1fr_1fr] gap-2"
+                  className="grid grid-cols-[3fr_1fr_1fr_2fr] gap-2"
                 >
                   <div className="text-sm truncate">{product.productName}</div>
                   <div className="flex justify-center items-center text-[12px]">
@@ -125,8 +125,8 @@ const OrderManagementCard: React.FC<OrderManagementCardProps> = React.memo(
                   <div className="flex justify-center items-center text-[12px]">
                     {quantity}
                   </div>
-                  <div className="flex justify-center items-center text-[12px] font-bold">
-                    {subtotal}
+                  <div className="text-right text-[12px] font-bold">
+                  &#8369; {subtotal.toFixed(2)}
                   </div>
                 </div>
               );
@@ -134,22 +134,22 @@ const OrderManagementCard: React.FC<OrderManagementCardProps> = React.memo(
           </div>
 
           {type === "payment" && (
-            <div className="w-[320px] bg-cream rounded-md mt-1 px-3 py-1 grid grid-cols-[2fr_1fr_1fr_1fr] gap-2 text-black">
-              <div className="text-sm">Discount</div>
+            <div className="w-[320px] bg-cream rounded-md mt-1 px-3 py-1 grid grid-cols-[3fr_1fr_1fr_2fr] gap-2 text-black">
+              <div className="text-sm">Discount </div>
               <div></div>
               <div></div>
-              <div className="flex justify-center items-center text-sm">
-                {discountAmount}
+              <div className="text-right text-[12px]">
+              &#8369; {discountAmount?.toFixed(2)}
               </div>
             </div>
           )}
 
-          <div className="w-[320px] bg-cream rounded-md mt-1 px-3 py-1 grid grid-cols-[2fr_1fr_1fr_1fr] gap-2 text-black">
-            <div className="text-[15px]">Total</div>
+          <div className="w-[320px] bg-cream rounded-md mt-1 px-3 py-1 grid grid-cols-[3fr_1fr_1fr_2fr] gap-2 text-black">
+            <div className="text-sm">Total</div>
             <div></div>
             <div></div>
-            <div className="flex justify-center items-center text-sm font-bold">
-              {total}
+            <div className="text-right text-[12px] font-bold">
+              &#8369; {total.toFixed(2)}
             </div>
           </div>
 

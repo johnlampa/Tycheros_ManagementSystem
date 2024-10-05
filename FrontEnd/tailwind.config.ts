@@ -15,13 +15,8 @@ module.exports = {
       fontFamily: {
         pattaya: ['var(--font-pattaya)'],
         pacifico: ['var(--font-pacifico)'],
-        inter: ['var(--font-inter']
+        inter: ['var(--font-inter)']
       },
-    },
-    fontFamily: {
-      pattaya: ['var(--font-pattaya)'],
-      pacifico: ['var(--font-pacifico)'],
-      inter: ['var(--font-inter)']
     },
     colors: {
       cream: "#EDE9D8",

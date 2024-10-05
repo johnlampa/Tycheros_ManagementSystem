@@ -4,6 +4,7 @@ export const pattaya = Pattaya({
     weight: '400',
     subsets: ['latin'],
     variable: '--font-pattaya',
+    display: "swap",
 });
 
 export const pacifico = Pacifico({
@@ -16,4 +17,5 @@ export const pacifico = Pacifico({
 export const inter = Inter({
     subsets: ['latin'],
     variable: '--font-inter',
+    display: "swap",
 });

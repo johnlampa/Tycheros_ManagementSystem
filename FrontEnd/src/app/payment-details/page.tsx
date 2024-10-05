@@ -187,8 +187,7 @@ function PaymentDetailsPage() {
                     </label>
                   </div>
                   <div>
-                    <span>Php </span>
-                    {total}
+                  &#8369; {total.toFixed(2)}
                   </div>
                 </div>
 
@@ -207,8 +206,7 @@ function PaymentDetailsPage() {
                     </label>
                   </div>
                   <div>
-                    <span>Php </span>
-                    {total}
+                  &#8369; {total.toFixed(2)}
                   </div>
                 </div>
 
@@ -227,9 +225,9 @@ function PaymentDetailsPage() {
                     </label>
                   </div>
                   <div>
-                    <span>Php </span>
-                    {total}
+                  &#8369; {total.toFixed(2)}
                   </div>
+                  
                 </div>
 
                 <div className="flex gap-3 mt-3">
