@@ -26,7 +26,9 @@ module.exports = {
       lightTealGreen: '#8FCEC3',
       gray: "#B2AB99",
       primaryBrown: "#6C4E3D",
-      secondaryBrown: '#D1C198'
+      secondaryBrown: '#D1C198',
+      lightRed: '#ED2939',
+      darkRed: '#C21807'
     }
   },
   plugins: [],

@@ -504,7 +504,7 @@ export default function InventoryManagementPage() {
                 <option value="Dry Goods">Dry Goods</option>
                 <option value="Sauces">Sauces</option>
                 <option value="Condiments">Condiments</option>
-                <option value="Food & Beverage">Food & Beverage</option>
+                <option value="Beverages">Beverages</option>
               </select>
 
               <input

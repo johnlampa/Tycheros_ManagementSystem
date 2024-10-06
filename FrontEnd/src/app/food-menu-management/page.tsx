@@ -41,14 +41,14 @@ export default function Page() {
 
   return (
     <>
-      <div className="w-[362px] p-6 border mx-auto">
-        <div className="flex items-center justify-center font-bold text-2xl mb-5">
+      <div className="w-[362px] p-6 border mx-auto bg-white">
+        <div className="flex items-center justify-center font-bold text-2xl mb-5 text-black">
           Food Menu
         </div>
 
         {categories.map((category) => (
           <div key={category.categoryName} className="mb-8">
-            <p className="font-semibold text-lg">{category.categoryName}</p>
+            <p className="font-semibold text-lg text-black">{category.categoryName}</p>
             <div>
               <MenuManagementCard
                 categoryName={category.categoryName}

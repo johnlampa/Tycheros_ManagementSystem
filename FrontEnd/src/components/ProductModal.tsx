@@ -3,6 +3,7 @@ import axios from "axios";
 import Modal from "@/components/ui/Modal";
 import { ProductModalProps } from "../../lib/types/props/ProductModalProps";
 import { ProductDataTypes, SubitemDataTypes } from "../../lib/types/ProductDataTypes";
+import { FaTrashAlt } from "react-icons/fa";
 
 const ProductModal: React.FC<ProductModalProps> = ({
   productModalIsVisible,
@@ -33,6 +34,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
   const categoryID = categoryMap[categoryName] || 0;
 
   const [subitems, setSubitems] = useState<SubitemDataTypes[]>([]);
+  const [deletedSubitemIds, setDeletedSubitemIds] = useState<number[]>([]);
 
   useEffect(() => {
     if (type === "edit" && menuProductToEdit?.productID) {
@@ -49,7 +51,6 @@ const ProductModal: React.FC<ProductModalProps> = ({
     }
   }, [type, menuProductToEdit]);
 
-  // Reset subitems when the modal is closed
   useEffect(() => {
     return () => {
       setSubitems([]);
@@ -58,6 +59,13 @@ const ProductModal: React.FC<ProductModalProps> = ({
 
   const handleAddSubitem = () => {
     setSubitems([...subitems, { inventoryID: 0, quantityNeeded: 0 }]);
+  };
+
+  const handleDeleteSubitem = (index: number) => {
+    const subitemToDelete = subitems[index].inventoryID;
+    setDeletedSubitemIds((prev) => [...prev, subitemToDelete]);
+    const updatedSubitems = subitems.filter((_, i) => i !== index);
+    setSubitems(updatedSubitems);
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -79,9 +87,14 @@ const ProductModal: React.FC<ProductModalProps> = ({
       })),
     };
 
+    console.log("Deleted Subitem IDs on submit:", deletedSubitemIds);
+
     if (type === "edit" && menuProductToEdit?.productID) {
       axios
-        .put(`http://localhost:8081/menuManagement/putProduct/${menuProductToEdit.productID}`, updatedProduct)
+        .put(`http://localhost:8081/menuManagement/putProduct/${menuProductToEdit.productID}`, {
+          ...updatedProduct,
+          deletedSubitemIds,
+        })
         .then((response) => {
           console.log("Product updated:", updatedProduct);
           if (setMenuProductHolder) {
@@ -114,6 +127,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
     if (menuProductToEdit?.productID) {
       const confirmDelete = window.confirm("Are you sure you want to delete this product? This action cannot be undone.");
       if (confirmDelete) {
+        console.log("Deleted Subitem IDs before product deletion:", deletedSubitemIds);
         axios
           .delete(`http://localhost:8081/menuManagement/deleteProduct/${menuProductToEdit.productID}`)
           .then((response) => {
@@ -131,14 +145,13 @@ const ProductModal: React.FC<ProductModalProps> = ({
 
   return (
     <Modal modalIsVisible={productModalIsVisible} setModalVisibility={setProductModalVisibility}>
-      <form id="productForm" onSubmit={handleSubmit} className="w-[340px] p-6 mx-auto"> {/* Added padding to the form */}
+      <form id="productForm" onSubmit={handleSubmit} className="w-[340px] p-6 mx-auto rounded">
         <p className="text-center text-xl font-bold text-black mb-4">{modalTitle}</p>
 
         <div className="flex justify-between items-center mb-4 text-black">
-          <label htmlFor="productName" className="pr-4"> {/* Padding added to label */}
+          <label htmlFor="productName" className="pr-4">
             Product Name
           </label>
-          <button type="button" className="px-4 py-2 bg-gray-300">Insert Image</button>
         </div>
 
         <input
@@ -158,25 +171,32 @@ const ProductModal: React.FC<ProductModalProps> = ({
           placeholder="Enter price"
           className="border border-gray-300 rounded w-full p-3 mb-4 text-black placeholder-gray-400"
           defaultValue={type === "edit" ? menuProductToEdit?.sellingPrice : ""}
+          onInput={(e) => {
+            const input = e.target as HTMLInputElement; // Typecast to HTMLInputElement
+            if (input.valueAsNumber < 0) {
+              input.value = "0"; // Reset the value to 0 if negative
+            }
+          }}
         />
-
+          
         <label className="block mb-2 text-black">Subitems</label>
         {subitems.map((subitem, index) => (
           <div key={index} className="flex justify-between items-center mb-4">
             <select
-              className="border border-gray-300 rounded w-[60%] p-3 text-black" 
+              className="border border-gray-300 rounded w-[60%] p-3 text-black mr-5 h-12"
               defaultValue={subitem.inventoryID}
               name={`subitem-${index}`}
               id={`subitem-${index}`}
             >
-              <option value="" disabled>Choose</option>
-              {inventoryData?.map((item) => (
-                <option value={item.inventoryID} key={item.inventoryID}>
-                  {item.inventoryName} ({item.unitOfMeasure})
-                </option>
-              ))}
+              <option value="">Choose</option>
+              {inventoryData
+                ?.filter((item) => item.inventoryCategory !== "Condiments")
+                .map((item) => (
+                  <option value={item.inventoryID} key={item.inventoryID}>
+                    {item.inventoryName} ({item.unitOfMeasure})
+                  </option>
+                ))}
             </select>
-
             <input
               type="number"
               name={`quantityNeeded-${index}`}
@@ -184,34 +204,64 @@ const ProductModal: React.FC<ProductModalProps> = ({
               placeholder="Quantity"
               className="border border-gray-300 rounded w-[30%] p-3 text-black placeholder-gray-400"
               defaultValue={subitem.quantityNeeded}
+              onInput={(e) => {
+                const input = e.target as HTMLInputElement; // Typecast to HTMLInputElement
+                if (input.valueAsNumber < 0) {
+                  input.value = "0"; // Prevent negative values by resetting to 0
+                }
+              }}
             />
+            <button
+              type="button"
+              className="ml-2 flex items-center justify-center"
+              onClick={() => handleDeleteSubitem(index)}
+            >
+              <FaTrashAlt className="text-tealGreen text-2xl" />
+            </button>
           </div>
         ))}
 
-        <button type="button" onClick={handleAddSubitem} className="border border-black rounded px-4 py-2 w-full mb-4 text-black">
+        <button
+          type="button"
+          onClick={handleAddSubitem}
+          className="border border-black rounded px-4 py-2 w-full mb-4 text-black bg-lightTealGreen hover:bg-tealGreen hover:text-white"
+        >
           Add Subitem
         </button>
-      
+
+        <div className="justify-center"> 
+        <button
+          type="button"
+          className="border border-black rounded mr-5 px-4 py-2 bg-lightTealGreen text-black hover:bg-tealGreen hover:text-white mb-5"
+        >
+          Insert Image
+        </button>
+        
         {type === "edit" && (
-            <button
-              onClick={handleDelete}
-              className="border border-black px-1 py-2 rounded bg-red-400 text-black hover:bg-red-500 mb-4" 
-            >
-              Remove Product
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={handleDelete}
+            className="border border-black rounded px-2 py-2 text-black bg-lightRed hover:bg-darkRed hover:text-white mb-5 ml-3"
+          >
+            Delete Product
+          </button>
+        )}
+        </div>
 
         <div className="flex justify-between">
           <button
             type="submit"
-            className="border border-black px-6 py-3 rounded bg-gray-300 hover:bg-gray-400 text-black" 
+            className="border border-black rounded px-5 py-2 text-black bg-lightTealGreen hover:bg-tealGreen hover:text-white mr-2"
           >
             Save
           </button>
-
           <button
-            onClick={() => setProductModalVisibility(false)}
-            className="border border-black px-6 py-3 rounded bg-gray-300 hover:bg-gray-400 text-black" 
+            type="button"
+            onClick={() => {
+              setProductModalVisibility(false);
+              setSubitems([]);
+            }}
+            className="border border-black rounded px-2 py-2 text-black bg-lightTealGreen hover:bg-tealGreen hover:text-white ml-2"
           >
             Cancel
           </button>
