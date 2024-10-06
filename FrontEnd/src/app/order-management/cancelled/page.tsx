@@ -10,6 +10,7 @@ import { FaArrowLeft } from "react-icons/fa";
 
 export default function Page() {
   const [orders, setOrders] = useState<Order[]>([]);
+  const [cancelledOrders, setCancelledOrders] = useState<Order[]>([]);
   const [menuData, setMenuData] = useState<ProductDataTypes[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);

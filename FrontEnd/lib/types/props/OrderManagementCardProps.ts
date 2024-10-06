@@ -9,4 +9,7 @@ export type OrderManagementCardProps = {
 
     type: string,
     discountAmount?: number
+
+    setCancelOrderModalVisibility?: React.Dispatch<React.SetStateAction<boolean>>;
+    setOrderToEdit?: React.Dispatch<React.SetStateAction<Order | undefined>> 
 }

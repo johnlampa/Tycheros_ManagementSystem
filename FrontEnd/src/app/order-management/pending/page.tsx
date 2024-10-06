@@ -7,12 +7,17 @@ import { ProductDataTypes } from "../../../../lib/types/ProductDataTypes";
 import Header from "@/components/Header";
 import Link from "next/link";
 import { FaArrowLeft } from "react-icons/fa";
+import CancelOrderModal from "@/components/CancelOrderModal";
 
 export default function Page() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [menuData, setMenuData] = useState<ProductDataTypes[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+
+  const [cancelOrderModalIsVisible, setCancelOrderModalVisibility] =
+    useState<boolean>(false);
+  const [orderToEdit, setOrderToEdit] = useState<Order>();
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -78,9 +83,18 @@ export default function Page() {
               orders={orders}
               setOrders={setOrders}
               type="management"
+              setCancelOrderModalVisibility={setCancelOrderModalVisibility}
             />
           </div>
         ))}
+        <CancelOrderModal
+          cancelOrderModalIsVisible={cancelOrderModalIsVisible}
+          setCancelOrderModalVisibility={setCancelOrderModalVisibility}
+          modalTitle="Cancel Order"
+          orderToEdit={orderToEdit}
+          orders={orders}
+          setOrders={setOrders}
+        ></CancelOrderModal>
       </div>
     </div>
   );

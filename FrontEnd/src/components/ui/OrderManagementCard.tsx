@@ -5,7 +5,16 @@ import Link from "next/link";
 import { Order } from "../../../lib/types/OrderDataTypes";
 
 const OrderManagementCard: React.FC<OrderManagementCardProps> = React.memo(
-  ({ order, menuData, orders, setOrders, type, discountAmount }) => {
+  ({
+    order,
+    menuData,
+    orders,
+    setOrders,
+    type,
+    discountAmount,
+    setCancelOrderModalVisibility,
+    setOrderToEdit,
+  }) => {
     const [total, setTotal] = useState(0);
 
     useEffect(() => {
@@ -88,6 +97,36 @@ const OrderManagementCard: React.FC<OrderManagementCardProps> = React.memo(
       updateOrderStatus("Cancelled");
     }, [order, orders, setOrders]);
 
+    const handleCancelPendingOrder = useCallback(() => {
+      if (setCancelOrderModalVisibility) {
+        setCancelOrderModalVisibility(true);
+        if (setOrderToEdit) {
+          setOrderToEdit(order);
+        }
+      }
+    }, [order, orders, setOrders]);
+
+    const handleCancelCompletedOrder = useCallback(() => {
+      if (setCancelOrderModalVisibility) {
+        setCancelOrderModalVisibility(true);
+        if (setOrderToEdit) {
+          setOrderToEdit(order);
+        }
+      }
+    }, [order, orders, setOrders]);
+
+    const [orderStatusLabel, setOrderStatusLabel] = useState<string>(
+      order.status
+    );
+
+    useEffect(() => {
+      if (order.status === "Cancelled") {
+        setOrderStatusLabel(order.paymentID ? "Refunded" : "Cancelled");
+      } else {
+        setOrderStatusLabel(order.status);
+      }
+    }, [order.status, order.paymentID]);
+
     return (
       <>
         <div className="w-[320px]">
@@ -102,6 +141,9 @@ const OrderManagementCard: React.FC<OrderManagementCardProps> = React.memo(
             </div>
           </div>
           <div className="rounded-md p-3 bg-cream text-black">
+            <div className="py-1 px-2 rounded-md bg-primaryBrown w-min text-xs text-white mb-2">
+              {orderStatusLabel}
+            </div>
             <div className="grid grid-cols-[3fr_1fr_1fr_2fr] gap-2 font-semibold mb-3">
               <div className="text-[15px] text-black">Name</div>
               <div className="flex items-center justify-center text-[15px]">
@@ -192,24 +234,30 @@ const OrderManagementCard: React.FC<OrderManagementCardProps> = React.memo(
               )}
 
               {order.status === "Pending" && (
-                <div className="ml-[198.77px]">
+                <div className="flex flex-col float-right">
                   <button
-                    className="px-2 py-1 rounded-md mt-1 mb-5 float-right text-xs w-[130px] h-[28px] font-semibold bg-tealGreen text-white"
+                    className="px-2 py-1 rounded-md mt-1 float-right text-xs w-[130px] h-[28px] font-semibold bg-tealGreen text-white"
                     onClick={handleCompleteOrder}
                   >
                     Complete Order
                   </button>
+
+                  <button
+                    className="px-2 py-1 rounded-md mt-1 mb-5 float-right text-xs w-[130px] h-[28px] font-semibold border border-red bg-white text-red hover:text-white hover:bg-red hover:border duration-200"
+                    onClick={handleCancelPendingOrder}
+                  >
+                    Cancel Order
+                  </button>
                 </div>
               )}
 
-              {(order.status === "Completed" ||
-                order.status === "Cancelled") && (
-                <div className="ml-[231.21px]">
+              {order.status === "Completed" && (
+                <div>
                   <button
-                    className="px-2 py-1 rounded-md mt-1 mb-5 float-right text-xs w-[130px] h-[28px] font-semibold bg-gray text-white justify-right"
-                    disabled
+                    className="px-2 py-1 rounded-md mt-1 mb-5 float-right text-xs w-[130px] h-[28px] font-semibold border border-red bg-white text-red hover:text-white hover:bg-red hover:border duration-200"
+                    onClick={handleCancelCompletedOrder}
                   >
-                    {order.status}
+                    Cancel Order
                   </button>
                 </div>
               )}
