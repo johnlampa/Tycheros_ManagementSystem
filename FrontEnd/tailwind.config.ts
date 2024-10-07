@@ -28,7 +28,8 @@ module.exports = {
       primaryBrown: "#6C4E3D",
       secondaryBrown: '#D1C198',
       lightRed: '#ED2939',
-      darkRed: '#C21807'
+      darkRed: '#C21807',
+      red: '#D11A2A'
     }
   },
   plugins: [],

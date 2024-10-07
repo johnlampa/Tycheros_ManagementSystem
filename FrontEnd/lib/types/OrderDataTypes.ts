@@ -3,6 +3,11 @@ export type OrderItemDataTypes = {
     quantity: number
 }
 
+export type SubitemUsed = {
+    subitemID: number;
+    quantityUsed: number
+}
+
 export type Order = {
     orderID?: number,
     paymentID?: number,
@@ -11,4 +16,8 @@ export type Order = {
     status: "Unpaid" | "Pending" | "Completed" | "Cancelled",
     amount?: number
     orderItems?: OrderItemDataTypes[]
+
+    cancellationReason?: string;
+    cancellationType?: "Unpaid" | "Pending" | "Completed" | "Cancelled"; //doesnt make sense pero cant make it work if only "Pending" || "Completed"
+    subitemsUsed?: SubitemUsed[];
 }
