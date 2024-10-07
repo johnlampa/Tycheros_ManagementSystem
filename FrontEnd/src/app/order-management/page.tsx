@@ -121,8 +121,8 @@ export default function Page() {
   }
 
   return (
-    <div className="flex justify-center items-center w-full pb-7">
-      <div className="w-[360px] l-[100px] flex flex-col justify-center items-center bg-white ">
+    <div className="flex justify-center items-center w-full pb-7 min-h-screen">
+      <div className="w-[360px] flex flex-col items-center bg-white min-h-screen">
         <Header text="Orders" color={"tealGreen"} type={"orders"}>
           <Link href={"/employee-home"} className="z-100">
             <button className="border border-white rounded-full h-[40px] w-[40px] bg-white text-white shadow-lg flex items-center justify-center overflow-hidden hover:bg-tealGreen group">
@@ -130,7 +130,7 @@ export default function Page() {
             </button>
           </Link>
         </Header>
-        <div className="h-[100px] w-full bg-tealGreen flex justify-center items-center">
+        <div className="pb-3 w-full bg-tealGreen flex justify-center items-center">
           <div className="w-max grid grid-cols-3 gap-x-5 gap-y-5">
             {/* edit href */}
             <Link href={"/order-management/unpaid"}>

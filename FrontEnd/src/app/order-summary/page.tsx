@@ -105,8 +105,8 @@ function OrderSummaryPage() {
   }, [order]);
 
   return (
-    <div className="w-full flex justify-center items-center">
-      <div className="w-[360px] flex flex-col justify-center items-center gap-3 bg-white">
+    <div className="w-full flex justify-center items-center min-h-screen">
+      <div className="w-[360px] flex flex-col items-center gap-3 bg-white min-h-screen">
         <Header text="Order Summary" color={"tealGreen"} type={"order_summary"}>
           <Link href={previousPage}>
             <button className="mr-3 border border-white rounded-full h-[40px] w-[40px] bg-white text-white shadow-lg flex items-center justify-center overflow-hidden hover:bg-tealGreen group">
@@ -125,10 +125,12 @@ function OrderSummaryPage() {
           setSubtotal={setSubtotal}
           type={"summary"}
         />
-        <OrderButtonSection
-          subtotal={subtotal}
-          handleClick={handleClick}
-        ></OrderButtonSection>
+        <div className="fixed bottom-0">
+          <OrderButtonSection
+            subtotal={subtotal}
+            handleClick={handleClick}
+          ></OrderButtonSection>
+        </div>
       </div>
     </div>
   );

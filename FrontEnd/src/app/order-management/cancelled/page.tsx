@@ -61,8 +61,8 @@ export default function Page() {
   const unpaidOrders = orders.filter((order) => order.status === "Cancelled");
 
   return (
-    <div className="flex justify-center items-center w-full pb-7">
-      <div className="w-[360px] flex flex-col justify-center items-center bg-white">
+    <div className="flex justify-center items-center w-full pb-7 min-h-screen">
+      <div className="w-[360px] flex flex-col items-center bg-white min-h-screen">
         <Header text="Cancelled" color={"tealGreen"} type={"orders"}>
           <Link href={"/order-management"} className="z-100">
             <button className="mr-3 border border-white rounded-full h-[40px] w-[40px] bg-white text-white shadow-lg flex items-center justify-center overflow-hidden hover:bg-tealGreen group">
