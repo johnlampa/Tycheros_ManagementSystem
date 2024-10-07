@@ -272,7 +272,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
         <button
           type="button"
           onClick={handleAddSubitem}
-          className="border border-black rounded px-4 py-2 w-full mb-4 text-black bg-lightTealGreen hover:bg-tealGreen hover:text-white"
+          className="border border-black rounded px-4 py-2 w-full mb-4 text-black bg-white hover:bg-black hover:text-white"
         >
           Add Subitem
         </button>
