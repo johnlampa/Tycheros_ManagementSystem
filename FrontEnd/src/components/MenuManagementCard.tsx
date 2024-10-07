@@ -45,25 +45,25 @@ const MenuManagementCard: React.FC<MenuManagementCardProps> = ({
 
   return (
     <>
-      <div className="border border-black dark:border-white rounded-md p-4">
+      <div className="border border-black dark:border-black rounded-md p-4 bg-cream">
         <div className="grid grid-cols-3 gap-2 text-lg font-semibold mb-3">
-          <p className="flex justify-center items-center">Name</p>
-          <p className="flex justify-center items-center">Price</p>
+          <p className="justify-normal items-center text-black">Name</p>
+          <p className="flex justify-center items-center text-black">Price</p>
           <p></p>
         </div>
         {menuData
           .filter((item) => item.categoryName === categoryName)
           .map((item) => (
             <div key={item.productID} className="grid grid-cols-3 gap-2 mb-3">
-              <p className="flex justify-center items-center">
+              <p className="justify-normal items-center text-black truncate">
                 {item.productName}
               </p>
-              <p className="flex justify-center items-center">
+              <p className="flex justify-center items-center text-black">
                 {item.sellingPrice}
               </p>
               <button
                 onClick={() => toggleEdit(item.productID)}
-                className="px-1 py-1 rounded-full border border-black text-gray-400 text-sm bg-white hover:bg-gray-50 hover:text-gray-600"
+                className="px-1 py-1 rounded-full border border-black text-black text-sm bg-lightTealGreen hover:bg-gray-50 hover:bg-tealGreen"
               >
                 Edit
               </button>
@@ -71,7 +71,7 @@ const MenuManagementCard: React.FC<MenuManagementCardProps> = ({
           ))}
         <div>
           <button
-            className="ml-4 mt-3 px-3 py-1 rounded-full border border-black text-gray-400 text-sm bg-white hover:bg-gray-50 hover:text-gray-600"
+            className="mt-3 px-3 py-1 rounded-full border border-black text-black text-sm bg-lightTealGreen hover:bg-gray-50 hover:bg-tealGreen"
             onClick={toggleAdd}
           >
             Add

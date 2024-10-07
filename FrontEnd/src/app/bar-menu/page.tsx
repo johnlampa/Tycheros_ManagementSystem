@@ -68,7 +68,7 @@ export default function Page() {
 
   return (
     <>
-      <div className="w-[362px] min-h-screen border mx-auto relative bg-white">
+      <div className="w-[362px] min-h-screen border border-black mx-auto relative bg-white">
         <MenuHeaderSection
           menuType="bar"
           categories={categories}
