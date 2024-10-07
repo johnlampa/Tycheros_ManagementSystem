@@ -63,20 +63,26 @@ const ProductModal: React.FC<ProductModalProps> = ({
   }, [productModalIsVisible]);
 
   const handleAddSubitem = () => {
-    setSubitems([...subitems, { inventoryID: 0, quantityNeeded: 0 }]);
+    setSubitems([...subitems, { inventoryID: -1, quantityNeeded: 0 }]);
   };
 
   const handleDeleteSubitem = (inventoryID: number) => {
-    // Remove subitem by matching the inventoryID
-    const updatedSubitems = subitems.filter(
-      (subitem) => subitem.inventoryID !== inventoryID
-    );
+    if (inventoryID === -1) {
+      if (subitems.length > 0) {
+        setSubitems(subitems.slice(0, -1)); // Remove last element which is emepty select option
+      }
+    } else {
+      // Remove subitem by matching the inventoryID
+      const updatedSubitems = subitems.filter(
+        (subitem) => subitem.inventoryID !== inventoryID
+      );
 
-    // Set the updated subitems array
-    setSubitems(updatedSubitems);
+      // Set the updated subitems array
+      setSubitems(updatedSubitems);
 
-    // Track deleted subitem IDs if needed
-    setDeletedSubitemIds((prev) => [...prev, inventoryID]);
+      // Track deleted subitem IDs if needed
+      setDeletedSubitemIds((prev) => [...prev, inventoryID]);
+    }
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
