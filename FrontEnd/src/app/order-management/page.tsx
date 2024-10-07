@@ -61,8 +61,8 @@ export default function Page() {
     <div className="flex justify-center items-center w-full pb-7">
       <div className="w-[360px] l-[100px] flex flex-col justify-center items-center bg-white ">
         <Header text="Orders" color={"tealGreen"} type={"orders"}>
-        <Link href={"/"} className="z-100">
-            <button className="mr-3 border border-white rounded-full h-[40px] w-[40px] bg-white text-white shadow-lg flex items-center justify-center overflow-hidden hover:bg-tealGreen group">
+        <Link href={"/employee-home"} className="z-100">
+            <button className="border border-white rounded-full h-[40px] w-[40px] bg-white text-white shadow-lg flex items-center justify-center overflow-hidden hover:bg-tealGreen group">
               <FaArrowLeft className="text-tealGreen group-hover:text-white transition-colors duration-300" />
             </button>
           </Link>

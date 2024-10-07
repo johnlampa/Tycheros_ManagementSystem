@@ -9,16 +9,16 @@ export default function Home() {
       <div className="w-full flex justify-center items-center min-h-screen">
         <div className="flex flex-col items-center w-[360px] h-screen relative bg-white">
           <Header
-            text="Tycheros World Cafe and Bar"
+            text="Tycheros World Cafe"
             color={"tealGreen"}
             type={"home"}
           > 
             <Link
               href={{
-                pathname: "/order-management",
+                pathname: "/employee-home",
               }}
             >
-              <button className="mr-5 mb-8 flex items-center justify-center overflow-hidden">
+              <button className="mr-3 flex items-center justify-center overflow-hidden">
                 <GiHamburgerMenu style={{ color: 'tealGreen', fontSize: '5vh' }} />
               </button>
             </Link>
