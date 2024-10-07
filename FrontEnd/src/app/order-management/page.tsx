@@ -11,6 +11,7 @@ import CancelOrderModal from "@/components/CancelOrderModal";
 
 export default function Page() {
   const [orders, setOrders] = useState<Order[]>([
+    //LOCAL ORDERS. SHOULD BE POPULATED FROM API CALL
     {
       orderID: 9,
       employeeID: 1,
