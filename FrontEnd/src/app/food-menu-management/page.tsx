@@ -5,6 +5,8 @@ import { ProductDataTypes } from "../../../lib/types/ProductDataTypes";
 import { InventoryDataTypes } from "../../../lib/types/InventoryDataTypes";
 import { CategoriesDataTypes } from "../../../lib/types/CategoriesDataTypes";
 import axios from 'axios';
+import { FaArrowLeft } from "react-icons/fa";
+import Link from "next/link";
 
 export default function Page() {
   const [MenuData, setMenuData] = useState<ProductDataTypes[]>([]);
@@ -42,8 +44,13 @@ export default function Page() {
   return (
     <>
       <div className="w-[362px] p-6 border mx-auto bg-white">
-        <div className="flex items-center justify-center font-bold text-2xl mb-5 text-black">
-          Food Menu
+        <div className="relative flex items-center justify-center font-bold text-2xl mb-5 text-black">
+          <Link href={"/menu-selection"} className="absolute left-[-12px]">
+            <button className="ml-3 border border-white rounded-full h-[40px] w-[40px] bg-white shadow-lg flex items-center justify-center overflow-hidden hover:bg-tealGreen group">
+              <FaArrowLeft className="text-tealGreen group-hover:text-white transition-colors duration-300" />
+            </button>
+          </Link>
+          <span>Food Menu</span>
         </div>
 
         {categories.map((category) => (
