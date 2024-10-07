@@ -6,6 +6,7 @@ import { format } from 'date-fns';
 interface InventoryItem {
   inventoryID: number;
   inventoryName: string;
+  inventoryCategory : string;
   reorderPoint: number;
   unitOfMeasure: string;
   purchaseOrderID: number;
@@ -27,10 +28,12 @@ export default function InventoryManagementPage() {
   const [showDeleteOverlay, setShowDeleteOverlay] = useState(false);
   const [newItem, setNewItem] = useState<{
     inventoryName: string;
+    inventoryCategory: string;
     unitOfMeasure: string;
     reorderPoint: number;
   }>({
     inventoryName: '',
+    inventoryCategory: '',
     unitOfMeasure: '',
     reorderPoint: 0,
   });
@@ -152,6 +155,7 @@ export default function InventoryManagementPage() {
 
       setNewItem({
         inventoryName: '',
+        inventoryCategory: '',
         unitOfMeasure: '',
         reorderPoint: 0,
       });
@@ -246,27 +250,12 @@ export default function InventoryManagementPage() {
   };
 
   return (
-    <div
-      style={{
-        backgroundColor: 'white',
-        padding: '20px',
-        borderRadius: '8px',
-        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-      }}
-    >
+    <div className="bg-white p-5 rounded-lg shadow-md">
       <h1>Inventory Management</h1>
       <div style={{ marginBottom: '20px' }}>
         <button
           onClick={() => setShowAddOverlay(true)}
-          style={{
-            backgroundColor: 'black',
-            color: 'white',
-            padding: '10px 20px',
-            borderRadius: '4px',
-            border: 'none',
-            cursor: 'pointer',
-            marginRight: '10px',
-          }}
+          className="bg-black text-white py-3 px-5 rounded cursor-pointer mr-2"
         >
           Add Subitem
         </button>
@@ -277,15 +266,7 @@ export default function InventoryManagementPage() {
               handleEditItem(Number(id));
             }
           }}
-          style={{
-            backgroundColor: 'black',
-            color: 'white',
-            padding: '10px 20px',
-            borderRadius: '4px',
-            border: 'none',
-            cursor: 'pointer',
-            marginRight: '10px',
-          }}
+          className="bg-black text-white py-3 px-5 rounded cursor-pointer mr-2"
         >
           Edit Subitem
         </button>
@@ -302,29 +283,13 @@ export default function InventoryManagementPage() {
               }
             }
           }}
-          style={{
-            backgroundColor: 'black',
-            color: 'white',
-            padding: '10px 20px',
-            borderRadius: '4px',
-            border: 'none',
-            cursor: 'pointer',
-            marginRight: '10px',
-          }}
+          className="bg-black text-white py-3 px-5 rounded cursor-pointer mr-2"
         >
           Delete Subitem
         </button>
         <button
           onClick={() => setShowStockInOverlay(true)}
-          style={{
-            backgroundColor: 'black',
-            color: 'white',
-            padding: '10px 20px',
-            borderRadius: '4px',
-            border: 'none',
-            cursor: 'pointer',
-            marginRight: '10px',
-          }}
+          className="bg-black text-white py-3 px-5 rounded cursor-pointer mr-2"
         >
           Stock In
         </button>
@@ -335,69 +300,52 @@ export default function InventoryManagementPage() {
               handleStockOut(id); // Pass the ID directly
             }
           }}
-          style={{
-            backgroundColor: 'black',
-            color: 'white',
-            padding: '10px 20px',
-            borderRadius: '4px',
-            border: 'none',
-            cursor: 'pointer',
-            marginRight: '10px',
-          }}
+          className="bg-black text-white py-3 px-5 rounded cursor-pointer mr-2"
         >
           Stock Out
         </button>
-
-
       </div>
 
       {inventoryData.length === 0 ? (
         <p>No inventory items found</p>
       ) : (
-        <table
-          style={{
-            width: '100%',
-            color: 'black',
-            border: '1px solid black',
-            borderCollapse: 'collapse',
-          }}
-        >
+        <table className="w-full text-black border border-black border-collapse">
           <thead>
             <tr>
-              <th style={{ border: '1px solid black', padding: '10px' }}>
+              <th className="border border-black p-2.5">
                 Inventory ID
               </th>
-              <th style={{ border: '1px solid black', padding: '10px' }}>
+              <th className="border border-black p-2.5">
                 Inventory Name
               </th>
-              <th style={{ border: '1px solid black', padding: '10px' }}>
+              <th className="border border-black p-2.5">
+                Category
+              </th>
+              <th className="border border-black p-2.5">
                 Reorder Point
               </th>
-              <th style={{ border: '1px solid black', padding: '10px' }}>
-                Unit of Measure
-              </th>
-              <th style={{ border: '1px solid black', padding: '10px' }}>
+              <th className="border border-black p-2.5">
                 Purchase Order ID
               </th>
-              <th style={{ border: '1px solid black', padding: '10px' }}>
+              <th className="border border-black p-2.5">
                 Total Quantity
               </th>
-              <th style={{ border: '1px solid black', padding: '10px' }}>
+              <th className="border border-black p-2.5">
                 Quantity Remaining
               </th>
-              <th style={{ border: '1px solid black', padding: '10px' }}>
+              <th className="border border-black p-2.5">
                 Price Per Unit
               </th>
-              <th style={{ border: '1px solid black', padding: '10px' }}>
+              <th className="border border-black p-2.5">
                 Stock In Date
               </th>
-              <th style={{ border: '1px solid black', padding: '10px' }}>
+              <th className="border border-black p-2.5">
                 Expiry Date
               </th>
-              <th style={{ border: '1px solid black', padding: '10px' }}>
+              <th className="border border-black p-2.5">
                 Supplier Name
               </th>
-              <th style={{ border: '1px solid black', padding: '10px' }}>
+              <th className="border border-black p-2.5">
                 Employee Name
               </th>
             </tr>
@@ -405,40 +353,40 @@ export default function InventoryManagementPage() {
           <tbody>
             {inventoryData.map((item) => (
               <tr key={item.inventoryID}>
-                <td style={{ border: '1px solid black', padding: '10px' }}>
+                <td className="border border-black p-2.5">
                   {item.inventoryID}
                 </td>
-                <td style={{ border: '1px solid black', padding: '10px' }}>
+                <td className="border border-black p-2.5">
                   {item.inventoryName}
                 </td>
-                <td style={{ border: '1px solid black', padding: '10px' }}>
-                  {item.reorderPoint}
+                <td className="border border-black p-2.5">
+                  {item.inventoryCategory}
                 </td>
-                <td style={{ border: '1px solid black', padding: '10px' }}>
-                  {item.unitOfMeasure}
+                <td className="border border-black p-2.5">
+                  {item.reorderPoint + item.unitOfMeasure}
                 </td>
-                <td style={{ border: '1px solid black', padding: '10px' }}>
+                <td className="border border-black p-2.5">
                   {item.purchaseOrderID}
                 </td>
-                <td style={{ border: '1px solid black', padding: '10px' }}>
+                <td className="border border-black p-2.5">
                   {item.totalQuantity}
                 </td>
-                <td style={{ border: '1px solid black', padding: '10px' }}>
+                <td className="border border-black p-2.5">
                   {item.quantityRemaining}
                 </td>
-                <td style={{ border: '1px solid black', padding: '10px' }}>
+                <td className="border border-black p-2.5">
                   {item.pricePerUnit}
                 </td>
-                <td style={{ border: '1px solid black', padding: '10px' }}>
+                <td className="border border-black p-2.5">
                   {formatDate(item.stockInDate)}
                 </td>
-                <td style={{ border: '1px solid black', padding: '10px' }}>
+                <td className="border border-black p-2.5">
                   {formatDate(item.expiryDate)}
                 </td>
-                <td style={{ border: '1px solid black', padding: '10px' }}>
+                <td className="border border-black p-2.5">
                   {item.supplierName}
                 </td>
-                <td style={{ border: '1px solid black', padding: '10px' }}>
+                <td className="border border-black p-2.5">
                   {item.employeeName}
                 </td>
               </tr>
@@ -448,28 +396,9 @@ export default function InventoryManagementPage() {
       )}
 
       {showAddOverlay && (
-        <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-        >
-          <div
-            style={{
-              backgroundColor: 'white',
-              padding: '20px',
-              borderRadius: '8px',
-              width: '300px',
-            }}
-          >
-            <h2 style={{ color: 'black' }}>Add Inventory Subitem</h2>
+        <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center">
+          <div className="bg-white p-5 rounded-lg w-72">
+            <h2 className="text-black">Add Inventory Subitem</h2>
             <div>
               <input
                 type="text"
@@ -478,27 +407,26 @@ export default function InventoryManagementPage() {
                 onChange={(e) =>
                   setNewItem({ ...newItem, inventoryName: e.target.value })
                 }
-                style={{
-                  marginBottom: '10px',
-                  padding: '8px',
-                  width: '100%',
-                  color: 'black',
-                }}
+                className="mb-2 p-2 w-full text-black"
               />
-              <input
-                type="text"
-                placeholder="Unit of Measure"
-                value={newItem.unitOfMeasure}
+              <select
+                value={newItem.inventoryCategory}
                 onChange={(e) =>
-                  setNewItem({ ...newItem, unitOfMeasure: e.target.value })
+                  setNewItem({ ...newItem, inventoryCategory: e.target.value })
                 }
-                style={{
-                  marginBottom: '10px',
-                  padding: '8px',
-                  width: '100%',
-                  color: 'black',
-                }}
-              />
+                className="mb-2 p-2 w-full text-black"
+              >
+                <option value="">Select Inventory Category</option>
+                <option value="Produce">Produce</option>
+                <option value="Dairy and Eggs">Dairy and Eggs</option>
+                <option value="Meat and Poultry">Meat and Poultry</option>
+                <option value="Seafood">Seafood</option>
+                <option value="Canned Goods">Canned Goods</option>
+                <option value="Dry Goods">Dry Goods</option>
+                <option value="Sauces">Sauces</option>
+                <option value="Condiments">Condiments</option>
+                <option value="Food & Beverage">Food & Beverage</option>
+              </select>
               <input
                 type="number"
                 placeholder="Reorder Point"
@@ -509,40 +437,32 @@ export default function InventoryManagementPage() {
                     reorderPoint: e.target.value === '' ? 0 : Number(e.target.value),
                   })
                 }
-                style={{
-                  marginBottom: '10px',
-                  padding: '8px',
-                  width: '100%',
-                  color: 'black',
-                }}
+                className="mb-2 p-2 w-full text-black"
               />
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <button
+
+              <input
+                type="text"
+                placeholder="Unit of Measure"
+                value={newItem.unitOfMeasure}
+                onChange={(e) =>
+                  setNewItem({ ...newItem, unitOfMeasure: e.target.value })
+                }
+                className="mb-2 p-2 w-full text-black"
+              />
+
+              <div className="flex justify-between">
+                <button
                   onClick={async () => {
                     await handleAddItem();
                     setShowAddOverlay(false);
                   }}
-                  style={{
-                    backgroundColor: 'black',
-                    color: 'white',
-                    padding: '8px 16px',
-                    borderRadius: '4px',
-                    border: 'none',
-                    cursor: 'pointer',
-                  }}
+                  className="bg-black text-white py-2 px-4 rounded cursor-pointer"
                 >
                   Save
                 </button>
                 <button
                   onClick={() => setShowAddOverlay(false)}
-                  style={{
-                    backgroundColor: 'black',
-                    color: 'white',
-                    padding: '8px 16px',
-                    borderRadius: '4px',
-                    border: 'none',
-                    cursor: 'pointer',
-                  }}
+                  className="bg-black text-white py-2 px-4 rounded cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -553,28 +473,9 @@ export default function InventoryManagementPage() {
       )}
 
       {showEditOverlay && itemToEdit && (
-        <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-        >
-          <div
-            style={{
-              backgroundColor: 'white',
-              padding: '20px',
-              borderRadius: '8px',
-              width: '300px',
-            }}
-          >
-            <h2 style={{ color: 'black' }}>Edit Inventory Subitem</h2>
+        <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center">
+          <div className="bg-white p-5 rounded-lg w-72">
+            <h2 className="bg-white text-black">Edit Inventory Subitem</h2>
             <div>
               <input
                 type="text"
@@ -583,13 +484,29 @@ export default function InventoryManagementPage() {
                 onChange={(e) =>
                   setItemToEdit({ ...itemToEdit, inventoryName: e.target.value })
                 }
-                style={{
-                  marginBottom: '10px',
-                  padding: '8px',
-                  width: '100%',
-                  color: 'black',
-                }}
+                className="mb-2 p-2 w-full text-black"
               />
+
+              {/* Dropdown for Inventory Category with current value */}
+              <select
+                value={itemToEdit.inventoryCategory} // Use itemToEdit for the current value
+                onChange={(e) =>
+                  setItemToEdit({ ...itemToEdit, inventoryCategory: e.target.value }) // Update itemToEdit on change
+                }
+                className="mb-2 p-2 w-full text-black"
+              >
+                <option value="">Select Inventory Category</option>
+                <option value="Produce">Produce</option>
+                <option value="Dairy and Eggs">Dairy and Eggs</option>
+                <option value="Meat and Poultry">Meat and Poultry</option>
+                <option value="Seafood">Seafood</option>
+                <option value="Canned Goods">Canned Goods</option>
+                <option value="Dry Goods">Dry Goods</option>
+                <option value="Sauces">Sauces</option>
+                <option value="Condiments">Condiments</option>
+                <option value="Food & Beverage">Food & Beverage</option>
+              </select>
+
               <input
                 type="number"
                 placeholder="Reorder Point"
@@ -600,13 +517,9 @@ export default function InventoryManagementPage() {
                     reorderPoint: e.target.value === '' ? 0 : Number(e.target.value),
                   })
                 }
-                style={{
-                  marginBottom: '10px',
-                  padding: '8px',
-                  width: '100%',
-                  color: 'black',
-                }}
+                className="mb-2 p-2 w-full text-black"
               />
+              
               <input
                 type="text"
                 placeholder="Unit of Measure"
@@ -614,40 +527,22 @@ export default function InventoryManagementPage() {
                 onChange={(e) =>
                   setItemToEdit({ ...itemToEdit, unitOfMeasure: e.target.value })
                 }
-                style={{
-                  marginBottom: '10px',
-                  padding: '8px',
-                  width: '100%',
-                  color: 'black',
-                }}
+                className="mb-2 p-2 w-full text-black"
               />
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <button
+
+              <div className="flex justify-between">
+                <button
                   onClick={async () => {
                     await handleSaveChanges();
                     setShowEditOverlay(false);
                   }}
-                  style={{
-                    backgroundColor: 'black',
-                    color: 'white',
-                    padding: '8px 16px',
-                    borderRadius: '4px',
-                    border: 'none',
-                    cursor: 'pointer',
-                  }}
+                  className="bg-black text-white py-2 px-4 rounded cursor-pointer"
                 >
                   Save
                 </button>
                 <button
                   onClick={() => setShowEditOverlay(false)}
-                  style={{
-                    backgroundColor: 'black',
-                    color: 'white',
-                    padding: '8px 16px',
-                    borderRadius: '4px',
-                    border: 'none',
-                    cursor: 'pointer',
-                  }}
+                  className="bg-black text-white py-2 px-4 rounded cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -657,61 +552,30 @@ export default function InventoryManagementPage() {
         </div>
       )}
 
+
       {showDeleteOverlay && itemToDelete && (
-        <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-        >
-          <div
-            style={{
-              backgroundColor: 'white',
-              padding: '20px',
-              borderRadius: '8px',
-              width: '300px',
-            }}
-          >
-            <h2 style={{ color: 'black' }}>Delete Inventory Subitem</h2>
-            <p style={{ color: 'black' }}>Are you sure you want to delete the following item?</p>
-            <p style={{ color: 'black' }}><strong>Inventory ID:</strong> {itemToDelete.inventoryID}</p>
-            <p style={{ color: 'black' }}><strong>Name:</strong> {itemToDelete.inventoryName}</p>
-            <p style={{ color: 'black' }}><strong>Reorder Point:</strong> {itemToDelete.reorderPoint}</p>
-            <p style={{ color: 'black' }}><strong>Unit of Measure:</strong> {itemToDelete.unitOfMeasure}</p>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-            <button
+        <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center">
+          <div className="bg-white p-5 rounded-lg w-72">
+            <h2 className="text-black">Delete Inventory Subitem</h2>
+            <p className="text-black">Are you sure you want to delete the following item?</p>
+            <p className="text-black"><strong>Inventory ID:</strong> {itemToDelete.inventoryID}</p>
+            <p className="text-black"><strong>Name:</strong> {itemToDelete.inventoryName}</p>
+            <p className="text-black"><strong>Inventory Category:</strong> {itemToDelete.inventoryCategory}</p>
+            <p className="text-black"><strong>Reorder Point:</strong> {itemToDelete.reorderPoint}</p>
+            <p className="text-black"><strong>Unit of Measure:</strong> {itemToDelete.unitOfMeasure}</p>
+            <div className="flex justify-between">
+              <button
                 onClick={async () => {
                   await handleDeleteItem();
                   setShowDeleteOverlay(false);
                 }}
-                style={{
-                  backgroundColor: 'black',
-                  color: 'white',
-                  padding: '8px 16px',
-                  borderRadius: '4px',
-                  border: 'none',
-                  cursor: 'pointer',
-                }}
+                className="bg-black text-white py-2 px-4 rounded cursor-pointer"
               >
                 Confirm
               </button>
               <button
                 onClick={() => setShowDeleteOverlay(false)}
-                style={{
-                  backgroundColor: 'black',
-                  color: 'white',
-                  padding: '8px 16px',
-                  borderRadius: '4px',
-                  border: 'none',
-                  cursor: 'pointer',
-                }}
+                className="bg-black text-white py-2 px-4 rounded cursor-pointer"
               >
                 Cancel
               </button>
@@ -719,29 +583,11 @@ export default function InventoryManagementPage() {
           </div>
         </div>
       )}
+
       {showStockInOverlay && (
-        <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-        >
-          <div
-            style={{
-              backgroundColor: 'white',
-              padding: '20px',
-              borderRadius: '8px',
-              width: '400px',
-            }}
-          >
-            <h2 style={{ color: 'black' }}>Stock In</h2>
+        <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center">
+          <div className="bg-white p-5 rounded-lg w-96">
+            <h2 className="text-black">Stock In</h2>
             <div>
               <input
                 type="text"
@@ -750,12 +596,7 @@ export default function InventoryManagementPage() {
                 onChange={(e) =>
                   setStockInData({ ...stockInData, inventoryID: e.target.value })
                 }
-                style={{
-                  marginBottom: '10px',
-                  padding: '8px',
-                  width: '100%',
-                  color: 'black',
-                }}
+                className="mb-2 p-2 w-full text-black"
               />
               <input
                 type="text"
@@ -764,12 +605,7 @@ export default function InventoryManagementPage() {
                 onChange={(e) =>
                   setStockInData({ ...stockInData, supplierName: e.target.value })
                 }
-                style={{
-                  marginBottom: '10px',
-                  padding: '8px',
-                  width: '100%',
-                  color: 'black',
-                }}
+                className="mb-2 p-2 w-full text-black"
               />
               <input
                 type="text"
@@ -778,12 +614,7 @@ export default function InventoryManagementPage() {
                 onChange={(e) =>
                   setStockInData({ ...stockInData, employeeID: e.target.value })
                 }
-                style={{
-                  marginBottom: '10px',
-                  padding: '8px',
-                  width: '100%',
-                  color: 'black',
-                }}
+                className="mb-2 p-2 w-full text-black"
               />
               <input
                 type="number"
@@ -795,12 +626,7 @@ export default function InventoryManagementPage() {
                     quantityOrdered: e.target.value,
                   })
                 }
-                style={{
-                  marginBottom: '10px',
-                  padding: '8px',
-                  width: '100%',
-                  color: 'black',
-                }}
+                className="mb-2 p-2 w-full text-black"
               />
               <input
                 type="number"
@@ -812,12 +638,7 @@ export default function InventoryManagementPage() {
                     actualQuantity: e.target.value,
                   })
                 }
-                style={{
-                  marginBottom: '10px',
-                  padding: '8px',
-                  width: '100%',
-                  color: 'black',
-                }}
+                className="mb-2 p-2 w-full text-black"
               />
               <input
                 type="number"
@@ -829,12 +650,7 @@ export default function InventoryManagementPage() {
                     pricePerUnit: e.target.value,
                   })
                 }
-                style={{
-                  marginBottom: '10px',
-                  padding: '8px',
-                  width: '100%',
-                  color: 'black',
-                }}
+                className="mb-2 p-2 w-full text-black"
               />
               <input
                 type="date"
@@ -843,12 +659,7 @@ export default function InventoryManagementPage() {
                 onChange={(e) =>
                   setStockInData({ ...stockInData, stockInDate: e.target.value })
                 }
-                style={{
-                  marginBottom: '10px',
-                  padding: '8px',
-                  width: '100%',
-                  color: 'black',
-                }}
+                className="mb-2 p-2 w-full text-black"
               />
               <input
                 type="date"
@@ -857,40 +668,21 @@ export default function InventoryManagementPage() {
                 onChange={(e) =>
                   setStockInData({ ...stockInData, expiryDate: e.target.value })
                 }
-                style={{
-                  marginBottom: '10px',
-                  padding: '8px',
-                  width: '100%',
-                  color: 'black',
-                }}
+                className="mb-2 p-2 w-full text-black"
               />
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <div className="flex justify-between">
                 <button
                   onClick={async () => {
                     await handleStockIn();
                     setShowStockInOverlay(false);
                   }}
-                  style={{
-                    backgroundColor: 'black',
-                    color: 'white',
-                    padding: '8px 16px',
-                    borderRadius: '4px',
-                    border: 'none',
-                    cursor: 'pointer',
-                  }}
+                  className="bg-black text-white py-2 px-4 rounded border-none cursor-pointer"
                 >
                   Stock In
                 </button>
                 <button
                   onClick={() => setShowStockInOverlay(false)}
-                  style={{
-                    backgroundColor: 'black',
-                    color: 'white',
-                    padding: '8px 16px',
-                    borderRadius: '4px',
-                    border: 'none',
-                    cursor: 'pointer',
-                  }}
+                  className="bg-black text-white py-2 px-4 rounded border-none cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -899,29 +691,11 @@ export default function InventoryManagementPage() {
           </div>
         </div>
       )}  
+
       {showStockOutOverlay && (
-        <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-        >
-          <div
-            style={{
-              backgroundColor: 'white',
-              padding: '20px',
-              borderRadius: '8px',
-              width: '300px',
-            }}
-          >
-            <h2 style={{ color: 'black' }}>Stock Out Subitem</h2>
+        <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center">
+          <div className="bg-white p-5 rounded-lg w-72">
+            <h2 className="text-black">Stock Out Subitem</h2>
             <div>
               <input
                 type="number"
@@ -933,12 +707,7 @@ export default function InventoryManagementPage() {
                     quantity: e.target.value === '' ? 0 : Number(e.target.value),
                   })
                 }
-                style={{
-                  marginBottom: '10px',
-                  padding: '8px',
-                  width: '100%',
-                  color: 'black',
-                }}
+                className="mb-2 p-2 w-full text-black"
               />
               <input
                 type="text"
@@ -947,40 +716,21 @@ export default function InventoryManagementPage() {
                 onChange={(e) =>
                   setStockOutData({ ...stockOutData, reason: e.target.value })
                 }
-                style={{
-                  marginBottom: '10px',
-                  padding: '8px',
-                  width: '100%',
-                  color: 'black',
-                }}
+                className="mb-2 p-2 w-full text-black"
               />
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <div className="flex justify-between">
                 <button
                   onClick={async () => {
                     await handleStockOutSubmit();
                     setShowStockOutOverlay(false);
                   }}
-                  style={{
-                    backgroundColor: 'black',
-                    color: 'white',
-                    padding: '8px 16px',
-                    borderRadius: '4px',
-                    border: 'none',
-                    cursor: 'pointer',
-                  }}
+                  className="bg-black text-white py-2 px-4 rounded cursor-pointer"
                 >
                   Save
                 </button>
                 <button
                   onClick={() => setShowStockOutOverlay(false)}
-                  style={{
-                    backgroundColor: 'black',
-                    color: 'white',
-                    padding: '8px 16px',
-                    borderRadius: '4px',
-                    border: 'none',
-                    cursor: 'pointer',
-                  }}
+                  className="bg-black text-white py-2 px-4 rounded cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -989,8 +739,6 @@ export default function InventoryManagementPage() {
           </div>
         </div>
       )}
-
-
     </div>
   );
 }

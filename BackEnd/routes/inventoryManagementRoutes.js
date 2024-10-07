@@ -28,6 +28,10 @@ router.get('/getSubitem', async (req, res) => {
           ELSE NULL 
       END AS inventoryName,
       CASE WHEN ROW_NUMBER() OVER (PARTITION BY i.inventoryID ORDER BY po.expiryDate ASC) = 1 
+          THEN i.inventoryCategory -- New column added here
+          ELSE NULL 
+      END AS inventoryCategory,
+      CASE WHEN ROW_NUMBER() OVER (PARTITION BY i.inventoryID ORDER BY po.expiryDate ASC) = 1 
           THEN i.reorderPoint 
           ELSE NULL 
       END AS reorderPoint,
@@ -80,10 +84,11 @@ router.get('/getSubitem', async (req, res) => {
 
 // ADD SUBITEM ENDPOINT
 router.post('/postSubitem', async (req, res) => {
-  const { inventoryName, unitOfMeasure, reorderPoint } = req.body;
+  const { inventoryName, inventoryCategory, unitOfMeasure, reorderPoint } = req.body;
 
   const newInventoryItem = {
     inventoryName,
+    inventoryCategory,
     unitOfMeasure,
     reorderPoint,
   };
@@ -105,6 +110,7 @@ router.put('/putSubitem/:inventoryID', async (req, res) => {
   const updateQuery = `
     UPDATE inventory
     SET inventoryName = COALESCE(?, inventoryName),
+        inventoryCategory = COALESCE(?, inventoryCategory),
         unitOfMeasure = COALESCE(?, unitOfMeasure),
         reorderPoint = COALESCE(?, reorderPoint)
     WHERE inventoryID = ?
@@ -112,6 +118,7 @@ router.put('/putSubitem/:inventoryID', async (req, res) => {
 
   const updateValues = [
     updatedData.inventoryName || null,
+    updatedData.inventoryCategory || null,
     updatedData.unitOfMeasure || null,
     updatedData.reorderPoint || null,
     inventoryID
