@@ -26,7 +26,6 @@ export default function EmployeeHome() {
     <>
       <div className="w-full flex justify-center items-center min-h-screen">
         <div className="flex flex-col items-center w-[360px] min-h-screen relative bg-white">
-          {/* Header with the GiHamburgerMenu included */}
           <Header text="Admin Login" color="tealGreen" type="home">
             <div className="relative flex items-center justify-center font-bold text-2xl mb-5 mt-4 -ml-8 text-black">
               <Link href={"/"} className="absolute left-[-12px]">

@@ -28,10 +28,10 @@ router.post('/postEmployee', (req, res) => {
   const employee = {
     firstName: employeeData.firstName, 
     lastName: employeeData.lastName,
-    password: employeeData.password,
     designation: employeeData.designation,
     status: employeeData.status,
     contactInformation: employeeData.contactInformation,
+    password: employeeData.password,
   };
 
   db.query("INSERT INTO employees SET ?", employee, (err, employeeResult) => {
@@ -59,10 +59,6 @@ router.put('/putEmployee/:employeeID', (req, res) => {
     fields.push("lastName = ?");
     values.push(employeeData.lastName);
   }
-  if (employeeData.password) {
-    fields.push("password = ?");
-    values.push(employeeData.password);
-  }
   if (employeeData.designation) {
     fields.push("designation = ?");
     values.push(employeeData.designation);
@@ -74,6 +70,10 @@ router.put('/putEmployee/:employeeID', (req, res) => {
   if (employeeData.contactInformation) {
     fields.push("contactInformation = ?");
     values.push(employeeData.contactInformation);
+  }
+  if (employeeData.password) {
+    fields.push("password = ?");
+    values.push(employeeData.password);
   }
 
   values.push(employeeID);
