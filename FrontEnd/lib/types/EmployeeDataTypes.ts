@@ -1,5 +1,5 @@
 export type Employee = {
-    employeeId?: number,
+    employeeID?: number,
     password: string,
     firstName: string,
     lastName: string,

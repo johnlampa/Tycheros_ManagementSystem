@@ -289,7 +289,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
             <button
               type="button"
               onClick={handleDelete}
-              className="border border-black rounded px-2 py-2 text-black bg-lightRed hover:bg-darkRed hover:text-white mb-5 ml-3"
+              className="border border-lightRed rounded px-2 py-2 text-lightRed bg-white hover:bg-darkRed hover:text-white mb-5 ml-3"
             >
               Delete Product
             </button>
