@@ -1,23 +1,8 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
-import { format } from 'date-fns';
-
-interface InventoryItem {
-  inventoryID: number;
-  inventoryName: string;
-  inventoryCategory : string;
-  reorderPoint: number;
-  unitOfMeasure: string;
-  purchaseOrderID: number;
-  totalQuantity: number;
-  quantityRemaining: number;
-  pricePerUnit: number;
-  stockInDate: string;
-  expiryDate: string;
-  supplierName: string;
-  employeeName: string;
-}
+import React, { useEffect, useState } from "react";
+import { format } from "date-fns";
+import { InventoryItem } from "../../../lib/types/InventoryItemDataTypes";
 
 export default function InventoryManagementPage() {
   const [inventoryData, setInventoryData] = useState<InventoryItem[]>([]);
@@ -32,9 +17,9 @@ export default function InventoryManagementPage() {
     unitOfMeasure: string;
     reorderPoint: number;
   }>({
-    inventoryName: '',
-    inventoryCategory: '',
-    unitOfMeasure: '',
+    inventoryName: "",
+    inventoryCategory: "",
+    unitOfMeasure: "",
     reorderPoint: 0,
   });
 
@@ -43,51 +28,54 @@ export default function InventoryManagementPage() {
 
   const [showStockInOverlay, setShowStockInOverlay] = useState(false);
   const [stockInData, setStockInData] = useState({
-    inventoryID: '',
-    supplierName: '',
-    employeeID: '',
-    quantityOrdered: '',
-    actualQuantity: '',
-    pricePerUnit: '',
-    stockInDate: '',
-    expiryDate: '',
+    inventoryID: "",
+    supplierName: "",
+    employeeID: "",
+    quantityOrdered: "",
+    actualQuantity: "",
+    pricePerUnit: "",
+    stockInDate: "",
+    expiryDate: "",
   });
 
   const handleStockIn = async () => {
     try {
-      const response = await fetch('http://localhost:8081/inventoryManagement/stockInSubitem', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...stockInData,
-          quantityOrdered: Number(stockInData.quantityOrdered),
-          actualQuantity: Number(stockInData.actualQuantity),
-          pricePerUnit: Number(stockInData.pricePerUnit),
-        }),
-      });
-  
-      if (!response.ok) {
-        throw new Error('Failed to stock in subitem');
-      }
-  
-      const updatedInventory = await fetch('http://localhost:8081/inventoryManagement/getSubitem').then((res) =>
-        res.json()
+      const response = await fetch(
+        "http://localhost:8081/inventoryManagement/stockInSubitem",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            ...stockInData,
+            quantityOrdered: Number(stockInData.quantityOrdered),
+            actualQuantity: Number(stockInData.actualQuantity),
+            pricePerUnit: Number(stockInData.pricePerUnit),
+          }),
+        }
       );
+
+      if (!response.ok) {
+        throw new Error("Failed to stock in subitem");
+      }
+
+      const updatedInventory = await fetch(
+        "http://localhost:8081/inventoryManagement/getSubitem"
+      ).then((res) => res.json());
       setInventoryData(updatedInventory);
-  
-      alert('Subitem stocked in successfully');
+
+      alert("Subitem stocked in successfully");
     } catch (error) {
-      console.error('Error stocking in subitem:', error);
+      console.error("Error stocking in subitem:", error);
     }
   };
-  
+
   const [showStockOutOverlay, setShowStockOutOverlay] = useState(false);
   const [stockOutData, setStockOutData] = useState({
-    purchaseOrderID: '',
+    purchaseOrderID: "",
     quantity: 0,
-    reason: ''
+    reason: "",
   });
 
   const handleStockOut = (purchaseOrderID: string) => {
@@ -97,35 +85,39 @@ export default function InventoryManagementPage() {
 
   const handleStockOutSubmit = async () => {
     try {
-      const response = await fetch('http://localhost:8081/inventoryManagement/stockOutSubitem', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(stockOutData),
-      });
-  
+      const response = await fetch(
+        "http://localhost:8081/inventoryManagement/stockOutSubitem",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(stockOutData),
+        }
+      );
+
       if (response.ok) {
-        alert('Stock-out recorded successfully');
+        alert("Stock-out recorded successfully");
         window.location.reload();
         // You might want to refresh the inventory list or update the UI here
       } else {
         const errorData = await response.json();
-        alert('Error: ' + errorData.message);
+        alert("Error: " + errorData.message);
       }
     } catch (err) {
-      console.error('Error during stock-out:', err);
-      alert('Error during stock-out: ');
+      console.error("Error during stock-out:", err);
+      alert("Error during stock-out: ");
     }
   };
-  
 
   useEffect(() => {
     const fetchInventory = async () => {
       try {
-        const response = await fetch('http://localhost:8081/inventoryManagement/getSubitem');
+        const response = await fetch(
+          "http://localhost:8081/inventoryManagement/getSubitem"
+        );
         if (!response.ok) {
-          throw new Error('Network response was not ok');
+          throw new Error("Network response was not ok");
         }
         const data: InventoryItem[] = await response.json();
         setInventoryData(data);
@@ -141,33 +133,36 @@ export default function InventoryManagementPage() {
 
   const handleAddItem = async () => {
     try {
-      const response = await fetch('http://localhost:8081/inventoryManagement/postSubitem', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(newItem),
-      });
+      const response = await fetch(
+        "http://localhost:8081/inventoryManagement/postSubitem",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(newItem),
+        }
+      );
 
       if (!response.ok) {
-        throw new Error('Failed to add inventory item');
+        throw new Error("Failed to add inventory item");
       }
 
       setNewItem({
-        inventoryName: '',
-        inventoryCategory: '',
-        unitOfMeasure: '',
+        inventoryName: "",
+        inventoryCategory: "",
+        unitOfMeasure: "",
         reorderPoint: 0,
       });
 
-      const updatedInventory = await fetch('http://localhost:8081/inventoryManagement/getSubitem').then((res) =>
-        res.json()
-      );
+      const updatedInventory = await fetch(
+        "http://localhost:8081/inventoryManagement/getSubitem"
+      ).then((res) => res.json());
       setInventoryData(updatedInventory);
 
-      alert('Inventory item added successfully');
+      alert("Inventory item added successfully");
     } catch (error) {
-      console.error('Error adding inventory item:', error);
+      console.error("Error adding inventory item:", error);
     }
   };
 
@@ -177,34 +172,37 @@ export default function InventoryManagementPage() {
       setItemToEdit(item);
       setShowEditOverlay(true);
     } else {
-      alert('Subitem not found');
+      alert("Subitem not found");
     }
   };
 
   const handleSaveChanges = async () => {
     if (itemToEdit) {
       try {
-        const response = await fetch(`http://localhost:8081/inventoryManagement/putSubitem/${itemToEdit.inventoryID}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(itemToEdit),
-        });
+        const response = await fetch(
+          `http://localhost:8081/inventoryManagement/putSubitem/${itemToEdit.inventoryID}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(itemToEdit),
+          }
+        );
 
         if (!response.ok) {
-          throw new Error('Failed to update subitem');
+          throw new Error("Failed to update subitem");
         }
 
-        const updatedInventory = await fetch('http://localhost:8081/inventoryManagement/getSubitem').then((res) =>
-          res.json()
-        );
+        const updatedInventory = await fetch(
+          "http://localhost:8081/inventoryManagement/getSubitem"
+        ).then((res) => res.json());
         setInventoryData(updatedInventory);
 
         setShowEditOverlay(false);
-        alert('Subitem updated successfully');
+        alert("Subitem updated successfully");
       } catch (error) {
-        console.error('Error updating subitem:', error);
+        console.error("Error updating subitem:", error);
       }
     }
   };
@@ -212,23 +210,26 @@ export default function InventoryManagementPage() {
   const handleDeleteItem = async () => {
     if (itemToDelete) {
       try {
-        const response = await fetch(`http://localhost:8081/inventoryManagement/deleteSubitem/${itemToDelete.inventoryID}`, {
-          method: 'DELETE',
-        });
+        const response = await fetch(
+          `http://localhost:8081/inventoryManagement/deleteSubitem/${itemToDelete.inventoryID}`,
+          {
+            method: "DELETE",
+          }
+        );
 
         if (!response.ok) {
-          throw new Error('Failed to delete subitem');
+          throw new Error("Failed to delete subitem");
         }
 
-        const updatedInventory = await fetch('http://localhost:8081/inventoryManagement/getSubitem').then((res) =>
-          res.json()
-        );
+        const updatedInventory = await fetch(
+          "http://localhost:8081/inventoryManagement/getSubitem"
+        ).then((res) => res.json());
         setInventoryData(updatedInventory);
 
         setShowDeleteOverlay(false);
-        alert('Subitem deleted successfully');
+        alert("Subitem deleted successfully");
       } catch (error) {
-        console.error('Error deleting subitem:', error);
+        console.error("Error deleting subitem:", error);
       }
     }
   };
@@ -243,16 +244,16 @@ export default function InventoryManagementPage() {
 
   const formatDate = (dateString?: string | null) => {
     if (!dateString) {
-      return '';
+      return "";
     }
     const date = new Date(dateString);
-    return isNaN(date.getTime()) ? '' : format(date, 'yyyy-MM-dd');
+    return isNaN(date.getTime()) ? "" : format(date, "yyyy-MM-dd");
   };
 
   return (
     <div className="bg-white p-5 rounded-lg shadow-md">
       <h1>Inventory Management</h1>
-      <div style={{ marginBottom: '20px' }}>
+      <div style={{ marginBottom: "20px" }}>
         <button
           onClick={() => setShowAddOverlay(true)}
           className="bg-black text-white py-3 px-5 rounded cursor-pointer mr-2"
@@ -261,7 +262,7 @@ export default function InventoryManagementPage() {
         </button>
         <button
           onClick={() => {
-            const id = prompt('Enter Inventory ID to Edit:');
+            const id = prompt("Enter Inventory ID to Edit:");
             if (id) {
               handleEditItem(Number(id));
             }
@@ -272,14 +273,16 @@ export default function InventoryManagementPage() {
         </button>
         <button
           onClick={() => {
-            const id = prompt('Enter Inventory ID to Delete:');
+            const id = prompt("Enter Inventory ID to Delete:");
             if (id) {
-              const item = inventoryData.find((item) => item.inventoryID === Number(id));
+              const item = inventoryData.find(
+                (item) => item.inventoryID === Number(id)
+              );
               if (item) {
                 setItemToDelete(item);
                 setShowDeleteOverlay(true);
               } else {
-                alert('Subitem not found');
+                alert("Subitem not found");
               }
             }
           }}
@@ -295,7 +298,7 @@ export default function InventoryManagementPage() {
         </button>
         <button
           onClick={() => {
-            const id = prompt('Enter Purchase Order ID to Stock Out:');
+            const id = prompt("Enter Purchase Order ID to Stock Out:");
             if (id) {
               handleStockOut(id); // Pass the ID directly
             }
@@ -312,42 +315,18 @@ export default function InventoryManagementPage() {
         <table className="w-full text-black border border-black border-collapse">
           <thead>
             <tr>
-              <th className="border border-black p-2.5">
-                Inventory ID
-              </th>
-              <th className="border border-black p-2.5">
-                Inventory Name
-              </th>
-              <th className="border border-black p-2.5">
-                Category
-              </th>
-              <th className="border border-black p-2.5">
-                Reorder Point
-              </th>
-              <th className="border border-black p-2.5">
-                Purchase Order ID
-              </th>
-              <th className="border border-black p-2.5">
-                Total Quantity
-              </th>
-              <th className="border border-black p-2.5">
-                Quantity Remaining
-              </th>
-              <th className="border border-black p-2.5">
-                Price Per Unit
-              </th>
-              <th className="border border-black p-2.5">
-                Stock In Date
-              </th>
-              <th className="border border-black p-2.5">
-                Expiry Date
-              </th>
-              <th className="border border-black p-2.5">
-                Supplier Name
-              </th>
-              <th className="border border-black p-2.5">
-                Employee Name
-              </th>
+              <th className="border border-black p-2.5">Inventory ID</th>
+              <th className="border border-black p-2.5">Inventory Name</th>
+              <th className="border border-black p-2.5">Category</th>
+              <th className="border border-black p-2.5">Reorder Point</th>
+              <th className="border border-black p-2.5">Purchase Order ID</th>
+              <th className="border border-black p-2.5">Total Quantity</th>
+              <th className="border border-black p-2.5">Quantity Remaining</th>
+              <th className="border border-black p-2.5">Price Per Unit</th>
+              <th className="border border-black p-2.5">Stock In Date</th>
+              <th className="border border-black p-2.5">Expiry Date</th>
+              <th className="border border-black p-2.5">Supplier Name</th>
+              <th className="border border-black p-2.5">Employee Name</th>
             </tr>
           </thead>
           <tbody>
@@ -430,11 +409,12 @@ export default function InventoryManagementPage() {
               <input
                 type="number"
                 placeholder="Reorder Point"
-                value={newItem.reorderPoint === 0 ? '' : newItem.reorderPoint}
+                value={newItem.reorderPoint === 0 ? "" : newItem.reorderPoint}
                 onChange={(e) =>
                   setNewItem({
                     ...newItem,
-                    reorderPoint: e.target.value === '' ? 0 : Number(e.target.value),
+                    reorderPoint:
+                      e.target.value === "" ? 0 : Number(e.target.value),
                   })
                 }
                 className="mb-2 p-2 w-full text-black"
@@ -482,7 +462,10 @@ export default function InventoryManagementPage() {
                 placeholder="Inventory Name"
                 value={itemToEdit.inventoryName}
                 onChange={(e) =>
-                  setItemToEdit({ ...itemToEdit, inventoryName: e.target.value })
+                  setItemToEdit({
+                    ...itemToEdit,
+                    inventoryName: e.target.value,
+                  })
                 }
                 className="mb-2 p-2 w-full text-black"
               />
@@ -490,8 +473,12 @@ export default function InventoryManagementPage() {
               {/* Dropdown for Inventory Category with current value */}
               <select
                 value={itemToEdit.inventoryCategory} // Use itemToEdit for the current value
-                onChange={(e) =>
-                  setItemToEdit({ ...itemToEdit, inventoryCategory: e.target.value }) // Update itemToEdit on change
+                onChange={
+                  (e) =>
+                    setItemToEdit({
+                      ...itemToEdit,
+                      inventoryCategory: e.target.value,
+                    }) // Update itemToEdit on change
                 }
                 className="mb-2 p-2 w-full text-black"
               >
@@ -510,22 +497,28 @@ export default function InventoryManagementPage() {
               <input
                 type="number"
                 placeholder="Reorder Point"
-                value={itemToEdit.reorderPoint === 0 ? '' : itemToEdit.reorderPoint}
+                value={
+                  itemToEdit.reorderPoint === 0 ? "" : itemToEdit.reorderPoint
+                }
                 onChange={(e) =>
                   setItemToEdit({
                     ...itemToEdit,
-                    reorderPoint: e.target.value === '' ? 0 : Number(e.target.value),
+                    reorderPoint:
+                      e.target.value === "" ? 0 : Number(e.target.value),
                   })
                 }
                 className="mb-2 p-2 w-full text-black"
               />
-              
+
               <input
                 type="text"
                 placeholder="Unit of Measure"
                 value={itemToEdit.unitOfMeasure}
                 onChange={(e) =>
-                  setItemToEdit({ ...itemToEdit, unitOfMeasure: e.target.value })
+                  setItemToEdit({
+                    ...itemToEdit,
+                    unitOfMeasure: e.target.value,
+                  })
                 }
                 className="mb-2 p-2 w-full text-black"
               />
@@ -552,17 +545,29 @@ export default function InventoryManagementPage() {
         </div>
       )}
 
-
       {showDeleteOverlay && itemToDelete && (
         <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center">
           <div className="bg-white p-5 rounded-lg w-72">
             <h2 className="text-black">Delete Inventory Subitem</h2>
-            <p className="text-black">Are you sure you want to delete the following item?</p>
-            <p className="text-black"><strong>Inventory ID:</strong> {itemToDelete.inventoryID}</p>
-            <p className="text-black"><strong>Name:</strong> {itemToDelete.inventoryName}</p>
-            <p className="text-black"><strong>Inventory Category:</strong> {itemToDelete.inventoryCategory}</p>
-            <p className="text-black"><strong>Reorder Point:</strong> {itemToDelete.reorderPoint}</p>
-            <p className="text-black"><strong>Unit of Measure:</strong> {itemToDelete.unitOfMeasure}</p>
+            <p className="text-black">
+              Are you sure you want to delete the following item?
+            </p>
+            <p className="text-black">
+              <strong>Inventory ID:</strong> {itemToDelete.inventoryID}
+            </p>
+            <p className="text-black">
+              <strong>Name:</strong> {itemToDelete.inventoryName}
+            </p>
+            <p className="text-black">
+              <strong>Inventory Category:</strong>{" "}
+              {itemToDelete.inventoryCategory}
+            </p>
+            <p className="text-black">
+              <strong>Reorder Point:</strong> {itemToDelete.reorderPoint}
+            </p>
+            <p className="text-black">
+              <strong>Unit of Measure:</strong> {itemToDelete.unitOfMeasure}
+            </p>
             <div className="flex justify-between">
               <button
                 onClick={async () => {
@@ -594,7 +599,10 @@ export default function InventoryManagementPage() {
                 placeholder="Inventory ID"
                 value={stockInData.inventoryID}
                 onChange={(e) =>
-                  setStockInData({ ...stockInData, inventoryID: e.target.value })
+                  setStockInData({
+                    ...stockInData,
+                    inventoryID: e.target.value,
+                  })
                 }
                 className="mb-2 p-2 w-full text-black"
               />
@@ -603,7 +611,10 @@ export default function InventoryManagementPage() {
                 placeholder="Supplier Name"
                 value={stockInData.supplierName}
                 onChange={(e) =>
-                  setStockInData({ ...stockInData, supplierName: e.target.value })
+                  setStockInData({
+                    ...stockInData,
+                    supplierName: e.target.value,
+                  })
                 }
                 className="mb-2 p-2 w-full text-black"
               />
@@ -657,7 +668,10 @@ export default function InventoryManagementPage() {
                 placeholder="Stock In Date"
                 value={stockInData.stockInDate}
                 onChange={(e) =>
-                  setStockInData({ ...stockInData, stockInDate: e.target.value })
+                  setStockInData({
+                    ...stockInData,
+                    stockInDate: e.target.value,
+                  })
                 }
                 className="mb-2 p-2 w-full text-black"
               />
@@ -690,7 +704,7 @@ export default function InventoryManagementPage() {
             </div>
           </div>
         </div>
-      )}  
+      )}
 
       {showStockOutOverlay && (
         <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center">
@@ -700,11 +714,12 @@ export default function InventoryManagementPage() {
               <input
                 type="number"
                 placeholder="Quantity"
-                value={stockOutData.quantity === 0 ? '' : stockOutData.quantity}
+                value={stockOutData.quantity === 0 ? "" : stockOutData.quantity}
                 onChange={(e) =>
                   setStockOutData({
                     ...stockOutData,
-                    quantity: e.target.value === '' ? 0 : Number(e.target.value),
+                    quantity:
+                      e.target.value === "" ? 0 : Number(e.target.value),
                   })
                 }
                 className="mb-2 p-2 w-full text-black"
@@ -742,5 +757,3 @@ export default function InventoryManagementPage() {
     </div>
   );
 }
-
-               
