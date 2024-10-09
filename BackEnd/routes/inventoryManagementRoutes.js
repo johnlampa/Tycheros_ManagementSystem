@@ -255,9 +255,9 @@ router.post('/stockInInventoryItem', async (req, res) => {
   }
 });
 
-//STOCK OUT 
+// STOCK OUT SUBITEM ENDPOINT
 router.post('/stockOutSubitem', async (req, res) => {
-  const { purchaseOrderID, quantity, reason } = req.body; // Assume purchaseOrderID is provided
+  const { inventoryID, quantity, reason } = req.body; // Assume inventoryID is provided
   const date = new Date();
 
   const connection = await pool.getConnection();
@@ -265,14 +265,14 @@ router.post('/stockOutSubitem', async (req, res) => {
   try {
     await connection.beginTransaction();
 
-    // Find the subinventory entries with the given purchaseOrderID, ordered by the oldest expiry date
+    // Find the subinventory entries for the given inventoryID, ordered by the oldest expiry date
     const [subinventoryEntries] = await connection.query(`
-      SELECT si.subinventoryID, si.quantityRemaining, po.expiryDate
+      SELECT si.subinventoryID, si.quantityRemaining, poi.expiryDate
       FROM subinventory si
-      JOIN purchaseorder po ON si.purchaseOrderID = po.purchaseOrderID
-      WHERE po.purchaseOrderID = ?
-      ORDER BY po.expiryDate ASC
-    `, [purchaseOrderID]);
+      JOIN purchaseorderitem poi ON si.subinventoryID = poi.subinventoryID
+      WHERE si.inventoryID = ? AND si.quantityRemaining > 0
+      ORDER BY poi.expiryDate ASC
+    `, [inventoryID]);
 
     let remainingQuantity = quantity;
     
@@ -312,6 +312,47 @@ router.post('/stockOutSubitem', async (req, res) => {
   }
 });
 
+// UPDATE SUBITEM QUANTITY
+router.put('/updateSubitemQuantity', async (req, res) => {
+  const { inventoryID, quantity } = req.body;
+
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+
+    // Find the subinventory entry with the oldest expiry date
+    const [subinventoryEntries] = await connection.query(`
+      SELECT si.subinventoryID, si.quantityRemaining
+      FROM subinventory si
+      JOIN purchaseorderitem poi ON si.subinventoryID = poi.subinventoryID
+      WHERE si.inventoryID = ?
+      ORDER BY poi.expiryDate ASC
+      LIMIT 1
+    `, [inventoryID]);
+
+    if (subinventoryEntries.length === 0) {
+      throw new Error('No subinventory found for the given inventoryID.');
+    }
+
+    const subinventoryID = subinventoryEntries[0].subinventoryID;
+
+    // Update the quantityRemaining
+    await connection.query(`
+      UPDATE subinventory
+      SET quantityRemaining = ?
+      WHERE subinventoryID = ?
+    `, [quantity, subinventoryID]);
+
+    await connection.commit();
+    res.status(200).send('Quantity updated successfully');
+  } catch (err) {
+    await connection.rollback();
+    console.error('Error updating subinventory quantity:', err);
+    res.status(500).send(`Error updating subinventory quantity: ${err.message}`);
+  } finally {
+    connection.release();
+  }
+});
 
 
 
