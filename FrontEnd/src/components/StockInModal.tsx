@@ -1,16 +1,17 @@
 import React, { useState } from "react";
 import { IoIosArrowUp, IoIosArrowDown } from "react-icons/io";
+import { format } from 'date-fns';
 
 interface StockInModalProps {
   stockInData: {
-    inventoryID: string;
+    inventoryID: number;
     supplierName: string;
-    employeeID: string;
-    quantityOrdered: string;
-    actualQuantity: string;
-    pricePerUnit: string;
-    expiryDate: string;
-    stockInDate: string;
+    employeeID: number;
+    quantityOrdered: number;
+    actualQuantity: number;
+    pricePerUnit: number;
+    expiryDate: Date;
+    stockInDate: Date;
   };
   setStockInData: (data: any) => void;
   employees: { employeeID: number; firstName: string; lastName: string }[];
@@ -45,6 +46,8 @@ const StockInModal: React.FC<StockInModalProps> = ({
     const newInventoryItems = [...inventoryItems];
     newInventoryItems[index] = { ...newInventoryItems[index], ...updatedItem };
     setInventoryItems(newInventoryItems);
+    // Propagate the update to parent
+    setStockInData(newInventoryItems[index]);
   };
 
   const updateAllInventoryItems = (updatedData: any) => {
@@ -53,6 +56,8 @@ const StockInModal: React.FC<StockInModalProps> = ({
       ...updatedData
     }));
     setInventoryItems(newInventoryItems);
+    // Update the parent state for the first item
+    setStockInData(newInventoryItems[0]);
   };
 
   return (
@@ -67,10 +72,9 @@ const StockInModal: React.FC<StockInModalProps> = ({
             <input
               type="date"
               id="stockInDate"
-              value={stockInData.stockInDate}
+              value={stockInData.stockInDate ? format(stockInData.stockInDate, 'yyyy-MM-dd') : ''}
               onChange={(e) => {
-                const newValue = e.target.value;
-                setStockInData({ ...stockInData, stockInDate: newValue });
+                const newValue = new Date(e.target.value);
                 updateAllInventoryItems({ stockInDate: newValue });
               }}
               className="p-2 text-black border border-black"
@@ -84,7 +88,6 @@ const StockInModal: React.FC<StockInModalProps> = ({
             value={stockInData.supplierName}
             onChange={(e) => {
               const newValue = e.target.value;
-              setStockInData({ ...stockInData, supplierName: newValue });
               updateAllInventoryItems({ supplierName: newValue });
             }}
             className="mb-2 p-2 w-full text-black border border-black"
@@ -92,13 +95,12 @@ const StockInModal: React.FC<StockInModalProps> = ({
           <select
             value={stockInData.employeeID}
             onChange={(e) => {
-              const newValue = e.target.value;
-              setStockInData({ ...stockInData, employeeID: newValue });
+              const newValue = parseInt(e.target.value);
               updateAllInventoryItems({ employeeID: newValue });
             }}
             className="mb-2 p-2 w-full text-black border border-black"
           >
-            <option value="" disabled>
+            <option value="0" disabled>
               Select Employee
             </option>
             {employees.map((employee) => (
@@ -114,12 +116,12 @@ const StockInModal: React.FC<StockInModalProps> = ({
                   value={item.inventoryID}
                   onChange={(e) =>
                     updateInventoryItem(index, {
-                      inventoryID: e.target.value,
+                      inventoryID: parseInt(e.target.value),
                     })
                   }
                   className="mb-2 mt-2 p-2 w-full text-black border border-black"
                 >
-                  <option value="" disabled>
+                  <option value="0" disabled>
                     Select Item
                   </option>
                   {inventoryNames.map((inventory) => (
@@ -138,7 +140,6 @@ const StockInModal: React.FC<StockInModalProps> = ({
               </div>
               {item.expanded && (
                 <div>
-                  {/* Side-by-Side Inputs for Quantity Ordered and Actual Quantity */}
                   <div className="flex gap-2 mb-2">
                     <input
                       type="number"
@@ -147,7 +148,7 @@ const StockInModal: React.FC<StockInModalProps> = ({
                       min="0"
                       onChange={(e) =>
                         updateInventoryItem(index, {
-                          quantityOrdered: e.target.value,
+                          quantityOrdered: parseInt(e.target.value),
                         })
                       }
                       className="p-2 w-1/2 text-black border border-black"
@@ -159,7 +160,7 @@ const StockInModal: React.FC<StockInModalProps> = ({
                       min="0"
                       onChange={(e) =>
                         updateInventoryItem(index, {
-                          actualQuantity: e.target.value,
+                          actualQuantity: parseInt(e.target.value),
                         })
                       }
                       className="p-2 w-1/2 text-black border border-black"
@@ -173,7 +174,7 @@ const StockInModal: React.FC<StockInModalProps> = ({
                     min="0"
                     onChange={(e) =>
                       updateInventoryItem(index, {
-                        pricePerUnit: e.target.value,
+                        pricePerUnit: parseFloat(e.target.value),
                       })
                     }
                     className="mb-2 p-2 w-full text-black border border-black"
@@ -181,10 +182,10 @@ const StockInModal: React.FC<StockInModalProps> = ({
                   <input
                     type="date"
                     placeholder="Expiry Date"
-                    value={item.expiryDate}
+                    value={format(item.expiryDate, 'yyyy-MM-dd')}
                     onChange={(e) =>
                       updateInventoryItem(index, {
-                        expiryDate: e.target.value,
+                        expiryDate: new Date(e.target.value),
                       })
                     }
                     className="mb-2 p-2 w-full text-black border border-black"
@@ -203,7 +204,6 @@ const StockInModal: React.FC<StockInModalProps> = ({
             <button
               onClick={async () => {
                 console.log("Stock In Data:", inventoryItems);
-                console.log("Employees:", employees);
                 await handleStockIn();
                 onClose();
               }}
@@ -223,5 +223,6 @@ const StockInModal: React.FC<StockInModalProps> = ({
     </div>
   );
 };
+
 
 export default StockInModal;
