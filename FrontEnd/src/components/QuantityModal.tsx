@@ -5,6 +5,9 @@ import { QuantityModalProps } from "../../lib/types/props/QuantityModalProps";
 import Modal from "@/components/ui/Modal";
 import { OrderItemDataTypes } from "../../lib/types/OrderDataTypes";
 import { usePathname } from "next/navigation";
+import { SubitemDataTypes } from "../../lib/types/ProductDataTypes";
+import { InventoryItem } from "../../lib/types/InventoryItemDataTypes";
+import axios from "axios";
 
 const QuantityModal: React.FC<QuantityModalProps> = ({
   productToAdd,
@@ -12,8 +15,62 @@ const QuantityModal: React.FC<QuantityModalProps> = ({
   setQuantityModalVisibility,
   type,
 }) => {
+  const [inventoryData, setInventoryData] = useState<InventoryItem[]>([]);
+  const [subitems, setSubitems] = useState<SubitemDataTypes[]>([]);
   const [cart, setCart] = useState<OrderItemDataTypes[]>([]);
   const [quantity, setQuantity] = useState(0);
+  const [maxQuantity, setMaxQuantity] = useState<number>(Infinity);
+
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+
+  const [correctType, setCorrectType] = useState(type);
+
+  // Fetch subitems for the given product
+  useEffect(() => {
+    axios
+      .get(
+        `http://localhost:8081/menuManagement/getSpecificSubitems/${productToAdd.productID}`
+      )
+      .then((response) => {
+        setSubitems(response.data);
+      })
+      .catch((error) => {
+        console.error("Error fetching subitems:", error);
+        setError(error);
+      });
+  }, [productToAdd]);
+
+  useEffect(() => {
+    const fetchInventory = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:8081/inventoryManagement/getSubitem"
+        );
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        const data: InventoryItem[] = await response.json();
+        setInventoryData(data);
+      } catch (error) {
+        setError(error as Error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchInventory();
+  }, []);
+
+  // Check if productToAdd is already in cart and change type to 'edit' if it is
+  useEffect(() => {
+    const itemInCart = cart.find(
+      (item) => item.productID === productToAdd.productID
+    );
+    if (itemInCart) {
+      setCorrectType("edit"); // Change the type to "edit"
+    }
+  }, [cart, productToAdd]);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -27,7 +84,11 @@ const QuantityModal: React.FC<QuantityModalProps> = ({
   }, []);
 
   useEffect(() => {
-    if (type === "edit" && quantityModalIsVisible && productToAdd.productID) {
+    if (
+      correctType === "edit" &&
+      quantityModalIsVisible &&
+      productToAdd.productID
+    ) {
       const item = cart.find(
         (item) => item.productID === productToAdd.productID
       );
@@ -36,10 +97,43 @@ const QuantityModal: React.FC<QuantityModalProps> = ({
       } else {
         setQuantity(0);
       }
-    } else if (type !== "edit") {
+    } else if (correctType !== "edit") {
       setQuantity(0);
     }
-  }, [type, quantityModalIsVisible, productToAdd, cart]);
+  }, [correctType, quantityModalIsVisible, productToAdd, cart]);
+
+  // Calculate the maximum allowable quantity based on subitems and inventory
+  useEffect(() => {
+    calculateMaxQuantity();
+  }, [quantityModalIsVisible, productToAdd, inventoryData, quantity]);
+
+  const calculateMaxQuantity = () => {
+    if (subitems && inventoryData) {
+      const maxQuantities = subitems.map((subitem) => {
+        const inventoryItem = inventoryData.find(
+          (item) => item.inventoryID === subitem.inventoryID
+        );
+        if (inventoryItem) {
+          return Math.floor(
+            inventoryItem.quantityRemaining / subitem.quantityNeeded
+          );
+        }
+        return 0;
+      });
+
+      const maxPossibleQuantity = Math.min(...maxQuantities);
+      setMaxQuantity(maxPossibleQuantity);
+
+      console.log(
+        "Max quantity of ",
+        productToAdd.productName,
+        " is ",
+        maxPossibleQuantity
+      );
+    } else {
+      console.log("Max quantity unknown.");
+    }
+  };
 
   let pathname = usePathname();
 
@@ -51,7 +145,7 @@ const QuantityModal: React.FC<QuantityModalProps> = ({
 
       const updatedCart = [...cart];
 
-      if (type === "edit") {
+      if (correctType === "edit") {
         if (quantity === 0) {
           if (itemIndex !== -1) {
             updatedCart.splice(itemIndex, 1);
@@ -104,6 +198,7 @@ const QuantityModal: React.FC<QuantityModalProps> = ({
             <button
               className="px-3 py-1 rounded-full text-black text-sm shadow-xl hover:scale-110 active:bg-secondaryBrown duration-200 bg-cream"
               onClick={() => setQuantity((prev) => Math.max(prev - 1, 0))}
+              disabled={quantity <= 0}
             >
               -
             </button>
@@ -112,16 +207,24 @@ const QuantityModal: React.FC<QuantityModalProps> = ({
             </div>
             <button
               className="px-3 py-1 rounded-full text-black text-sm shadow-xl hover:scale-110 active:bg-secondaryBrown duration-200 bg-cream"
-              onClick={() => setQuantity(quantity + 1)}
+              onClick={() => setQuantity((prev) => prev + 1)}
+              disabled={quantity >= maxQuantity}
             >
               +
             </button>
           </div>
 
+          {quantity >= maxQuantity && (
+            <p className="text-gray text-xs text-center mt-3">
+              Maximum quantity reached
+            </p>
+          )}
+
           {/* Confirm Button */}
           <button
             className="w-full px-4 py-2 mt-3 rounded-md font-semibold text-white text-sm bg-tealGreen hover:bg-gray-500"
             onClick={handleSave}
+            disabled={quantity > maxQuantity || quantity === 0}
           >
             Confirm
           </button>
