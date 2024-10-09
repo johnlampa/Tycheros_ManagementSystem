@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { format } from "date-fns";
-import { InventoryItem } from "../../../lib/types/InventoryItemDataTypes";
+import { MultiItemStockInData, InventoryItem } from "../../../lib/types/InventoryItemDataTypes";
 import SubitemModal from "@/components/SubitemModal";
 import StockInModal from "@/components/StockInModal";
 import axios from "axios";
@@ -42,22 +42,20 @@ export default function InventoryManagementPage() {
   const [itemToDelete, setItemToDelete] = useState<InventoryItem | null>(null);
 
   const [showStockInOverlay, setShowStockInOverlay] = useState(false);
-  const [stockInData, setStockInData] = useState({
-    inventoryID: 0,
+  const [stockInData, setStockInData] = useState<MultiItemStockInData>({
     supplierName: "",
-    employeeID: 0,
-    quantityOrdered: 0,
-    actualQuantity: 0,
-    pricePerUnit: 0,
-    stockInDate: new Date(),
-    expiryDate: new Date(),
+    employeeID: "",
+    stockInDate: "",
+    inventoryItems: [
+      {
+        inventoryID: 0,
+        quantityOrdered: 0,
+        actualQuantity: 0,
+        pricePerUnit: 0,
+        expiryDate: "",
+      },
+    ],
   });
-  
-  const formattedStockInData = {
-    ...stockInData,
-    stockInDate: format(stockInData.stockInDate, 'yyyy-MM-dd'),
-    expiryDate: format(stockInData.expiryDate, 'yyyy-MM-dd'),
-  };
 
   const handleStockIn = async () => {
     try {
@@ -70,12 +68,7 @@ export default function InventoryManagementPage() {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({
-            ...formattedStockInData,
-            quantityOrdered: Number(stockInData.quantityOrdered),
-            actualQuantity: Number(stockInData.actualQuantity),
-            pricePerUnit: Number(stockInData.pricePerUnit),
-          }),
+          body: JSON.stringify(stockInData),
         }
       );
   
@@ -93,19 +86,23 @@ export default function InventoryManagementPage() {
   
       // Reset data only after successful stock-in
       setStockInData({
-        inventoryID: 0,
         supplierName: "",
-        employeeID: 0,
-        quantityOrdered: 0,
-        actualQuantity: 0,
-        pricePerUnit: 0,
-        stockInDate: new Date(),
-        expiryDate: new Date(),
+        employeeID: "",
+        stockInDate: "",
+        inventoryItems: [
+          {
+            inventoryID: 0,
+            quantityOrdered: 0,
+            actualQuantity: 0,
+            pricePerUnit: 0,
+            expiryDate: "",
+          },
+        ],
       });
     } catch (error) {
       console.error("Error stocking in subitem:", error);
     }
-  };  
+  };
 
   const [employees, setEmployees] = useState<{ employeeID: number; firstName: string; lastName: string }[]>([]);
 
@@ -140,7 +137,7 @@ export default function InventoryManagementPage() {
     };
   
     fetchInventoryNames();
-  }, []);  
+  }, []);
 
   const [showStockOutOverlay, setShowStockOutOverlay] = useState(false);
   const [stockOutData, setStockOutData] = useState({
@@ -519,12 +516,13 @@ export default function InventoryManagementPage() {
         <StockInModal
           stockInData={stockInData}
           setStockInData={(data) => {
-            // Properly set data and convert fields to Date objects where necessary.
             setStockInData((prevData) => ({
               ...prevData,
               ...data,
-              stockInDate: data.stockInDate ? new Date(data.stockInDate) : prevData.stockInDate,
-              expiryDate: data.expiryDate ? new Date(data.expiryDate) : prevData.expiryDate,
+              inventoryItems: data.inventoryItems.map((item) => ({
+                ...item,
+                expiryDate: item.expiryDate ? format(new Date(item.expiryDate), 'yyyy-MM-dd') : "",
+              })),
             }));
           }}
           employees={employees}
