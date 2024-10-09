@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState } from "react";
+import { IoIosArrowUp, IoIosArrowDown } from "react-icons/io";
 
 interface StockInModalProps {
   stockInData: {
@@ -26,9 +27,37 @@ const StockInModal: React.FC<StockInModalProps> = ({
   handleStockIn,
   onClose,
 }) => {
+  const [inventoryItems, setInventoryItems] = useState(
+    [{ ...stockInData, expanded: true }]
+  );
+
+  const addInventoryItem = () => {
+    setInventoryItems([...inventoryItems, { ...stockInData, expanded: true }]);
+  };
+
+  const toggleExpandItem = (index: number) => {
+    const newInventoryItems = [...inventoryItems];
+    newInventoryItems[index].expanded = !newInventoryItems[index].expanded;
+    setInventoryItems(newInventoryItems);
+  };
+
+  const updateInventoryItem = (index: number, updatedItem: any) => {
+    const newInventoryItems = [...inventoryItems];
+    newInventoryItems[index] = { ...newInventoryItems[index], ...updatedItem };
+    setInventoryItems(newInventoryItems);
+  };
+
+  const updateAllInventoryItems = (updatedData: any) => {
+    const newInventoryItems = inventoryItems.map(item => ({
+      ...item,
+      ...updatedData
+    }));
+    setInventoryItems(newInventoryItems);
+  };
+
   return (
     <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center">
-      <div className="bg-white p-5 rounded-lg w-96">
+      <div className="bg-white p-5 rounded-lg w-96 max-h-full overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-black">Stock In</h2>
           <div className="flex items-center">
@@ -39,10 +68,12 @@ const StockInModal: React.FC<StockInModalProps> = ({
               type="date"
               id="stockInDate"
               value={stockInData.stockInDate}
-              onChange={(e) =>
-                setStockInData({ ...stockInData, stockInDate: e.target.value })
-              }
-              className="p-2 text-black"
+              onChange={(e) => {
+                const newValue = e.target.value;
+                setStockInData({ ...stockInData, stockInDate: newValue });
+                updateAllInventoryItems({ stockInDate: newValue });
+              }}
+              className="p-2 text-black border border-black"
             />
           </div>
         </div>
@@ -51,123 +82,138 @@ const StockInModal: React.FC<StockInModalProps> = ({
             type="text"
             placeholder="Supplier Name"
             value={stockInData.supplierName}
-            onChange={(e) =>
-              setStockInData({
-                ...stockInData,
-                supplierName: e.target.value,
-              })
-            }
-            className="mb-2 p-2 w-full text-black"
+            onChange={(e) => {
+              const newValue = e.target.value;
+              setStockInData({ ...stockInData, supplierName: newValue });
+              updateAllInventoryItems({ supplierName: newValue });
+            }}
+            className="mb-2 p-2 w-full text-black border border-black"
           />
           <select
             value={stockInData.employeeID}
-            onChange={(e) =>
-              setStockInData({
-                ...stockInData,
-                employeeID: e.target.value,
-              })
-            }
-            className="mb-2 p-2 w-full text-black"
+            onChange={(e) => {
+              const newValue = e.target.value;
+              setStockInData({ ...stockInData, employeeID: newValue });
+              updateAllInventoryItems({ employeeID: newValue });
+            }}
+            className="mb-2 p-2 w-full text-black border border-black"
           >
             <option value="" disabled>
               Select Employee
             </option>
             {employees.map((employee) => (
-              <option
-                key={employee.employeeID} // Change `id` to `employeeID`
-                value={employee.employeeID} // Set value to `employee.employeeID` (actual employee ID)
-              >
+              <option key={employee.employeeID} value={employee.employeeID}>
                 {`${employee.firstName} ${employee.lastName}`}
               </option>
             ))}
           </select>
-          <select
-            value={stockInData.inventoryID}
-            onChange={(e) =>
-              setStockInData({
-                ...stockInData,
-                inventoryID: e.target.value,
-              })
-            }
-            className="mb-2 p-2 w-full text-black"
+          {inventoryItems.map((item, index) => (
+            <div key={index} className="inventoryItem mb-4 border border-black bg-cream p-2">
+              <div className="flex justify-between items-center">
+                <select
+                  value={item.inventoryID}
+                  onChange={(e) =>
+                    updateInventoryItem(index, {
+                      inventoryID: e.target.value,
+                    })
+                  }
+                  className="mb-2 mt-2 p-2 w-full text-black border border-black"
+                >
+                  <option value="" disabled>
+                    Select Item
+                  </option>
+                  {inventoryNames.map((inventory) => (
+                    <option key={inventory.inventoryID} value={inventory.inventoryID}>
+                      {inventory.inventoryName}
+                    </option>
+                  ))}
+                </select>
+                <button onClick={() => toggleExpandItem(index)} className="ml-2">
+                  {item.expanded ? (
+                    <IoIosArrowUp className="text-black" />
+                  ) : (
+                    <IoIosArrowDown className="text-black" />
+                  )}
+                </button>
+              </div>
+              {item.expanded && (
+                <div>
+                  {/* Side-by-Side Inputs for Quantity Ordered and Actual Quantity */}
+                  <div className="flex gap-2 mb-2">
+                    <input
+                      type="number"
+                      placeholder="Quantity Ordered"
+                      value={item.quantityOrdered}
+                      min="0"
+                      onChange={(e) =>
+                        updateInventoryItem(index, {
+                          quantityOrdered: e.target.value,
+                        })
+                      }
+                      className="p-2 w-1/2 text-black border border-black"
+                    />
+                    <input
+                      type="number"
+                      placeholder="Actual Quantity"
+                      value={item.actualQuantity}
+                      min="0"
+                      onChange={(e) =>
+                        updateInventoryItem(index, {
+                          actualQuantity: e.target.value,
+                        })
+                      }
+                      className="p-2 w-1/2 text-black border border-black"
+                    />
+                  </div>
+
+                  <input
+                    type="number"
+                    placeholder="Price Per Unit"
+                    value={item.pricePerUnit}
+                    min="0"
+                    onChange={(e) =>
+                      updateInventoryItem(index, {
+                        pricePerUnit: e.target.value,
+                      })
+                    }
+                    className="mb-2 p-2 w-full text-black border border-black"
+                  />
+                  <input
+                    type="date"
+                    placeholder="Expiry Date"
+                    value={item.expiryDate}
+                    onChange={(e) =>
+                      updateInventoryItem(index, {
+                        expiryDate: e.target.value,
+                      })
+                    }
+                    className="mb-2 p-2 w-full text-black border border-black"
+                  />
+                </div>
+              )}
+            </div>
+          ))}
+          <button
+            onClick={addInventoryItem}
+            className="bg-tealGreen text-black py-2 px-4 rounded mb-4 border-none cursor-pointer mx-auto block"
           >
-            <option value="" disabled>
-              Select Item
-            </option>
-            {inventoryNames.map((item) => (
-              <option key={item.inventoryID} value={item.inventoryID}> {/* Set value to inventoryID */}
-                {item.inventoryName} {/* Display inventory name */}
-              </option>
-            ))}
-          </select>
-  
-          {/* Side-by-Side Inputs for Quantity Ordered and Actual Quantity */}
-          <div className="flex gap-2 mb-2">
-            <input
-              type="number"
-              placeholder="Quantity Ordered"
-              value={stockInData.quantityOrdered}
-              min="0"
-              onChange={(e) =>
-                setStockInData({
-                  ...stockInData,
-                  quantityOrdered: e.target.value,
-                })
-              }
-              className="p-2 w-1/2 text-black"
-            />
-            <input
-              type="number"
-              placeholder="Actual Quantity"
-              value={stockInData.actualQuantity}
-              min="0"
-              onChange={(e) =>
-                setStockInData({
-                  ...stockInData,
-                  actualQuantity: e.target.value,
-                })
-              }
-              className="p-2 w-1/2 text-black"
-            />
-          </div>
-  
-          <input
-            type="number"
-            placeholder="Price Per Unit"
-            value={stockInData.pricePerUnit}
-            min="0"
-            onChange={(e) =>
-              setStockInData({
-                ...stockInData,
-                pricePerUnit: e.target.value,
-              })
-            }
-            className="mb-2 p-2 w-full text-black"
-          />
-          <input
-            type="date"
-            placeholder="Expiry Date"
-            value={stockInData.expiryDate}
-            onChange={(e) =>
-              setStockInData({ ...stockInData, expiryDate: e.target.value })
-            }
-            className="mb-2 p-2 w-full text-black"
-          />
+            Add Inventory Item
+          </button>
           <div className="flex justify-between">
             <button
               onClick={async () => {
-                console.log("Stock In Data:", stockInData);
+                console.log("Stock In Data:", inventoryItems);
                 console.log("Employees:", employees);
                 await handleStockIn();
                 onClose();
               }}
-              className="bg-black text-white py-2 px-4 rounded border-none cursor-pointer"
+              className="bg-tealGreen text-black py-2 px-4 rounded border-none cursor-pointer"
             >
               Stock In
             </button>
             <button
               onClick={onClose}
-              className="bg-black text-white py-2 px-4 rounded border-none cursor-pointer"
+              className="bg-tealGreen text-black py-2 px-4 rounded border-none cursor-pointer"
             >
               Cancel
             </button>
@@ -175,7 +221,7 @@ const StockInModal: React.FC<StockInModalProps> = ({
         </div>
       </div>
     </div>
-  );  
+  );
 };
 
 export default StockInModal;
