@@ -400,7 +400,10 @@ export default function InventoryManagementPage() {
           </thead>
           <tbody>
             {inventoryData.map((item) => (
-              <tr key={item.inventoryID}>
+              <tr
+              key={item.inventoryID}
+              className={item.totalQuantity !== null && item.totalQuantity < item.reorderPoint ? "bg-low-quantity" : ""}
+              >
                 <td className="border border-black p-2.5">
                   {item.inventoryID}
                 </td>
