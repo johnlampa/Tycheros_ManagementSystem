@@ -12,8 +12,8 @@ interface StockInModalProps {
     stockInDate: string;
   };
   setStockInData: (data: any) => void;
-  employees: { id: number; firstName: string; lastName: string }[];
-  inventoryNames: { id: number; inventoryName: string }[];
+  employees: { employeeID: number; firstName: string; lastName: string }[];
+  inventoryNames: { inventoryID: number; inventoryName: string }[];
   handleStockIn: () => Promise<void>;
   onClose: () => void;
 }
@@ -74,8 +74,8 @@ const StockInModal: React.FC<StockInModalProps> = ({
             </option>
             {employees.map((employee) => (
               <option
-                key={employee.id}
-                value={`${employee.firstName} ${employee.lastName}`}
+                key={employee.employeeID} // Change `id` to `employeeID`
+                value={employee.employeeID} // Set value to `employee.employeeID` (actual employee ID)
               >
                 {`${employee.firstName} ${employee.lastName}`}
               </option>
@@ -95,8 +95,8 @@ const StockInModal: React.FC<StockInModalProps> = ({
               Select Item
             </option>
             {inventoryNames.map((item) => (
-              <option key={item.id} value={item.inventoryName}>
-                {item.inventoryName}
+              <option key={item.inventoryID} value={item.inventoryID}> {/* Set value to inventoryID */}
+                {item.inventoryName} {/* Display inventory name */}
               </option>
             ))}
           </select>
@@ -156,6 +156,8 @@ const StockInModal: React.FC<StockInModalProps> = ({
           <div className="flex justify-between">
             <button
               onClick={async () => {
+                console.log("Stock In Data:", stockInData);
+                console.log("Employees:", employees);
                 await handleStockIn();
                 onClose();
               }}
