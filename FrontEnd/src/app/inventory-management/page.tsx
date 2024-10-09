@@ -43,49 +43,69 @@ export default function InventoryManagementPage() {
 
   const [showStockInOverlay, setShowStockInOverlay] = useState(false);
   const [stockInData, setStockInData] = useState({
-    inventoryID: "",
+    inventoryID: 0,
     supplierName: "",
-    employeeID: "",
-    quantityOrdered: "",
-    actualQuantity: "",
-    pricePerUnit: "",
-    stockInDate: "",
-    expiryDate: "",
+    employeeID: 0,
+    quantityOrdered: 0,
+    actualQuantity: 0,
+    pricePerUnit: 0,
+    stockInDate: new Date(),
+    expiryDate: new Date(),
   });
+  
+  const formattedStockInData = {
+    ...stockInData,
+    stockInDate: format(stockInData.stockInDate, 'yyyy-MM-dd'),
+    expiryDate: format(stockInData.expiryDate, 'yyyy-MM-dd'),
+  };
 
   const handleStockIn = async () => {
     try {
+      console.log("StockIn Data before request:", stockInData); // Log data before making the request
+  
       const response = await fetch(
-        "http://localhost:8081/inventoryManagement/stockInSubitem",
+        "http://localhost:8081/inventoryManagement/stockInInventoryItem",
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            ...stockInData,
+            ...formattedStockInData,
             quantityOrdered: Number(stockInData.quantityOrdered),
             actualQuantity: Number(stockInData.actualQuantity),
             pricePerUnit: Number(stockInData.pricePerUnit),
           }),
         }
       );
-
+  
       if (!response.ok) {
         throw new Error("Failed to stock in subitem");
       }
-
+  
       const updatedInventory = await fetch(
         "http://localhost:8081/inventoryManagement/getSubitem"
       ).then((res) => res.json());
       setInventoryData(updatedInventory);
-      console.log("Stock In Data:", stockInData);
-
+      console.log("Stock In Data after success:", stockInData); // Log data after successful stocking in
+  
       alert("Subitem stocked in successfully");
+  
+      // Reset data only after successful stock-in
+      setStockInData({
+        inventoryID: 0,
+        supplierName: "",
+        employeeID: 0,
+        quantityOrdered: 0,
+        actualQuantity: 0,
+        pricePerUnit: 0,
+        stockInDate: new Date(),
+        expiryDate: new Date(),
+      });
     } catch (error) {
       console.error("Error stocking in subitem:", error);
     }
-  };
+  };  
 
   const [employees, setEmployees] = useState<{ employeeID: number; firstName: string; lastName: string }[]>([]);
 
@@ -498,22 +518,21 @@ export default function InventoryManagementPage() {
       {showStockInOverlay && (
         <StockInModal
           stockInData={stockInData}
-          setStockInData={setStockInData}
+          setStockInData={(data) => {
+            // Properly set data and convert fields to Date objects where necessary.
+            setStockInData((prevData) => ({
+              ...prevData,
+              ...data,
+              stockInDate: data.stockInDate ? new Date(data.stockInDate) : prevData.stockInDate,
+              expiryDate: data.expiryDate ? new Date(data.expiryDate) : prevData.expiryDate,
+            }));
+          }}
           employees={employees}
           inventoryNames={inventoryNames}
           handleStockIn={handleStockIn}
           onClose={() => {
+            console.log("StockInData on close:", stockInData);
             setShowStockInOverlay(false);
-            setStockInData({
-              inventoryID: "",
-              supplierName: "",
-              employeeID: "",
-              quantityOrdered: "",
-              actualQuantity: "",
-              pricePerUnit: "",
-              stockInDate: "",
-              expiryDate: "",
-            });
           }}
         />
       )}

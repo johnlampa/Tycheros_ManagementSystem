@@ -169,56 +169,86 @@ router.delete('/deleteSubitem/:inventoryID', async (req, res) => {
 // STOCK IN STOCK OUT STOCK IN STOCK OUT STOCK IN STOCK OUT STOCK IN STOCK OUT STOCK IN STOCK OUT STOCK IN STOCK OUT STOCK IN STOCK OUT 
 
 // STOCK IN ENDPOINT
-router.post('/stockInSubitem', async (req, res) => {
-  const { inventoryID, supplierName, employeeID, quantityOrdered, actualQuantity, pricePerUnit, stockInDate, expiryDate } = req.body;
-
+router.post('/stockInInventoryItem', async (req, res) => {
+  const {
+    supplierName,
+    employeeID,
+    stockInDate,
+    inventoryID,
+    quantityOrdered,
+    actualQuantity,
+    pricePerUnit,
+    expiryDate,
+  } = req.body;
   const connection = await pool.getConnection();
+  console.log("Request Body: ", req.body);
 
   try {
     await connection.beginTransaction();
 
     // 1. Check if the supplier already exists
-    const [existingSupplier] = await connection.query('SELECT supplierID FROM supplier WHERE supplierName = ?', [supplierName]);
-    
+    const [existingSupplier] = await connection.query(
+      'SELECT supplierID FROM supplier WHERE supplierName = ?',
+      [supplierName]
+    );
+
     let supplierID;
     if (existingSupplier.length > 0) {
       // Supplier exists, use the existing supplierID
       supplierID = existingSupplier[0].supplierID;
     } else {
       // Supplier does not exist, insert a new one
-      const [supplierResult] = await connection.query('INSERT INTO supplier (supplierName) VALUES (?)', [supplierName]);
+      const [supplierResult] = await connection.query(
+        'INSERT INTO supplier (supplierName) VALUES (?)',
+        [supplierName]
+      );
       supplierID = supplierResult.insertId;
     }
 
     // 2. Insert into the purchaseorder table
-    const [purchaseOrderResult] = await connection.query(`
-      INSERT INTO purchaseorder 
-      (supplierID, employeeID, quantityOrdered, actualQuantity, pricePerUnit, stockInDate, expiryDate) 
-      VALUES (?, ?, ?, ?, ?, ?, ?)`, 
-      [supplierID, employeeID, quantityOrdered, actualQuantity, pricePerUnit, stockInDate, expiryDate]
+    const [purchaseOrderResult] = await connection.query(
+      `INSERT INTO purchaseorder (supplierID, employeeID, stockInDate) VALUES (?, ?, ?)`,
+      [supplierID, employeeID, stockInDate]
     );
     const purchaseOrderID = purchaseOrderResult.insertId;
 
-    // 3. Insert into the subinventory table and get the subinventoryID
-    const [subinventoryResult] = await connection.query('INSERT INTO subinventory (inventoryID, purchaseOrderID, quantityRemaining) VALUES (?, ?, ?)', [inventoryID, purchaseOrderID, actualQuantity]);
+    // 3. Insert into the purchaseorderitem table
+    const [purchaseOrderItemResult] = await connection.query(
+      `INSERT INTO purchaseorderitem (quantityOrdered, actualQuantity, pricePerUnit, expiryDate, subinventoryID, purchaseOrderID) 
+       VALUES (?, ?, ?, ?, NULL, ?)`,
+      [quantityOrdered, actualQuantity, pricePerUnit, expiryDate, purchaseOrderID]
+    );
+    const purchaseOrderItemID = purchaseOrderItemResult.insertId;
+
+    // 4. Insert into the subinventory table and get the subinventoryID
+    const [subinventoryResult] = await connection.query(
+      'INSERT INTO subinventory (inventoryID, quantityRemaining) VALUES (?, ?)',
+      [inventoryID, actualQuantity]
+    );
     const subinventoryID = subinventoryResult.insertId;
+
+    // 5. Update the subinventoryID in purchaseorderitem
+    await connection.query(
+      'UPDATE purchaseorderitem SET subinventoryID = ? WHERE purchaseOrderItemID = ?',
+      [subinventoryID, purchaseOrderItemID]
+    );
 
     await connection.commit();
     res.status(201).send({
       message: 'Product stocked in successfully',
       supplierID,
       purchaseOrderID,
-      subinventoryID
+      purchaseOrderItemID,
+      subinventoryID,
     });
   } catch (err) {
     await connection.rollback();
-    console.error("Error stocking in subitem:", err);
+    console.error('Error stocking in subitem:', err);
     res.status(500).send(err);
   } finally {
     connection.release();
   }
 });
-
 
 //STOCK OUT 
 router.post('/stockOutSubitem', async (req, res) => {
