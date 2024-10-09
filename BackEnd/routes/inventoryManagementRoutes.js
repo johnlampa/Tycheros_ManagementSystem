@@ -168,17 +168,13 @@ router.delete('/deleteSubitem/:inventoryID', async (req, res) => {
 
 // STOCK IN STOCK OUT STOCK IN STOCK OUT STOCK IN STOCK OUT STOCK IN STOCK OUT STOCK IN STOCK OUT STOCK IN STOCK OUT STOCK IN STOCK OUT 
 
-// STOCK IN ENDPOINT
+// STOCK IN ENDPOINT (Modified to Handle Multiple Items)
 router.post('/stockInInventoryItem', async (req, res) => {
   const {
     supplierName,
     employeeID,
     stockInDate,
-    inventoryID,
-    quantityOrdered,
-    actualQuantity,
-    pricePerUnit,
-    expiryDate,
+    inventoryItems,
   } = req.body;
   const connection = await pool.getConnection();
   console.log("Request Body: ", req.body);
@@ -212,38 +208,47 @@ router.post('/stockInInventoryItem', async (req, res) => {
     );
     const purchaseOrderID = purchaseOrderResult.insertId;
 
-    // 3. Insert into the purchaseorderitem table
-    const [purchaseOrderItemResult] = await connection.query(
-      `INSERT INTO purchaseorderitem (quantityOrdered, actualQuantity, pricePerUnit, expiryDate, subinventoryID, purchaseOrderID) 
-       VALUES (?, ?, ?, ?, NULL, ?)`,
-      [quantityOrdered, actualQuantity, pricePerUnit, expiryDate, purchaseOrderID]
-    );
-    const purchaseOrderItemID = purchaseOrderItemResult.insertId;
+    // 3. Loop through each inventory item and add it
+    for (let item of inventoryItems) {
+      const {
+        inventoryID,
+        quantityOrdered,
+        actualQuantity,
+        pricePerUnit,
+        expiryDate,
+      } = item;
 
-    // 4. Insert into the subinventory table and get the subinventoryID
-    const [subinventoryResult] = await connection.query(
-      'INSERT INTO subinventory (inventoryID, quantityRemaining) VALUES (?, ?)',
-      [inventoryID, actualQuantity]
-    );
-    const subinventoryID = subinventoryResult.insertId;
+      // Insert into the purchaseorderitem table
+      const [purchaseOrderItemResult] = await connection.query(
+        `INSERT INTO purchaseorderitem (quantityOrdered, actualQuantity, pricePerUnit, expiryDate, subinventoryID, purchaseOrderID) 
+         VALUES (?, ?, ?, ?, NULL, ?)`,
+        [quantityOrdered, actualQuantity, pricePerUnit, expiryDate, purchaseOrderID]
+      );
+      const purchaseOrderItemID = purchaseOrderItemResult.insertId;
 
-    // 5. Update the subinventoryID in purchaseorderitem
-    await connection.query(
-      'UPDATE purchaseorderitem SET subinventoryID = ? WHERE purchaseOrderItemID = ?',
-      [subinventoryID, purchaseOrderItemID]
-    );
+      // Insert into the subinventory table and get the subinventoryID
+      const [subinventoryResult] = await connection.query(
+        'INSERT INTO subinventory (inventoryID, quantityRemaining) VALUES (?, ?)',
+        [inventoryID, actualQuantity]
+      );
+      const subinventoryID = subinventoryResult.insertId;
+
+      // Update the subinventoryID in purchaseorderitem
+      await connection.query(
+        'UPDATE purchaseorderitem SET subinventoryID = ? WHERE purchaseOrderItemID = ?',
+        [subinventoryID, purchaseOrderItemID]
+      );
+    }
 
     await connection.commit();
     res.status(201).send({
-      message: 'Product stocked in successfully',
+      message: 'Products stocked in successfully',
       supplierID,
       purchaseOrderID,
-      purchaseOrderItemID,
-      subinventoryID,
     });
   } catch (err) {
     await connection.rollback();
-    console.error('Error stocking in subitem:', err);
+    console.error('Error stocking in subitems:', err);
     res.status(500).send(err);
   } finally {
     connection.release();

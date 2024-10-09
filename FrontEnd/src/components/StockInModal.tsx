@@ -1,19 +1,11 @@
 import React, { useState } from "react";
 import { IoIosArrowUp, IoIosArrowDown } from "react-icons/io";
 import { format } from 'date-fns';
+import { MultiItemStockInData } from "../../lib/types/InventoryItemDataTypes";
 
 interface StockInModalProps {
-  stockInData: {
-    inventoryID: number;
-    supplierName: string;
-    employeeID: number;
-    quantityOrdered: number;
-    actualQuantity: number;
-    pricePerUnit: number;
-    expiryDate: Date;
-    stockInDate: Date;
-  };
-  setStockInData: (data: any) => void;
+  stockInData: MultiItemStockInData;
+  setStockInData: (data: MultiItemStockInData) => void;
   employees: { employeeID: number; firstName: string; lastName: string }[];
   inventoryNames: { inventoryID: number; inventoryName: string }[];
   handleStockIn: () => Promise<void>;
@@ -29,11 +21,22 @@ const StockInModal: React.FC<StockInModalProps> = ({
   onClose,
 }) => {
   const [inventoryItems, setInventoryItems] = useState(
-    [{ ...stockInData, expanded: true }]
+    stockInData.inventoryItems.map(item => ({
+      ...item,
+      expiryDate: typeof item.expiryDate === 'string' ? item.expiryDate : format(item.expiryDate, 'yyyy-MM-dd'),
+      expanded: true
+    }))
   );
 
   const addInventoryItem = () => {
-    setInventoryItems([...inventoryItems, { ...stockInData, expanded: true }]);
+    setInventoryItems([...inventoryItems, {
+      inventoryID: 0,
+      quantityOrdered: 0,
+      actualQuantity: 0,
+      pricePerUnit: 0,
+      expiryDate: format(new Date(), 'yyyy-MM-dd'),
+      expanded: true,
+    }]);
   };
 
   const toggleExpandItem = (index: number) => {
@@ -46,8 +49,7 @@ const StockInModal: React.FC<StockInModalProps> = ({
     const newInventoryItems = [...inventoryItems];
     newInventoryItems[index] = { ...newInventoryItems[index], ...updatedItem };
     setInventoryItems(newInventoryItems);
-    // Propagate the update to parent
-    setStockInData(newInventoryItems[index]);
+    setStockInData({ ...stockInData, inventoryItems: newInventoryItems });
   };
 
   const updateAllInventoryItems = (updatedData: any) => {
@@ -56,8 +58,7 @@ const StockInModal: React.FC<StockInModalProps> = ({
       ...updatedData
     }));
     setInventoryItems(newInventoryItems);
-    // Update the parent state for the first item
-    setStockInData(newInventoryItems[0]);
+    setStockInData({ ...stockInData, inventoryItems: newInventoryItems });
   };
 
   return (
@@ -72,10 +73,10 @@ const StockInModal: React.FC<StockInModalProps> = ({
             <input
               type="date"
               id="stockInDate"
-              value={stockInData.stockInDate ? format(stockInData.stockInDate, 'yyyy-MM-dd') : ''}
+              value={stockInData.stockInDate ? stockInData.stockInDate : ''}
               onChange={(e) => {
-                const newValue = new Date(e.target.value);
-                updateAllInventoryItems({ stockInDate: newValue });
+                const newValue = e.target.value;
+                setStockInData({ ...stockInData, stockInDate: newValue });
               }}
               className="p-2 text-black border border-black"
             />
@@ -88,23 +89,23 @@ const StockInModal: React.FC<StockInModalProps> = ({
             value={stockInData.supplierName}
             onChange={(e) => {
               const newValue = e.target.value;
-              updateAllInventoryItems({ supplierName: newValue });
+              setStockInData({ ...stockInData, supplierName: newValue });
             }}
             className="mb-2 p-2 w-full text-black border border-black"
           />
           <select
             value={stockInData.employeeID}
             onChange={(e) => {
-              const newValue = parseInt(e.target.value);
-              updateAllInventoryItems({ employeeID: newValue });
+              const newValue = e.target.value;
+              setStockInData({ ...stockInData, employeeID: newValue });
             }}
             className="mb-2 p-2 w-full text-black border border-black"
           >
-            <option value="0" disabled>
+            <option value="" disabled>
               Select Employee
             </option>
             {employees.map((employee) => (
-              <option key={employee.employeeID} value={employee.employeeID}>
+              <option key={employee.employeeID} value={employee.employeeID.toString()}>
                 {`${employee.firstName} ${employee.lastName}`}
               </option>
             ))}
@@ -182,10 +183,10 @@ const StockInModal: React.FC<StockInModalProps> = ({
                   <input
                     type="date"
                     placeholder="Expiry Date"
-                    value={format(item.expiryDate, 'yyyy-MM-dd')}
+                    value={item.expiryDate}
                     onChange={(e) =>
                       updateInventoryItem(index, {
-                        expiryDate: new Date(e.target.value),
+                        expiryDate: e.target.value,
                       })
                     }
                     className="mb-2 p-2 w-full text-black border border-black"
@@ -223,6 +224,5 @@ const StockInModal: React.FC<StockInModalProps> = ({
     </div>
   );
 };
-
 
 export default StockInModal;
