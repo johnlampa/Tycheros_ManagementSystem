@@ -15,62 +15,72 @@ const pool = mysql.createPool(dbConfig);
 
 // INVENTORY MANAGEMENT ROUTES :3
 
+router.get('/getInventoryName', async (req, res) => {
+  const query = `SELECT * FROM inventory`;
+  try {
+    const [data] = await pool.query(query);
+    return res.json(data);
+  } catch (err) {
+    console.error('Error fetching inventory names:', err);
+    return res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
 // GET INVENTORY DATA ENDPOINT
 router.get('/getSubitem', async (req, res) => {
   const query = `
+    WITH InventoryData AS (
+        SELECT 
+            inv.inventoryID,
+            inv.inventoryName,
+            inv.inventoryCategory,
+            inv.reorderPoint,
+            inv.unitOfMeasure,
+            si.quantityRemaining,  -- Show quantityRemaining per subinventory entry
+            SUM(CASE WHEN si.quantityRemaining > 0 THEN si.quantityRemaining ELSE 0 END) 
+                OVER (PARTITION BY inv.inventoryID) AS totalQuantity,  -- Total positive quantityRemaining for each inventoryID
+            poi.quantityOrdered,
+            poi.actualQuantity,
+            poi.pricePerUnit,
+            poi.expiryDate,
+            po.stockInDate,
+            s.supplierName,
+            CONCAT(e.firstName, ' ', e.lastName) AS employeeName,  -- Full employee name as firstName + lastName
+            ROW_NUMBER() OVER (PARTITION BY inv.inventoryID ORDER BY poi.expiryDate ASC) AS row_num  -- For ordering by expiryDate within each inventoryID
+        FROM 
+            inventory inv
+        LEFT JOIN 
+            subinventory si ON inv.inventoryID = si.inventoryID AND si.quantityRemaining > 0 -- Include only positive quantities
+        LEFT JOIN 
+            purchaseorderitem poi ON si.subinventoryID = poi.subinventoryID
+        LEFT JOIN 
+            purchaseorder po ON poi.purchaseOrderID = po.purchaseOrderID
+        LEFT JOIN 
+            supplier s ON po.supplierID = s.supplierID
+        LEFT JOIN 
+            employees e ON po.employeeID = e.employeeID
+    )
     SELECT 
-      CASE WHEN ROW_NUMBER() OVER (PARTITION BY i.inventoryID ORDER BY po.expiryDate ASC) = 1 
-          THEN i.inventoryID 
-          ELSE NULL 
-      END AS inventoryID,
-      CASE WHEN ROW_NUMBER() OVER (PARTITION BY i.inventoryID ORDER BY po.expiryDate ASC) = 1 
-          THEN i.inventoryName 
-          ELSE NULL 
-      END AS inventoryName,
-      CASE WHEN ROW_NUMBER() OVER (PARTITION BY i.inventoryID ORDER BY po.expiryDate ASC) = 1 
-          THEN i.inventoryCategory -- New column added here
-          ELSE NULL 
-      END AS inventoryCategory,
-      CASE WHEN ROW_NUMBER() OVER (PARTITION BY i.inventoryID ORDER BY po.expiryDate ASC) = 1 
-          THEN i.reorderPoint 
-          ELSE NULL 
-      END AS reorderPoint,
-      CASE WHEN ROW_NUMBER() OVER (PARTITION BY i.inventoryID ORDER BY po.expiryDate ASC) = 1 
-          THEN i.unitOfMeasure 
-          ELSE NULL 
-      END AS unitOfMeasure,
-      po.purchaseOrderID,
-      sub.totalQuantity,
-      si.quantityRemaining,
-      po.pricePerUnit,
-      DATE(po.stockInDate) AS stockInDate,
-      DATE(po.expiryDate) AS expiryDate,
-      s.supplierName,
-      CONCAT(e.firstName, ' ', e.lastName) AS employeeName
+        inventoryID,  -- Always retain inventoryID for each row
+        CASE WHEN row_num = 1 THEN inventoryName ELSE NULL END AS inventoryName,
+        CASE WHEN row_num = 1 THEN inventoryCategory ELSE NULL END AS inventoryCategory,
+        CASE WHEN row_num = 1 THEN reorderPoint ELSE NULL END AS reorderPoint,
+        CASE WHEN row_num = 1 THEN unitOfMeasure ELSE NULL END AS unitOfMeasure,
+        CASE WHEN row_num = 1 THEN totalQuantity ELSE NULL END AS totalQuantity,
+        quantityRemaining,  -- Quantity remaining per subinventory entry
+        quantityOrdered,
+        actualQuantity,
+        pricePerUnit,
+        expiryDate,
+        stockInDate,
+        supplierName,
+        employeeName
     FROM 
-        inventory i
-    LEFT JOIN 
-        subinventory si ON i.inventoryID = si.inventoryID AND si.quantityRemaining > 0 -- Filter out zero quantities here
-    LEFT JOIN 
-        purchaseorder po ON si.purchaseOrderID = po.purchaseOrderID
-    LEFT JOIN 
-        supplier s ON po.supplierID = s.supplierID
-    LEFT JOIN 
-        employees e ON po.employeeID = e.employeeID
-    LEFT JOIN 
-        (
-            SELECT 
-                inventoryID,
-                SUM(quantityRemaining) AS totalQuantity
-            FROM 
-                subinventory
-            WHERE quantityRemaining > 0 -- Ensure subinventory totals only positive quantities
-            GROUP BY 
-                inventoryID
-        ) sub ON i.inventoryID = sub.inventoryID
+        InventoryData
     ORDER BY 
-        i.inventoryName ASC,
-        po.expiryDate ASC;
+        COALESCE(inventoryName, (SELECT inventoryName FROM InventoryData WHERE inventoryID = InventoryData.inventoryID AND row_num = 1)) ASC,  -- Order by inventoryName alphabetically, group NULLs with their corresponding inventoryName
+        inventoryID ASC,     -- Group all entries with the same inventoryID together
+        row_num ASC;         -- Then order by row number (earliest expiryDate first)
   `;
 
   try {
