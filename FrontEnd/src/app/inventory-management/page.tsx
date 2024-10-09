@@ -79,6 +79,7 @@ export default function InventoryManagementPage() {
         "http://localhost:8081/inventoryManagement/getSubitem"
       ).then((res) => res.json());
       setInventoryData(updatedInventory);
+      console.log("Stock In Data:", stockInData);
 
       alert("Subitem stocked in successfully");
     } catch (error) {
@@ -86,7 +87,7 @@ export default function InventoryManagementPage() {
     }
   };
 
-  const [employees, setEmployees] = useState<{ id: number; firstName: string; lastName: string }[]>([]);
+  const [employees, setEmployees] = useState<{ employeeID: number; firstName: string; lastName: string }[]>([]);
 
   useEffect(() => {
     const fetchEmployees = async () => {
@@ -107,7 +108,7 @@ export default function InventoryManagementPage() {
     fetchEmployees();
   }, []);
 
-  const [inventoryNames, setInventoryNames] = useState<{ id: number; inventoryName: string }[]>([]);
+  const [inventoryNames, setInventoryNames] = useState<{ inventoryID: number; inventoryName: string }[]>([]);
   useEffect(() => {
     const fetchInventoryNames = async () => {
       try {
