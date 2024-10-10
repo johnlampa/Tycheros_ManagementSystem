@@ -199,4 +199,95 @@ router.put('/updateOrderStatus', (req, res) => {
   });
 });
 
+router.post('/cancelOrder', (req, res) => {
+  const { orderID, cancellationReason, subitemsUsed } = req.body;
+
+  console.log("Request received for cancelling order:", {
+    orderID,
+    cancellationReason,
+    subitemsUsed,
+  });
+
+  // Start transaction
+  db.beginTransaction((err) => {
+    if (err) {
+      console.error("Error starting transaction:", err);
+      return res.status(500).send("Error starting transaction");
+    }
+
+    // Insert into cancelledOrders table
+    const insertCancelledOrderQuery = `
+      INSERT INTO cancelledOrders (orderID, cancellationReason, cancellationType)
+      VALUES (?, ?, (SELECT status FROM \`order\` WHERE orderID = ?))
+    `;
+    db.query(insertCancelledOrderQuery, [orderID, cancellationReason, orderID], (err, result) => {
+      if (err) {
+        console.error("Error inserting into cancelledOrders:", err);
+        return db.rollback(() => res.status(500).send("Error inserting into cancelledOrders"));
+      }
+
+      const cancelledOrderID = result.insertId;
+      console.log("Cancelled order inserted with ID:", cancelledOrderID);
+
+      // Validate if all subitemsUsed exist in subitem table
+      const subitemIDs = subitemsUsed.map(subitem => subitem.subitemID);
+      console.log("Validating subitemIDs:", subitemIDs);
+
+      const checkSubitemsQuery = `
+        SELECT subitemID FROM subitem WHERE subitemID IN (?)
+      `;
+      db.query(checkSubitemsQuery, [subitemIDs], (err, result) => {
+        if (err) {
+          console.error("Error validating subitemIDs:", err);
+          return db.rollback(() => res.status(500).send("Error validating subitemIDs"));
+        }
+
+        // Check if all subitemIDs are valid
+        const validSubitemIDs = result.map(row => row.subitemID);
+        const invalidSubitemIDs = subitemIDs.filter(id => !validSubitemIDs.includes(id));
+
+        if (invalidSubitemIDs.length > 0) {
+          console.error("Invalid subitemIDs found:", invalidSubitemIDs);
+          return db.rollback(() => res.status(400).send("Invalid subitemIDs: " + invalidSubitemIDs.join(', ')));
+        }
+
+        // Insert each valid subitem used into subitemused table
+        const insertSubitemUsedPromises = subitemsUsed.map((subitem) => {
+          return new Promise((resolve, reject) => {
+            console.log("Inserting subitem used:", subitem);
+            const insertSubitemUsedQuery = `
+              INSERT INTO subitemused (subitemID, quantityUsed, cancelledOrderID)
+              VALUES (?, ?, ?)
+            `;
+            db.query(insertSubitemUsedQuery, [subitem.subitemID, subitem.quantityUsed, cancelledOrderID], (err) => {
+              if (err) {
+                return reject(err);
+              }
+              resolve();
+            });
+          });
+        });
+
+        // Execute all subitem inserts
+        Promise.all(insertSubitemUsedPromises)
+          .then(() => {
+            // Commit transaction
+            db.commit((err) => {
+              if (err) {
+                console.error("Error committing transaction:", err);
+                return db.rollback(() => res.status(500).send("Error committing transaction"));
+              }
+              console.log("Order cancellation transaction committed successfully.");
+              res.status(200).send("Order cancelled successfully");
+            });
+          })
+          .catch((err) => {
+            console.error("Error inserting subitems used:", err);
+            db.rollback(() => res.status(500).send("Error inserting subitems used"));
+          });
+      });
+    });
+  });
+});
+
 module.exports = router;

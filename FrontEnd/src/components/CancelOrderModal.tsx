@@ -1,7 +1,3 @@
-//if orderToEdit.status === "pending" {ask for subitemsUsed}
-//if orderToEdit.status === "completed" {ask for reason, automatically
-//subitemsUsed = orderToEdit.orderItems.ALLsubitems}
-
 import { useEffect, useState } from "react";
 import { CancelOrderModalProps } from "../../lib/types/props/CancelOrderModalProps";
 
@@ -29,6 +25,7 @@ const CancelOrderModal: React.FC<CancelOrderModalProps> = ({
         const response = await axios.get(
           `http://localhost:8081/menuManagement/getSpecificSubitems/${productID}`
         );
+        console.log("Fetched specific subitems for productID:", productID, response.data);
         return response.data;
       } catch (error) {
         console.error("Error fetching subitems:", error);
@@ -57,7 +54,7 @@ const CancelOrderModal: React.FC<CancelOrderModalProps> = ({
 
         // After fetching all subitems, update the state once
         setSubitems(allSubitems);
-        console.log("Fetched subitems: ", allSubitems);
+        console.log("All fetched subitems for order:", allSubitems);
       } catch (error) {
         console.error("Error in fetchAllSubitems:", error);
       }
@@ -68,7 +65,7 @@ const CancelOrderModal: React.FC<CancelOrderModalProps> = ({
       fetchAllSubitems();
     }
 
-    console.log("Subitems: ", subitems);
+    console.log("Subitems state:", subitems);
   }, [orderToEdit]); // Dependency on orderToEdit
 
   useEffect(() => {
@@ -77,6 +74,7 @@ const CancelOrderModal: React.FC<CancelOrderModalProps> = ({
       .get("http://localhost:8081/menuManagement/getAllSubitems")
       .then((response) => {
         setInventoryData(response.data);
+        console.log("Fetched inventory data:", response.data);
       })
       .catch((error) => {
         console.error("Error fetching inventory data:", error);
@@ -85,36 +83,10 @@ const CancelOrderModal: React.FC<CancelOrderModalProps> = ({
 
   const handleAddSubitemUsed = () => {
     setSubitemsUsed([...subitemsUsed, { subitemID: 0, quantityUsed: 0 }]);
+    console.log("Subitems used after adding:", subitemsUsed);
   };
 
-  const handleSave = () => {
-    if (!orderToEdit) {
-      console.error("orderToEdit is not defined. Cannot proceed with update.");
-      return;
-    }
-
-    // Directly define and assign 'updatedOrderToEdit' in this scope
-    const updatedOrderToEdit: Order = {
-      ...orderToEdit,
-      status: "Cancelled",
-      subitemsUsed: subitemsUsed, // Ensure subitemsUsed is properly assigned
-      date: orderToEdit.date.substring(0, 10), // Truncate the date if needed
-      employeeID: orderToEdit?.employeeID ?? 0, // Default employeeID to 0 if undefined
-    };
-
-    console.log("Updated order before saving:", updatedOrderToEdit);
-
-    setOrders?.(
-      orders.map((o) =>
-        o.orderID === orderToEdit.orderID ? updatedOrderToEdit : o
-      )
-    );
-
-    // Optionally call your API to persist the change
-    // updateOrderStatus("Cancelled");
-  };
-
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setCancelOrderModalVisibility(false);
 
@@ -127,74 +99,67 @@ const CancelOrderModal: React.FC<CancelOrderModalProps> = ({
       return;
     }
 
-    let updatedOrderToEdit: Order;
+    let cancellationType = orderToEdit.status;
+    let cancellationReason = formJson.cancellationReason as string;
+
+    let updatedSubitemsUsed: SubitemUsed[] = [];
 
     if (orderToEdit.status === "Pending") {
-      // Directly define and assign 'updatedOrderToEdit' in this scope
-      updatedOrderToEdit = {
-        ...orderToEdit,
-        status: "Cancelled",
-        subitemsUsed: subitemsUsed.map((subitemUsed, index) => ({
-          subitemID: parseInt(formJson[`subitemUsed-${index}`] as string),
-          quantityUsed: parseFloat(formJson[`quantityUsed-${index}`] as string),
-        })),
-        date: orderToEdit.date.substring(0, 10), // Truncate the date if needed
-        employeeID: orderToEdit?.employeeID ?? 0, // Default employeeID to 0 if undefined
-        cancellationReason: formJson.cancellationReason as string,
-        cancellationType: orderToEdit.status,
-      };
-    } else {
-      updatedOrderToEdit = {
-        ...orderToEdit,
-        status: "Cancelled",
-        subitemsUsed: subitems.map((subitem, index) => ({
-          subitemID: subitem.inventoryID,
-          quantityUsed: subitem.quantityNeeded,
-        })),
-        date: orderToEdit.date.substring(0, 10), // Truncate the date if needed
-        employeeID: orderToEdit?.employeeID ?? 0, // Default employeeID to 0 if undefined
-        cancellationReason: formJson.cancellationReason as string,
-        cancellationType: orderToEdit.status,
-      };
+      // Map subitemsUsed from form inputs
+      updatedSubitemsUsed = subitemsUsed.map((subitemUsed, index) => ({
+        subitemID: parseInt(formJson[`subitemUsed-${index}`] as string),
+        quantityUsed: parseFloat(formJson[`quantityUsed-${index}`] as string),
+      }));
+    } else if (orderToEdit.status === "Completed") {
+      // Automatically fetch all subitems and set quantity needed as quantity used
+      updatedSubitemsUsed = subitems.map((subitem) => ({
+        subitemID: subitem.subitemID,
+        quantityUsed: subitem.quantityNeeded,
+      }));
+    } else if (orderToEdit.status === "Unpaid") {
+      // Set quantityUsed to 0 for unpaid orders
+      updatedSubitemsUsed = subitems.map((subitem) => ({
+        subitemID: subitem.subitemID,
+        quantityUsed: 0,
+      }));
     }
 
-    console.log("Updated order before saving:", updatedOrderToEdit);
+    console.log("Subitems used to cancel the order:", updatedSubitemsUsed);
 
-    setOrders?.(
-      orders.map((o) =>
-        o.orderID === orderToEdit.orderID ? updatedOrderToEdit : o
-      )
-    );
+    // Prepare data for API call
+    const cancelOrderData = {
+      orderID: orderToEdit.orderID,
+      cancellationReason,
+      subitemsUsed: updatedSubitemsUsed,
+    };
 
-    // if (type === "edit" && menuProductToEdit?.productID) {
-    //   axios
-    //     .put(`http://localhost:8081/menuManagement/putProduct/${menuProductToEdit.productID}`, updatedProduct)
-    //     .then((response) => {
-    //       console.log("Product updated:", updatedProduct);
-    //       if (setMenuProductHolder) {
-    //         setMenuProductHolder(updatedProduct);
-    //       }
-    //       form.reset();
-    //       window.location.reload();
-    //     })
-    //     .catch((error) => {
-    //       console.error("Error updating product:", error);
-    //     });
-    // } else {
-    //   axios
-    //     .post("http://localhost:8081/menuManagement/postProduct", updatedProduct)
-    //     .then((response) => {
-    //       console.log("Product added:", updatedProduct);
-    //       if (setMenuProductHolder) {
-    //         setMenuProductHolder(updatedProduct);
-    //       }
-    //       form.reset();
-    //       window.location.reload();
-    //     })
-    //     .catch((error) => {
-    //       console.error("Error adding product:", error);
-    //     });
-    // }
+    try {
+      // Make API call to cancel order
+      const response = await axios.post(
+        "http://localhost:8081/orderManagement/cancelOrder",
+        cancelOrderData
+      );
+
+      if (response.status === 200) {
+        console.log("Order cancelled successfully:", response.data);
+
+        // Update order status to "Cancelled" locally
+        const updatedOrderToEdit: Order = {
+          ...orderToEdit,
+          status: "Cancelled",
+        };
+
+        setOrders?.(
+          orders.map((o) =>
+            o.orderID === orderToEdit.orderID ? updatedOrderToEdit : o
+          )
+        );
+      } else {
+        console.error("Failed to cancel order:", response.data);
+      }
+    } catch (error) {
+      console.error("Error cancelling order:", error);
+    }
   };
 
   return (
@@ -208,8 +173,6 @@ const CancelOrderModal: React.FC<CancelOrderModalProps> = ({
           onSubmit={handleSubmit}
           className="w-[340px] p-6 mx-auto"
         >
-          {" "}
-          {/* Added padding to the form */}
           <p className="text-center text-xl font-bold text-black mb-4">
             {modalTitle}
           </p>
@@ -237,22 +200,24 @@ const CancelOrderModal: React.FC<CancelOrderModalProps> = ({
                     name={`subitemUsed-${index}`}
                     id={`subitemUsed-${index}`}
                   >
-                    <option value="" disabled>
+                    <option value="0" disabled>
                       Choose
                     </option>
-                    {inventoryData
+                    {subitems
                       .filter(
-                        (item) =>
-                          subitems.some(
-                            (subitem) =>
-                              subitem.inventoryID === item.inventoryID
-                          ) // Check if the inventoryID matches
+                        (subitem) =>
+                          inventoryData.some((item) => item.inventoryID === subitem.inventoryID)
                       )
-                      .map((item) => (
-                        <option value={item.inventoryID} key={item.inventoryID}>
-                          {item.inventoryName} ({item.unitOfMeasure})
-                        </option>
-                      ))}
+                      .map((subitem) => {
+                        const inventory = inventoryData.find(
+                          (item) => item.inventoryID === subitem.inventoryID
+                        );
+                        return (
+                          <option value={subitem.subitemID} key={subitem.subitemID}>
+                            {inventory?.inventoryName} ({inventory?.unitOfMeasure})
+                          </option>
+                        );
+                      })}
                   </select>
 
                   <input

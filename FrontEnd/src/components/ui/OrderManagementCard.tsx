@@ -33,9 +33,9 @@ const OrderManagementCard: React.FC<OrderManagementCardProps> = React.memo(
         0
       );
       setTotal(calculatedTotal || 0);
-    }, [order, menuData]);
+    }, [order, menuData, discountAmount]);
 
-    const updateOrderStatus = async (newStatus: string) => {
+    const updateOrderStatus = async (newStatus: "Unpaid" | "Pending" | "Completed" | "Cancelled") => {
       try {
         const response = await fetch(
           "http://localhost:8081/orderManagement/updateOrderStatus",
@@ -56,64 +56,56 @@ const OrderManagementCard: React.FC<OrderManagementCardProps> = React.memo(
         }
 
         alert(`Order status updated to ${newStatus}`);
+
+        // Update the UI locally
+        const updatedOrder: Order = {
+          ...order,
+          status: newStatus,
+        };
+        setOrders?.(
+          orders.map((o) => (o.orderID === order.orderID ? updatedOrder : o))
+        );
       } catch (error) {
         console.error("Error updating order status:", error);
         alert("Error updating order status");
       }
     };
 
-    const handleConfirmPayment = useCallback(() => {
-      const updatedOrder: Order = {
-        ...order,
-        status: "Pending",
-      };
+    const handleConfirmPayment = useCallback(async () => {
+      try {
+        // API call to confirm payment
+        await updateOrderStatus("Pending");
+      } catch (error) {
+        console.error("Error confirming payment:", error);
+      }
+    }, [order]);
 
-      setOrders?.(
-        orders.map((o) => (o.orderID === order.orderID ? updatedOrder : o))
-      );
-    }, [order, orders, setOrders]);
+    const handleCompleteOrder = useCallback(async () => {
+      try {
+        // API call to complete order
+        await updateOrderStatus("Completed");
+      } catch (error) {
+        console.error("Error completing order:", error);
+      }
+    }, [order]);
 
-    const handleCompleteOrder = useCallback(() => {
-      const updatedOrder: Order = {
-        ...order,
-        status: "Completed",
-      };
-
-      setOrders?.(
-        orders.map((o) => (o.orderID === order.orderID ? updatedOrder : o))
-      );
-      updateOrderStatus("Completed");
-    }, [order, orders, setOrders]);
-
-    const handleCancelUnpaidOrder = useCallback(() => {
-      const updatedOrder: Order = {
-        ...order,
-        status: "Cancelled",
-      };
-
-      setOrders?.(
-        orders.map((o) => (o.orderID === order.orderID ? updatedOrder : o))
-      );
-      updateOrderStatus("Cancelled");
-    }, [order, orders, setOrders]);
-
-    const handleCancelPendingOrder = useCallback(() => {
-      if (setCancelOrderModalVisibility) {
-        setCancelOrderModalVisibility(true);
-        if (setOrderToEdit) {
-          setOrderToEdit(order);
+    const handleCancelOrder = useCallback(() => {
+      if (order.status === "Unpaid" || order.status === "Pending") {
+        if (setCancelOrderModalVisibility) {
+          setCancelOrderModalVisibility(true);
+          if (setOrderToEdit) {
+            setOrderToEdit(order);
+          }
+        }
+      } else if (order.status === "Completed") {
+        if (setCancelOrderModalVisibility) {
+          setCancelOrderModalVisibility(true);
+          if (setOrderToEdit) {
+            setOrderToEdit(order);
+          }
         }
       }
-    }, [order, orders, setOrders]);
-
-    const handleCancelCompletedOrder = useCallback(() => {
-      if (setCancelOrderModalVisibility) {
-        setCancelOrderModalVisibility(true);
-        if (setOrderToEdit) {
-          setOrderToEdit(order);
-        }
-      }
-    }, [order, orders, setOrders]);
+    }, [order, setCancelOrderModalVisibility, setOrderToEdit]);
 
     const [orderStatusLabel, setOrderStatusLabel] = useState<string>(
       order.status
@@ -225,7 +217,7 @@ const OrderManagementCard: React.FC<OrderManagementCardProps> = React.memo(
                   <div>
                     <button
                       className="px-2 py-1 rounded-md mt-1 mb-5 float-right text-xs w-[130px] h-[28px] font-semibold border border-red bg-white text-red hover:text-white hover:bg-red hover:border duration-200"
-                      onClick={handleCancelUnpaidOrder}
+                      onClick={handleCancelOrder}
                     >
                       Cancel Order
                     </button>
@@ -244,7 +236,7 @@ const OrderManagementCard: React.FC<OrderManagementCardProps> = React.memo(
 
                   <button
                     className="px-2 py-1 rounded-md mt-1 mb-5 float-right text-xs w-[130px] h-[28px] font-semibold border border-red bg-white text-red hover:text-white hover:bg-red hover:border duration-200"
-                    onClick={handleCancelPendingOrder}
+                    onClick={handleCancelOrder}
                   >
                     Cancel Order
                   </button>
@@ -255,7 +247,7 @@ const OrderManagementCard: React.FC<OrderManagementCardProps> = React.memo(
                 <div>
                   <button
                     className="px-2 py-1 rounded-md mt-1 mb-5 float-right text-xs w-[130px] h-[28px] font-semibold border border-red bg-white text-red hover:text-white hover:bg-red hover:border duration-200"
-                    onClick={handleCancelCompletedOrder}
+                    onClick={handleCancelOrder}
                   >
                     Cancel Order
                   </button>
