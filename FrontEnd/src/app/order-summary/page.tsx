@@ -4,34 +4,33 @@ import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import OrderCard from "@/components/OrderCard";
 import { Order, OrderItemDataTypes } from "../../../lib/types/OrderDataTypes";
-import { ProductDataTypes } from "../../../lib/types/ProductDataTypes";
-import { format } from "date-fns";
+import { ProductDataTypes, SubitemDataTypes } from "../../../lib/types/ProductDataTypes";
 import Header from "@/components/Header";
 import Link from "next/link";
 import OrderButtonSection from "@/components/section/OrderButtonSection";
 import { FaArrowLeft } from "react-icons/fa";
+import axios from "axios";
 
 function OrderSummaryPage() {
   const [menuData, setMenuData] = useState<ProductDataTypes[]>([]);
   const date = new Date();
-  const time =
-    date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
-
+  const time = date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
   const dateTime = date.toISOString() + " " + time;
 
   const [order, setOrder] = useState<Order>({
     employeeID: 1,
-    date: dateTime, //still does not work as intended
+    date: dateTime,
     status: "Unpaid",
     orderItems: [],
   });
   const [subtotal, setSubtotal] = useState(0);
   const [quantityModalVisibility, setQuantityModalVisibility] = useState(false);
-  const [previousPage, setPreviousPage] = useState("/"); // Default to root in case there's no previous page
-
+  const [previousPage, setPreviousPage] = useState("/");
   const searchParams = useSearchParams();
-
   const [orderID, setOrderID] = useState(-1);
+  const [cart, setCart] = useState<OrderItemDataTypes[]>([]);
+  const [subitems, setSubitems] = useState<SubitemDataTypes[]>([]);
+  const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
     fetch("http://localhost:8081/ordering/getCustomerMenu")
@@ -39,8 +38,6 @@ function OrderSummaryPage() {
       .then((data) => setMenuData(data))
       .catch((error) => console.error("Error fetching menu data:", error));
   }, []);
-
-  const [cart, setCart] = useState<OrderItemDataTypes[]>([]);
 
   // Load cart and previous page from localStorage on component mount
   useEffect(() => {
@@ -51,7 +48,7 @@ function OrderSummaryPage() {
       if (savedCart) {
         setCart(JSON.parse(savedCart));
       } else {
-        localStorage.setItem("cart", JSON.stringify([])); // Initialize empty cart
+        localStorage.setItem("cart", JSON.stringify([]));
       }
 
       if (storedPreviousPage) {
@@ -60,7 +57,6 @@ function OrderSummaryPage() {
     }
   }, []);
 
-  // Function to create an order by sending data to the backend
   // Function to create an order by sending data to the backend
   const createOrder = async () => {
     try {
@@ -78,10 +74,8 @@ function OrderSummaryPage() {
       if (response.ok) {
         const data = await response.json();
         console.log("Order created:", data);
-        // Set the orderID and save it to localStorage
         setOrderID(data.orderID);
 
-        // Now, save the orderID to localStorage after the state has been updated
         if (typeof window !== "undefined") {
           localStorage.setItem("orderID", data.orderID.toString());
         }
@@ -92,12 +86,103 @@ function OrderSummaryPage() {
       console.error("Error:", error);
     }
 
-    // Remove the cart after the order is created
     localStorage.removeItem("cart");
   };
 
-  const handleClick = () => {
-    createOrder(); // Call the function to create the order
+  // Define the type for an update
+  type UpdateType = {
+    subinventoryID: number;
+    quantityToReduce: number;
+  };
+
+  // Function to update inventory quantities after placing the order
+  const updateInventoryAfterOrder = async (subitems: SubitemDataTypes[]) => {
+    try {
+      // Explicitly type the updates array
+      let updates: UpdateType[] = [];
+
+      // Iterate through each unique inventoryID to determine the correct quantity to reduce
+      subitems.forEach((subitem) => {
+        let quantityNeeded = subitem.quantityNeeded;
+
+        // Filter all relevant subinventory entries for the given inventoryID in ascending order of expiryDate
+        const relevantSubinventories = subitems
+          .filter(
+            (s) => s.inventoryID === subitem.inventoryID && s.quantityRemaining > 0
+          )
+          .sort((a, b) => new Date(a.expiryDate).getTime() - new Date(b.expiryDate).getTime());
+
+        // Iterate through subinventory items until the quantityNeeded is fulfilled
+        for (let sub of relevantSubinventories) {
+          if (quantityNeeded <= 0) break;
+
+          // Determine how much we can deduct from the current subinventory
+          const quantityToDeduct = Math.min(sub.quantityRemaining, quantityNeeded);
+
+          // Push the deduction to the updates array
+          updates.push({
+            subinventoryID: sub.subinventoryID,
+            quantityToReduce: quantityToDeduct,
+          });
+
+          // Log the deduction
+          console.log(`Deducting ${quantityToDeduct} from subinventoryID ${sub.subinventoryID}`);
+
+          // Update quantity needed for the next subinventory
+          quantityNeeded -= quantityToDeduct;
+        }
+      });
+
+      console.log("Final updates to be sent to backend:", updates);
+
+      const response = await fetch(
+        "http://localhost:8081/inventoryManagement/updateMultipleSubitemQuantities",
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ updates }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to update inventory quantities");
+      }
+
+      console.log("Inventory updated successfully");
+    } catch (error) {
+      console.error("Error updating inventory quantities:", error);
+    }
+  };
+
+
+  const handleClick = async () => {
+    await createOrder(); // Place the order
+  
+    // After creating the order, fetch the subitems and update inventory
+    if (cart.length > 0) {
+      try {
+        const productIDs = cart.map((product) => product.productID);
+        
+        // Fetch all subinventory details for products in cart in one API call
+        const response = await axios.post(
+          "http://localhost:8081/inventoryManagement/getSubinventoryDetails",
+          { productIDs }
+        );
+
+        const allSubitems: SubitemDataTypes[] = response.data;
+
+        console.log("Fetched subitems for inventory update:", allSubitems);
+
+        await updateInventoryAfterOrder(allSubitems); // Update inventory quantities
+      } catch (error) {
+        console.error("Error updating inventory after order:", error);
+      }
+    }
+
+    // Remove the cart after the order is created
+    localStorage.removeItem("cart");
   };
 
   useEffect(() => {
