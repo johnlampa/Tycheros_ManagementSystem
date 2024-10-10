@@ -115,7 +115,7 @@ const QuantityModal: React.FC<QuantityModalProps> = ({
         );
         if (inventoryItem) {
           return Math.floor(
-            inventoryItem.quantityRemaining / subitem.quantityNeeded
+            inventoryItem.totalQuantity / subitem.quantityNeeded
           );
         }
         return 0;

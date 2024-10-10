@@ -4,6 +4,15 @@ export type SubitemDataTypes = {
   quantityNeeded: number;
 };
 
+export type SubitemForStockInDataTypes = {
+  productID: number;
+  inventoryID: number;
+  quantityNeeded: number;
+  subinventoryID: number; // Added
+  quantityRemaining: number; // Added
+  expiryDate: string; // Added
+};
+
 export type ProductDataTypes = {
   productID?: number;
   productName: string;

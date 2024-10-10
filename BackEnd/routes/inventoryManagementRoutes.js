@@ -354,6 +354,99 @@ router.put('/updateSubitemQuantity', async (req, res) => {
   }
 });
 
+// GET Subinventory Details for Products in Cart
+router.post('/getSubinventoryDetails', async (req, res) => {
+  const { productIDs } = req.body; // Array of product IDs from the cart
+
+  if (!productIDs || productIDs.length === 0) {
+    return res.status(400).json({ error: "Product IDs are required" });
+  }
+
+  const query = `
+    WITH SubinventoryDetails AS (
+      SELECT
+        p.productID,
+        p.productName,
+        s.subitemID,
+        s.inventoryID,
+        s.quantityNeeded,
+        inv.inventoryName,
+        inv.inventoryCategory,
+        inv.unitOfMeasure,
+        inv.reorderPoint,
+        si.subinventoryID,
+        si.quantityRemaining,
+        poi.quantityOrdered,
+        poi.actualQuantity,
+        poi.pricePerUnit,
+        poi.expiryDate
+      FROM
+        product p
+      JOIN 
+        subitem s ON p.productID = s.productID
+      JOIN 
+        inventory inv ON s.inventoryID = inv.inventoryID
+      JOIN 
+        subinventory si ON inv.inventoryID = si.inventoryID
+      JOIN 
+        purchaseOrderItem poi ON si.subinventoryID = poi.subinventoryID
+      WHERE
+        p.productID IN (?)
+    )
+    SELECT *
+    FROM SubinventoryDetails
+    ORDER BY inventoryID, expiryDate ASC;
+  `;
+
+  try {
+    const [results] = await pool.query(query, [productIDs]);
+    res.json(results);
+  } catch (err) {
+    console.error("Error fetching subinventory details:", err);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+// UPDATE MULTIPLE SUBINVENTORY QUANTITIES
+router.put('/updateMultipleSubitemQuantities', async (req, res) => {
+  const { updates } = req.body; // Array of updates, each with subinventoryID and quantity to reduce
+
+  // Log the incoming updates array for debugging purposes
+  console.log('Received updates for subinventory quantities:', updates);
+
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+
+    for (const update of updates) {
+      const { subinventoryID, quantityToReduce } = update;
+
+      // Log the details of the subinventoryID and quantity to reduce before the update
+      console.log(`Updating subinventoryID ${subinventoryID}: reducing quantity by ${quantityToReduce}`);
+
+      // Update the quantityRemaining, ensuring no value goes below zero
+      const [result] = await connection.query(`
+        UPDATE subinventory
+        SET quantityRemaining = GREATEST(quantityRemaining - ?, 0)
+        WHERE subinventoryID = ?
+      `, [quantityToReduce, subinventoryID]);
+
+      // Log the result of the update query
+      console.log(`Result of update for subinventoryID ${subinventoryID}:`, result);
+    }
+
+    await connection.commit();
+    console.log('Transaction committed successfully.');
+    res.status(200).send('Subinventory quantities updated successfully');
+  } catch (err) {
+    await connection.rollback();
+    console.error('Error updating subinventory quantities:', err);
+    res.status(500).send(`Error updating subinventory quantities: ${err.message}`);
+  } finally {
+    connection.release();
+    console.log('Database connection released.');
+  }
+});
 
 
 module.exports = router;
