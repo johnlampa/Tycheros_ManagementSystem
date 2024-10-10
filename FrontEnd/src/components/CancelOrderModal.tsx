@@ -5,7 +5,7 @@ import Modal from "@/components/ui/Modal";
 import { Order, SubitemUsed } from "../../lib/types/OrderDataTypes";
 import axios from "axios";
 import { InventoryDataTypes } from "../../lib/types/InventoryDataTypes";
-import { SubitemDataTypes } from "../../lib/types/ProductDataTypes";
+import { SubitemForStockInDataTypes } from "../../lib/types/ProductDataTypes";
 
 const CancelOrderModal: React.FC<CancelOrderModalProps> = ({
   cancelOrderModalIsVisible,
@@ -17,7 +17,7 @@ const CancelOrderModal: React.FC<CancelOrderModalProps> = ({
 }) => {
   const [subitemsUsed, setSubitemsUsed] = useState<SubitemUsed[]>([]);
   const [inventoryData, setInventoryData] = useState<InventoryDataTypes[]>([]);
-  const [subitems, setSubitems] = useState<SubitemDataTypes[]>([]);
+  const [subitems, setSubitems] = useState<SubitemForStockInDataTypes[]>([]);
 
   useEffect(() => {
     const fetchSubitems = async (productID: number) => {
@@ -40,7 +40,7 @@ const CancelOrderModal: React.FC<CancelOrderModalProps> = ({
       }
 
       try {
-        const allSubitems: SubitemDataTypes[] = [];
+        const allSubitems: SubitemForStockInDataTypes[] = [];
 
         // Outer loop: Iterate over all orderItems
         for (const orderItem of orderToEdit.orderItems) {
