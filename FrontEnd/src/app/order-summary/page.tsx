@@ -29,7 +29,6 @@ function OrderSummaryPage() {
   const searchParams = useSearchParams();
   const [orderID, setOrderID] = useState(-1);
   const [cart, setCart] = useState<OrderItemDataTypes[]>([]);
-  const [subitems, setSubitems] = useState<SubitemDataTypes[]>([]);
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
@@ -155,7 +154,6 @@ function OrderSummaryPage() {
       console.error("Error updating inventory quantities:", error);
     }
   };
-
 
   const handleClick = async () => {
     await createOrder(); // Place the order
