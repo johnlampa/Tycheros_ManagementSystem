@@ -2,6 +2,9 @@
 export type SubitemDataTypes = {
   inventoryID: number;
   quantityNeeded: number;
+  subinventoryID: number; // Added
+  quantityRemaining: number; // Added
+  expiryDate: string; // Added
 };
 
 export type ProductDataTypes = {

@@ -61,9 +61,9 @@ const MenuCard: React.FC<MenuCardProps> = ({
         const matchingInventory = inventoryData.find(
           (inventory) => inventory.inventoryID === subitem.inventoryID
         );
-        // Check if the quantity needed is less than or equal to the quantity remaining in inventory
+        // Check if the quantity needed is less than or equal to the total quantity remaining in inventory
         return matchingInventory
-          ? subitem.quantityNeeded <= matchingInventory.quantityRemaining
+          ? subitem.quantityNeeded <= matchingInventory.totalQuantity
           : false;
       });
 
