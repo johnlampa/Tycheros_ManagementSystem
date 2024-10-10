@@ -1,5 +1,6 @@
 // ProductDataTypes.ts
 export type SubitemDataTypes = {
+  productID: number;
   inventoryID: number;
   quantityNeeded: number;
   subinventoryID: number; // Added

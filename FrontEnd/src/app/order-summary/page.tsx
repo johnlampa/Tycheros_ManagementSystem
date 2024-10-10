@@ -99,10 +99,19 @@ function OrderSummaryPage() {
     try {
       // Explicitly type the updates array
       let updates: UpdateType[] = [];
+      const inventoryProcessed = new Set(); // Keep track of processed inventory IDs
 
       // Iterate through each unique inventoryID to determine the correct quantity to reduce
       subitems.forEach((subitem) => {
-        let quantityNeeded = subitem.quantityNeeded;
+        if (inventoryProcessed.has(subitem.inventoryID)) return; // Skip if already processed
+
+        // Find the corresponding product in the cart to get the order quantity
+        const cartItem = cart.find((item) => item.productID === subitem.productID);
+        if (!cartItem) return;
+
+        // Calculate the total quantity needed for this inventory
+        let totalQuantityNeeded = subitem.quantityNeeded * cartItem.quantity;
+        inventoryProcessed.add(subitem.inventoryID); // Mark inventoryID as processed
 
         // Filter all relevant subinventory entries for the given inventoryID in ascending order of expiryDate
         const relevantSubinventories = subitems
@@ -111,12 +120,12 @@ function OrderSummaryPage() {
           )
           .sort((a, b) => new Date(a.expiryDate).getTime() - new Date(b.expiryDate).getTime());
 
-        // Iterate through subinventory items until the quantityNeeded is fulfilled
+        // Iterate through subinventory items until the totalQuantityNeeded is fulfilled
         for (let sub of relevantSubinventories) {
-          if (quantityNeeded <= 0) break;
+          if (totalQuantityNeeded <= 0) break;
 
           // Determine how much we can deduct from the current subinventory
-          const quantityToDeduct = Math.min(sub.quantityRemaining, quantityNeeded);
+          const quantityToDeduct = Math.min(sub.quantityRemaining, totalQuantityNeeded);
 
           // Push the deduction to the updates array
           updates.push({
@@ -128,7 +137,7 @@ function OrderSummaryPage() {
           console.log(`Deducting ${quantityToDeduct} from subinventoryID ${sub.subinventoryID}`);
 
           // Update quantity needed for the next subinventory
-          quantityNeeded -= quantityToDeduct;
+          totalQuantityNeeded -= quantityToDeduct;
         }
       });
 
@@ -157,12 +166,12 @@ function OrderSummaryPage() {
 
   const handleClick = async () => {
     await createOrder(); // Place the order
-  
+
     // After creating the order, fetch the subitems and update inventory
     if (cart.length > 0) {
       try {
         const productIDs = cart.map((product) => product.productID);
-        
+
         // Fetch all subinventory details for products in cart in one API call
         const response = await axios.post(
           "http://localhost:8081/inventoryManagement/getSubinventoryDetails",
@@ -171,6 +180,7 @@ function OrderSummaryPage() {
 
         const allSubitems: SubitemDataTypes[] = response.data;
 
+        // Log the fetched subitems needed for inventory update
         console.log("Fetched subitems for inventory update:", allSubitems);
 
         await updateInventoryAfterOrder(allSubitems); // Update inventory quantities
