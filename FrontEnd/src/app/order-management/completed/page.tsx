@@ -10,61 +10,7 @@ import { FaArrowLeft } from "react-icons/fa";
 import CancelOrderModal from "@/components/CancelOrderModal";
 
 export default function Page() {
-  const [orders, setOrders] = useState<Order[]>([
-    //LOCAL ORDERS. SHOULD BE POPULATED FROM API CALL
-    {
-      orderID: 9,
-      employeeID: 1,
-      date: "2022-11-15",
-      status: "Cancelled",
-      orderItems: [
-        {
-          productID: 1,
-          quantity: 1,
-        },
-        {
-          productID: 2,
-          quantity: 2,
-        },
-      ],
-    },
-    {
-      orderID: 10,
-      employeeID: 1,
-      date: "2022-12-15",
-      status: "Pending",
-      orderItems: [
-        {
-          productID: 1,
-          quantity: 3,
-        },
-        {
-          productID: 2,
-          quantity: 4,
-        },
-      ],
-
-      paymentID: 10,
-    },
-    {
-      orderID: 11,
-      employeeID: 1,
-      date: "2022-10-15",
-      status: "Completed",
-      orderItems: [
-        {
-          productID: 1,
-          quantity: 5,
-        },
-        {
-          productID: 2,
-          quantity: 6,
-        },
-      ],
-
-      paymentID: 11,
-    },
-  ]);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [menuData, setMenuData] = useState<ProductDataTypes[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -74,21 +20,21 @@ export default function Page() {
   const [orderToEdit, setOrderToEdit] = useState<Order>();
 
   useEffect(() => {
-    // const fetchOrders = async () => {
-    //   try {
-    //     const response = await fetch(
-    //       "http://localhost:8081/orderManagement/getOrders"
-    //     );
-    //     if (!response.ok) throw new Error("Failed to fetch orders");
-    //     const data = await response.json();
-    //     setOrders(data);
-    //   } catch (error) {
-    //     console.error("Error fetching orders:", error);
-    //     setError("Error fetching orders");
-    //   } finally {
-    //     setLoading(false);
-    //   }
-    // };
+    const fetchOrders = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:8081/orderManagement/getOrders"
+        );
+        if (!response.ok) throw new Error("Failed to fetch orders");
+        const data = await response.json();
+        setOrders(data);
+      } catch (error) {
+        console.error("Error fetching orders:", error);
+        setError("Error fetching orders");
+      } finally {
+        setLoading(false);
+      }
+    };
 
     const fetchMenuData = async () => {
       try {
@@ -104,13 +50,13 @@ export default function Page() {
       }
     };
 
-    // fetchOrders();
+    fetchOrders();
     fetchMenuData();
   }, []);
 
-  // if (loading) {
-  //   return <div>Loading...</div>;
-  // }
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   if (error) {
     return <div>{error}</div>;

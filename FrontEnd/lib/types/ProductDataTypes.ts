@@ -5,6 +5,7 @@ export type SubitemDataTypes = {
 };
 
 export type SubitemForStockInDataTypes = {
+  subitemID: number;
   productID: number;
   inventoryID: number;
   quantityNeeded: number;

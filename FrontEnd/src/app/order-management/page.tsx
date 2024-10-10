@@ -8,63 +8,10 @@ import Header from "@/components/Header";
 import Link from "next/link";
 import { FaArrowLeft } from "react-icons/fa";
 import CancelOrderModal from "@/components/CancelOrderModal";
+import axios from "axios";
 
 export default function Page() {
-  const [orders, setOrders] = useState<Order[]>([
-    //LOCAL ORDERS. SHOULD BE POPULATED FROM API CALL
-    {
-      orderID: 9,
-      employeeID: 1,
-      date: "2022-11-15",
-      status: "Cancelled",
-      orderItems: [
-        {
-          productID: 1,
-          quantity: 1,
-        },
-        {
-          productID: 2,
-          quantity: 2,
-        },
-      ],
-    },
-    {
-      orderID: 10,
-      employeeID: 1,
-      date: "2022-12-15",
-      status: "Pending",
-      orderItems: [
-        {
-          productID: 1,
-          quantity: 3,
-        },
-        {
-          productID: 2,
-          quantity: 4,
-        },
-      ],
-
-      paymentID: 10,
-    },
-    {
-      orderID: 11,
-      employeeID: 1,
-      date: "2022-10-15",
-      status: "Completed",
-      orderItems: [
-        {
-          productID: 1,
-          quantity: 5,
-        },
-        {
-          productID: 2,
-          quantity: 6,
-        },
-      ],
-
-      paymentID: 11,
-    },
-  ]);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [menuData, setMenuData] = useState<ProductDataTypes[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -74,51 +21,52 @@ export default function Page() {
   const [orderToEdit, setOrderToEdit] = useState<Order>();
 
   useEffect(() => {
-    // const fetchOrders = async () => {
-    //   try {
-    //     const response = await fetch(
-    //       "http://localhost:8081/orderManagement/getOrders"
-    //     );
-    //     if (!response.ok) throw new Error("Failed to fetch orders");
-    //     const data = await response.json();
-    //     setOrders(data);
-    //   } catch (error) {
-    //     console.error("Error fetching orders:", error);
-    //     setError("Error fetching orders");
-    //   } finally {
-    //     setLoading(false);
-    //   }
-    // };
+    const fetchOrders = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:8081/orderManagement/getOrders"
+        );
+        setOrders(response.data);
+      } catch (error) {
+        console.error("Error fetching orders:", error);
+        setError("Error fetching orders");
+      } finally {
+        setLoading(false);
+      }
+    };
 
     const fetchMenuData = async () => {
       try {
-        const response = await fetch(
+        const response = await axios.get(
           "http://localhost:8081/orderManagement/getMenuData"
         );
-        if (!response.ok) throw new Error("Failed to fetch menu data");
-        const data = await response.json();
-        setMenuData(data);
+        setMenuData(response.data);
       } catch (error) {
         console.error("Error fetching menu data:", error);
         setError("Error fetching menu data");
       }
     };
 
-    // fetchOrders();
+    fetchOrders();
     fetchMenuData();
   }, []);
 
   useEffect(() => {
-    console.log(orders);
+    console.log("Orders fetched:", orders);
   }, [orders]);
 
-  // if (loading) {
-  //   return <div>Loading...</div>;
-  // }
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   if (error) {
     return <div>{error}</div>;
   }
+
+  const handleCancelOrder = (order: Order) => {
+    setOrderToEdit(order);
+    setCancelOrderModalVisibility(true);
+  };
 
   return (
     <div className="flex justify-center items-center w-full pb-7 min-h-screen">
@@ -132,33 +80,25 @@ export default function Page() {
         </Header>
         <div className="pb-3 w-full bg-tealGreen flex justify-center items-center">
           <div className="w-max grid grid-cols-3 gap-x-5 gap-y-5">
-            {/* edit href */}
+            {/* Status Links */}
             <Link href={"/order-management/unpaid"}>
-              <div
-                className={`w-[88px] h-[25px] rounded-sm border border-white flex justify-center items-center font-pattaya text-white`}
-              >
+              <div className={`w-[88px] h-[25px] rounded-sm border border-white flex justify-center items-center font-pattaya text-white`}>
                 Unpaid
               </div>
             </Link>
             <Link href={"/order-management/pending"}>
-              <div
-                className={`w-[88px] h-[25px] rounded-sm border border-white flex justify-center items-center font-pattaya text-white`}
-              >
+              <div className={`w-[88px] h-[25px] rounded-sm border border-white flex justify-center items-center font-pattaya text-white`}>
                 Pending
               </div>
             </Link>
             <Link href={"/order-management/completed"}>
-              <div
-                className={`w-[88px] h-[25px] rounded-sm border border-white flex justify-center items-center font-pattaya text-white`}
-              >
+              <div className={`w-[88px] h-[25px] rounded-sm border border-white flex justify-center items-center font-pattaya text-white`}>
                 Completed
               </div>
             </Link>
             <div></div>
             <Link href={"/order-management/cancelled"}>
-              <div
-                className={`w-[88px] h-[25px] rounded-sm border border-white flex justify-center items-center font-pattaya text-white`}
-              >
+              <div className={`w-[88px] h-[25px] rounded-sm border border-white flex justify-center items-center font-pattaya text-white`}>
                 Cancelled
               </div>
             </Link>
@@ -172,7 +112,7 @@ export default function Page() {
               orders={orders}
               setOrders={setOrders}
               type={"management"}
-              setCancelOrderModalVisibility={setCancelOrderModalVisibility}
+              setCancelOrderModalVisibility={() => handleCancelOrder(order)}
               setOrderToEdit={setOrderToEdit}
             />
           </div>
@@ -184,7 +124,7 @@ export default function Page() {
           orderToEdit={orderToEdit}
           orders={orders}
           setOrders={setOrders}
-        ></CancelOrderModal>
+        />
       </div>
     </div>
   );
