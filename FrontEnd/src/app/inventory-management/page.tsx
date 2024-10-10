@@ -2,7 +2,12 @@
 
 import React, { useEffect, useState } from "react";
 import { format } from "date-fns";
-import { InventoryItem } from "../../../lib/types/InventoryItemDataTypes";
+import { MultiItemStockInData, InventoryItem } from "../../../lib/types/InventoryItemDataTypes";
+import SubitemModal from "@/components/SubitemModal";
+import StockInModal from "@/components/StockInModal";
+import StockOutModal from "@/components/StockOutModal";
+import UpdateStockModal from "@/components/UpdateStockModal";
+import axios from "axios";
 
 export default function InventoryManagementPage() {
   const [inventoryData, setInventoryData] = useState<InventoryItem[]>([]);
@@ -11,6 +16,18 @@ export default function InventoryManagementPage() {
   const [showAddOverlay, setShowAddOverlay] = useState(false);
   const [showEditOverlay, setShowEditOverlay] = useState(false);
   const [showDeleteOverlay, setShowDeleteOverlay] = useState(false);
+
+  const initialItemState = {
+    inventoryName: "",
+    inventoryCategory: "",
+    reorderPoint: 0,
+    unitOfMeasure: "",
+  };
+
+  const resetNewItem = () => {
+    setNewItem(initialItemState);
+  };
+
   const [newItem, setNewItem] = useState<{
     inventoryName: string;
     inventoryCategory: string;
@@ -27,59 +44,152 @@ export default function InventoryManagementPage() {
   const [itemToDelete, setItemToDelete] = useState<InventoryItem | null>(null);
 
   const [showStockInOverlay, setShowStockInOverlay] = useState(false);
-  const [stockInData, setStockInData] = useState({
-    inventoryID: "",
+  const [stockInData, setStockInData] = useState<MultiItemStockInData>({
     supplierName: "",
     employeeID: "",
-    quantityOrdered: "",
-    actualQuantity: "",
-    pricePerUnit: "",
     stockInDate: "",
-    expiryDate: "",
+    inventoryItems: [
+      {
+        inventoryID: 0,
+        quantityOrdered: 0,
+        actualQuantity: 0,
+        pricePerUnit: 0,
+        expiryDate: "",
+      },
+    ],
   });
 
   const handleStockIn = async () => {
     try {
+      console.log("StockIn Data before request:", stockInData); // Log data before making the request
+  
       const response = await fetch(
-        "http://localhost:8081/inventoryManagement/stockInSubitem",
+        "http://localhost:8081/inventoryManagement/stockInInventoryItem",
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({
-            ...stockInData,
-            quantityOrdered: Number(stockInData.quantityOrdered),
-            actualQuantity: Number(stockInData.actualQuantity),
-            pricePerUnit: Number(stockInData.pricePerUnit),
-          }),
+          body: JSON.stringify(stockInData),
         }
       );
-
+  
       if (!response.ok) {
         throw new Error("Failed to stock in subitem");
       }
-
+  
       const updatedInventory = await fetch(
         "http://localhost:8081/inventoryManagement/getSubitem"
       ).then((res) => res.json());
       setInventoryData(updatedInventory);
-
+      console.log("Stock In Data after success:", stockInData); // Log data after successful stocking in
+  
       alert("Subitem stocked in successfully");
+  
+      // Reset data only after successful stock-in
+      setStockInData({
+        supplierName: "",
+        employeeID: "",
+        stockInDate: "",
+        inventoryItems: [
+          {
+            inventoryID: 0,
+            quantityOrdered: 0,
+            actualQuantity: 0,
+            pricePerUnit: 0,
+            expiryDate: "",
+          },
+        ],
+      });
     } catch (error) {
       console.error("Error stocking in subitem:", error);
     }
   };
 
+  const [employees, setEmployees] = useState<{ employeeID: number; firstName: string; lastName: string }[]>([]);
+
+  useEffect(() => {
+    const fetchEmployees = async () => {
+      try {
+        const response = await axios.get('http://localhost:8081/employeemanagement/getEmployee');
+        setEmployees(response.data);
+  
+        // Log the employee names to the console
+        response.data.forEach((employee: { firstName: any; lastName: any; }) => {
+          console.log(`${employee.firstName} ${employee.lastName}`);
+        });
+  
+      } catch (error) {
+        console.error('Error fetching employees:', error);
+      }
+    };
+  
+    fetchEmployees();
+  }, []);
+
+  const [showUpdateStockOverlay, setShowUpdateStockOverlay] = useState(false);
+  const [updateStockData, setUpdateStockData] = useState({
+    inventoryID: "",
+    quantity: 0,
+  });
+
+  const handleUpdateStock = (inventoryID: string) => {
+    setUpdateStockData({ ...updateStockData, inventoryID });
+    setShowUpdateStockOverlay(true);
+  };
+
+  const handleUpdateStockSubmit = async () => {
+    try {
+      const response = await fetch("http://localhost:8081/inventoryManagement/updateSubitemQuantity", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updateStockData),
+      });
+  
+      if (response.ok) {
+        alert("Stock updated successfully");
+        // Refresh the inventory data
+        const updatedInventory = await fetch(
+          "http://localhost:8081/inventoryManagement/getSubitem"
+        ).then((res) => res.json());
+        setInventoryData(updatedInventory);
+      } else {
+        const errorData = await response.json();
+        alert("Error: " + errorData.message);
+      }
+    } catch (err) {
+      console.error("Error updating stock:", err);
+      alert("Error updating stock");
+    }
+  };
+  
+
+
+  const [inventoryNames, setInventoryNames] = useState<{ inventoryID: number; inventoryName: string }[]>([]);
+  useEffect(() => {
+    const fetchInventoryNames = async () => {
+      try {
+        const response = await axios.get('http://localhost:8081/inventoryManagement/getInventoryName');
+        setInventoryNames(response.data);
+      } catch (error) {
+        console.error('Error fetching inventory names:', error);
+      }
+    };
+  
+    fetchInventoryNames();
+  }, []);
+
   const [showStockOutOverlay, setShowStockOutOverlay] = useState(false);
   const [stockOutData, setStockOutData] = useState({
-    purchaseOrderID: "",
+    inventoryID: "",
     quantity: 0,
     reason: "",
   });
 
-  const handleStockOut = (purchaseOrderID: string) => {
-    setStockOutData({ ...stockOutData, purchaseOrderID });
+  const handleStockOut = (inventoryID: string) => {
+    setStockOutData({ ...stockOutData, inventoryID });
     setShowStockOutOverlay(true);
   };
 
@@ -159,8 +269,10 @@ export default function InventoryManagementPage() {
         "http://localhost:8081/inventoryManagement/getSubitem"
       ).then((res) => res.json());
       setInventoryData(updatedInventory);
+      setShowAddOverlay(false);
 
       alert("Inventory item added successfully");
+      window.location.reload();
     } catch (error) {
       console.error("Error adding inventory item:", error);
     }
@@ -286,9 +398,21 @@ export default function InventoryManagementPage() {
               }
             }
           }}
-          className="bg-black text-white py-3 px-5 rounded cursor-pointer mr-2"
+          className="bg-black text-white py-3 px-5 rounded cursor-pointer mr-10"
         >
           Delete Subitem
+        </button>
+        <button
+          onClick={() => {
+            const id = prompt("Enter Inventory ID to Update Stock:");
+            if (id) {
+              setUpdateStockData({ inventoryID: id, quantity: 0 });
+              setShowUpdateStockOverlay(true);
+            }
+          }}
+          className="bg-black text-white py-3 px-5 rounded cursor-pointer mr-2"
+        >
+          Update Stock
         </button>
         <button
           onClick={() => setShowStockInOverlay(true)}
@@ -298,7 +422,7 @@ export default function InventoryManagementPage() {
         </button>
         <button
           onClick={() => {
-            const id = prompt("Enter Purchase Order ID to Stock Out:");
+            const id = prompt("Enter Inventory ID to Stock Out:");
             if (id) {
               handleStockOut(id); // Pass the ID directly
             }
@@ -319,7 +443,6 @@ export default function InventoryManagementPage() {
               <th className="border border-black p-2.5">Inventory Name</th>
               <th className="border border-black p-2.5">Category</th>
               <th className="border border-black p-2.5">Reorder Point</th>
-              <th className="border border-black p-2.5">Purchase Order ID</th>
               <th className="border border-black p-2.5">Total Quantity</th>
               <th className="border border-black p-2.5">Quantity Remaining</th>
               <th className="border border-black p-2.5">Price Per Unit</th>
@@ -331,7 +454,10 @@ export default function InventoryManagementPage() {
           </thead>
           <tbody>
             {inventoryData.map((item) => (
-              <tr key={item.inventoryID}>
+              <tr
+              key={item.inventoryID}
+              className={item.totalQuantity !== null && item.totalQuantity <= item.reorderPoint ? "bg-low-quantity" : ""}
+              >
                 <td className="border border-black p-2.5">
                   {item.inventoryID}
                 </td>
@@ -342,10 +468,7 @@ export default function InventoryManagementPage() {
                   {item.inventoryCategory}
                 </td>
                 <td className="border border-black p-2.5">
-                  {item.reorderPoint + item.unitOfMeasure}
-                </td>
-                <td className="border border-black p-2.5">
-                  {item.purchaseOrderID}
+                  {item.inventoryName ? item.reorderPoint + " " + item.unitOfMeasure : ""}
                 </td>
                 <td className="border border-black p-2.5">
                   {item.totalQuantity}
@@ -375,174 +498,31 @@ export default function InventoryManagementPage() {
       )}
 
       {showAddOverlay && (
-        <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white p-5 rounded-lg w-72">
-            <h2 className="text-black">Add Inventory Subitem</h2>
-            <div>
-              <input
-                type="text"
-                placeholder="Inventory Name"
-                value={newItem.inventoryName}
-                onChange={(e) =>
-                  setNewItem({ ...newItem, inventoryName: e.target.value })
-                }
-                className="mb-2 p-2 w-full text-black"
-              />
-              <select
-                value={newItem.inventoryCategory}
-                onChange={(e) =>
-                  setNewItem({ ...newItem, inventoryCategory: e.target.value })
-                }
-                className="mb-2 p-2 w-full text-black"
-              >
-                <option value="">Select Inventory Category</option>
-                <option value="Produce">Produce</option>
-                <option value="Dairy and Eggs">Dairy and Eggs</option>
-                <option value="Meat and Poultry">Meat and Poultry</option>
-                <option value="Seafood">Seafood</option>
-                <option value="Canned Goods">Canned Goods</option>
-                <option value="Dry Goods">Dry Goods</option>
-                <option value="Sauces">Sauces</option>
-                <option value="Condiments">Condiments</option>
-                <option value="Food & Beverage">Food & Beverage</option>
-              </select>
-              <input
-                type="number"
-                placeholder="Reorder Point"
-                value={newItem.reorderPoint === 0 ? "" : newItem.reorderPoint}
-                onChange={(e) =>
-                  setNewItem({
-                    ...newItem,
-                    reorderPoint:
-                      e.target.value === "" ? 0 : Number(e.target.value),
-                  })
-                }
-                className="mb-2 p-2 w-full text-black"
-              />
-
-              <input
-                type="text"
-                placeholder="Unit of Measure"
-                value={newItem.unitOfMeasure}
-                onChange={(e) =>
-                  setNewItem({ ...newItem, unitOfMeasure: e.target.value })
-                }
-                className="mb-2 p-2 w-full text-black"
-              />
-
-              <div className="flex justify-between">
-                <button
-                  onClick={async () => {
-                    await handleAddItem();
-                    setShowAddOverlay(false);
-                  }}
-                  className="bg-black text-white py-2 px-4 rounded cursor-pointer"
-                >
-                  Save
-                </button>
-                <button
-                  onClick={() => setShowAddOverlay(false)}
-                  className="bg-black text-white py-2 px-4 rounded cursor-pointer"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+        <SubitemModal
+          modalTitle="Add Inventory Subitem"
+          subitemData={newItem}
+          setSubitemData={setNewItem}
+          onSave={async () => {
+            await handleAddItem();
+            resetNewItem();
+          }}
+          onCancel={() => {
+            setShowAddOverlay(false);
+            resetNewItem();
+          }}
+        />
       )}
 
       {showEditOverlay && itemToEdit && (
-        <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white p-5 rounded-lg w-72">
-            <h2 className="bg-white text-black">Edit Inventory Subitem</h2>
-            <div>
-              <input
-                type="text"
-                placeholder="Inventory Name"
-                value={itemToEdit.inventoryName}
-                onChange={(e) =>
-                  setItemToEdit({
-                    ...itemToEdit,
-                    inventoryName: e.target.value,
-                  })
-                }
-                className="mb-2 p-2 w-full text-black"
-              />
-
-              {/* Dropdown for Inventory Category with current value */}
-              <select
-                value={itemToEdit.inventoryCategory} // Use itemToEdit for the current value
-                onChange={
-                  (e) =>
-                    setItemToEdit({
-                      ...itemToEdit,
-                      inventoryCategory: e.target.value,
-                    }) // Update itemToEdit on change
-                }
-                className="mb-2 p-2 w-full text-black"
-              >
-                <option value="">Select Inventory Category</option>
-                <option value="Produce">Produce</option>
-                <option value="Dairy and Eggs">Dairy and Eggs</option>
-                <option value="Meat and Poultry">Meat and Poultry</option>
-                <option value="Seafood">Seafood</option>
-                <option value="Canned Goods">Canned Goods</option>
-                <option value="Dry Goods">Dry Goods</option>
-                <option value="Sauces">Sauces</option>
-                <option value="Condiments">Condiments</option>
-                <option value="Beverages">Beverages</option>
-              </select>
-
-              <input
-                type="number"
-                placeholder="Reorder Point"
-                value={
-                  itemToEdit.reorderPoint === 0 ? "" : itemToEdit.reorderPoint
-                }
-                onChange={(e) =>
-                  setItemToEdit({
-                    ...itemToEdit,
-                    reorderPoint:
-                      e.target.value === "" ? 0 : Number(e.target.value),
-                  })
-                }
-                className="mb-2 p-2 w-full text-black"
-              />
-
-              <input
-                type="text"
-                placeholder="Unit of Measure"
-                value={itemToEdit.unitOfMeasure}
-                onChange={(e) =>
-                  setItemToEdit({
-                    ...itemToEdit,
-                    unitOfMeasure: e.target.value,
-                  })
-                }
-                className="mb-2 p-2 w-full text-black"
-              />
-
-              <div className="flex justify-between">
-                <button
-                  onClick={async () => {
-                    await handleSaveChanges();
-                    setShowEditOverlay(false);
-                  }}
-                  className="bg-black text-white py-2 px-4 rounded cursor-pointer"
-                >
-                  Save
-                </button>
-                <button
-                  onClick={() => setShowEditOverlay(false)}
-                  className="bg-black text-white py-2 px-4 rounded cursor-pointer"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+        <SubitemModal
+          modalTitle="Edit Inventory Subitem"
+          subitemData={itemToEdit}
+          setSubitemData={setItemToEdit}
+          onSave={async () => {
+            await handleSaveChanges();
+          }}
+          onCancel={() => setShowEditOverlay(false)}
+        />
       )}
 
       {showDeleteOverlay && itemToDelete && (
@@ -590,169 +570,44 @@ export default function InventoryManagementPage() {
       )}
 
       {showStockInOverlay && (
-        <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white p-5 rounded-lg w-96">
-            <h2 className="text-black">Stock In</h2>
-            <div>
-              <input
-                type="text"
-                placeholder="Inventory ID"
-                value={stockInData.inventoryID}
-                onChange={(e) =>
-                  setStockInData({
-                    ...stockInData,
-                    inventoryID: e.target.value,
-                  })
-                }
-                className="mb-2 p-2 w-full text-black"
-              />
-              <input
-                type="text"
-                placeholder="Supplier Name"
-                value={stockInData.supplierName}
-                onChange={(e) =>
-                  setStockInData({
-                    ...stockInData,
-                    supplierName: e.target.value,
-                  })
-                }
-                className="mb-2 p-2 w-full text-black"
-              />
-              <input
-                type="text"
-                placeholder="Employee ID"
-                value={stockInData.employeeID}
-                onChange={(e) =>
-                  setStockInData({ ...stockInData, employeeID: e.target.value })
-                }
-                className="mb-2 p-2 w-full text-black"
-              />
-              <input
-                type="number"
-                placeholder="Quantity Ordered"
-                value={stockInData.quantityOrdered}
-                onChange={(e) =>
-                  setStockInData({
-                    ...stockInData,
-                    quantityOrdered: e.target.value,
-                  })
-                }
-                className="mb-2 p-2 w-full text-black"
-              />
-              <input
-                type="number"
-                placeholder="Actual Quantity"
-                value={stockInData.actualQuantity}
-                onChange={(e) =>
-                  setStockInData({
-                    ...stockInData,
-                    actualQuantity: e.target.value,
-                  })
-                }
-                className="mb-2 p-2 w-full text-black"
-              />
-              <input
-                type="number"
-                placeholder="Price Per Unit"
-                value={stockInData.pricePerUnit}
-                onChange={(e) =>
-                  setStockInData({
-                    ...stockInData,
-                    pricePerUnit: e.target.value,
-                  })
-                }
-                className="mb-2 p-2 w-full text-black"
-              />
-              <input
-                type="date"
-                placeholder="Stock In Date"
-                value={stockInData.stockInDate}
-                onChange={(e) =>
-                  setStockInData({
-                    ...stockInData,
-                    stockInDate: e.target.value,
-                  })
-                }
-                className="mb-2 p-2 w-full text-black"
-              />
-              <input
-                type="date"
-                placeholder="Expiry Date"
-                value={stockInData.expiryDate}
-                onChange={(e) =>
-                  setStockInData({ ...stockInData, expiryDate: e.target.value })
-                }
-                className="mb-2 p-2 w-full text-black"
-              />
-              <div className="flex justify-between">
-                <button
-                  onClick={async () => {
-                    await handleStockIn();
-                    setShowStockInOverlay(false);
-                  }}
-                  className="bg-black text-white py-2 px-4 rounded border-none cursor-pointer"
-                >
-                  Stock In
-                </button>
-                <button
-                  onClick={() => setShowStockInOverlay(false)}
-                  className="bg-black text-white py-2 px-4 rounded border-none cursor-pointer"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+        <StockInModal
+          stockInData={stockInData}
+          setStockInData={(data) => {
+            setStockInData((prevData) => ({
+              ...prevData,
+              ...data,
+              inventoryItems: data.inventoryItems.map((item) => ({
+                ...item,
+                expiryDate: item.expiryDate ? format(new Date(item.expiryDate), 'yyyy-MM-dd') : "",
+              })),
+            }));
+          }}
+          employees={employees}
+          inventoryNames={inventoryNames}
+          handleStockIn={handleStockIn}
+          onClose={() => {
+            console.log("StockInData on close:", stockInData);
+            setShowStockInOverlay(false);
+          }}
+        />
       )}
 
       {showStockOutOverlay && (
-        <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white p-5 rounded-lg w-72">
-            <h2 className="text-black">Stock Out Subitem</h2>
-            <div>
-              <input
-                type="number"
-                placeholder="Quantity"
-                value={stockOutData.quantity === 0 ? "" : stockOutData.quantity}
-                onChange={(e) =>
-                  setStockOutData({
-                    ...stockOutData,
-                    quantity:
-                      e.target.value === "" ? 0 : Number(e.target.value),
-                  })
-                }
-                className="mb-2 p-2 w-full text-black"
-              />
-              <input
-                type="text"
-                placeholder="Reason"
-                value={stockOutData.reason}
-                onChange={(e) =>
-                  setStockOutData({ ...stockOutData, reason: e.target.value })
-                }
-                className="mb-2 p-2 w-full text-black"
-              />
-              <div className="flex justify-between">
-                <button
-                  onClick={async () => {
-                    await handleStockOutSubmit();
-                    setShowStockOutOverlay(false);
-                  }}
-                  className="bg-black text-white py-2 px-4 rounded cursor-pointer"
-                >
-                  Save
-                </button>
-                <button
-                  onClick={() => setShowStockOutOverlay(false)}
-                  className="bg-black text-white py-2 px-4 rounded cursor-pointer"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+        <StockOutModal
+          stockOutData={stockOutData}
+          setStockOutData={setStockOutData}
+          handleStockOutSubmit={handleStockOutSubmit}
+          onClose={() => setShowStockOutOverlay(false)}
+        />
+      )}
+
+      {showUpdateStockOverlay && (
+        <UpdateStockModal
+          updateStockData={updateStockData} // Make sure this prop matches the expected prop name in UpdateStockModal
+          setUpdateStockData={setUpdateStockData} // Update to match prop name
+          handleUpdateStockSubmit={handleUpdateStockSubmit}
+          onClose={() => setShowUpdateStockOverlay(false)}
+        />
       )}
     </div>
   );
