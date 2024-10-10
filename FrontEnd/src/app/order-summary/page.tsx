@@ -4,7 +4,10 @@ import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import OrderCard from "@/components/OrderCard";
 import { Order, OrderItemDataTypes } from "../../../lib/types/OrderDataTypes";
-import { ProductDataTypes, SubitemDataTypes } from "../../../lib/types/ProductDataTypes";
+import {
+  ProductDataTypes,
+  SubitemForStockInDataTypes,
+} from "../../../lib/types/ProductDataTypes";
 import Header from "@/components/Header";
 import Link from "next/link";
 import OrderButtonSection from "@/components/section/OrderButtonSection";
@@ -14,7 +17,8 @@ import axios from "axios";
 function OrderSummaryPage() {
   const [menuData, setMenuData] = useState<ProductDataTypes[]>([]);
   const date = new Date();
-  const time = date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
+  const time =
+    date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
   const dateTime = date.toISOString() + " " + time;
 
   const [order, setOrder] = useState<Order>({
@@ -95,7 +99,9 @@ function OrderSummaryPage() {
   };
 
   // Function to update inventory quantities after placing the order
-  const updateInventoryAfterOrder = async (subitems: SubitemDataTypes[]) => {
+  const updateInventoryAfterOrder = async (
+    subitems: SubitemForStockInDataTypes[]
+  ) => {
     try {
       // Explicitly type the updates array
       let updates: UpdateType[] = [];
@@ -106,7 +112,9 @@ function OrderSummaryPage() {
         if (inventoryProcessed.has(subitem.inventoryID)) return; // Skip if already processed
 
         // Find the corresponding product in the cart to get the order quantity
-        const cartItem = cart.find((item) => item.productID === subitem.productID);
+        const cartItem = cart.find(
+          (item) => item.productID === subitem.productID
+        );
         if (!cartItem) return;
 
         // Calculate the total quantity needed for this inventory
@@ -116,16 +124,24 @@ function OrderSummaryPage() {
         // Filter all relevant subinventory entries for the given inventoryID in ascending order of expiryDate
         const relevantSubinventories = subitems
           .filter(
-            (s) => s.inventoryID === subitem.inventoryID && s.quantityRemaining > 0
+            (s) =>
+              s.inventoryID === subitem.inventoryID && s.quantityRemaining > 0
           )
-          .sort((a, b) => new Date(a.expiryDate).getTime() - new Date(b.expiryDate).getTime());
+          .sort(
+            (a, b) =>
+              new Date(a.expiryDate).getTime() -
+              new Date(b.expiryDate).getTime()
+          );
 
         // Iterate through subinventory items until the totalQuantityNeeded is fulfilled
         for (let sub of relevantSubinventories) {
           if (totalQuantityNeeded <= 0) break;
 
           // Determine how much we can deduct from the current subinventory
-          const quantityToDeduct = Math.min(sub.quantityRemaining, totalQuantityNeeded);
+          const quantityToDeduct = Math.min(
+            sub.quantityRemaining,
+            totalQuantityNeeded
+          );
 
           // Push the deduction to the updates array
           updates.push({
@@ -134,7 +150,9 @@ function OrderSummaryPage() {
           });
 
           // Log the deduction
-          console.log(`Deducting ${quantityToDeduct} from subinventoryID ${sub.subinventoryID}`);
+          console.log(
+            `Deducting ${quantityToDeduct} from subinventoryID ${sub.subinventoryID}`
+          );
 
           // Update quantity needed for the next subinventory
           totalQuantityNeeded -= quantityToDeduct;
@@ -178,7 +196,7 @@ function OrderSummaryPage() {
           { productIDs }
         );
 
-        const allSubitems: SubitemDataTypes[] = response.data;
+        const allSubitems: SubitemForStockInDataTypes[] = response.data;
 
         // Log the fetched subitems needed for inventory update
         console.log("Fetched subitems for inventory update:", allSubitems);
