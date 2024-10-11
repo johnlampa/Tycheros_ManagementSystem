@@ -5,6 +5,8 @@ import { pattaya, inter, pacifico } from "@/styles/fonts";
 import { CartProvider } from "../../lib/context/CartContext";
 import { OrderProvider } from "../../lib/context/OrderContext";
 
+import { EdgeStoreProvider } from "../../lib/edgestore";
+
 export const metadata = {
   title: "Tycheros Management System",
   description: "",
@@ -22,7 +24,9 @@ export default function RootLayout({ children }: RootLayoutProps) {
     >
       <body className={inter.className}>
         <CartProvider>
-          <OrderProvider>{children}</OrderProvider>
+          <OrderProvider>
+            <EdgeStoreProvider>{children}</EdgeStoreProvider>
+          </OrderProvider>
         </CartProvider>
       </body>
     </html>
