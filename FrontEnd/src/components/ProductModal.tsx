@@ -7,6 +7,9 @@ import {
   SubitemDataTypes,
 } from "../../lib/types/ProductDataTypes";
 import { FaTrashAlt } from "react-icons/fa";
+import React from "react";
+import { useEdgeStore } from "../../lib/edgestore";
+import Link from "next/link";
 
 const ProductModal: React.FC<ProductModalProps> = ({
   productModalIsVisible,
@@ -39,6 +42,15 @@ const ProductModal: React.FC<ProductModalProps> = ({
   const [subitems, setSubitems] = useState<SubitemDataTypes[]>([]);
   const [deletedSubitemIds, setDeletedSubitemIds] = useState<number[]>([]);
 
+  const [file, setFile] = React.useState<File>();
+  const [urls, setUrls] = useState<{
+    url: string;
+    thumbnailUrl: string | null;
+  }>();
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadingMessage, setUploadingMessage] = useState<string | null>(null); // Upload message state
+  const { edgestore } = useEdgeStore();
+
   useEffect(() => {
     if (type === "edit" && menuProductToEdit?.productID) {
       axios
@@ -69,82 +81,97 @@ const ProductModal: React.FC<ProductModalProps> = ({
   const handleDeleteSubitem = (inventoryID: number) => {
     if (inventoryID === -1) {
       if (subitems.length > 0) {
-        setSubitems(subitems.slice(0, -1)); // Remove last element which is emepty select option
+        setSubitems(subitems.slice(0, -1)); // Remove last element which is an empty select option
       }
     } else {
-      // Remove subitem by matching the inventoryID
       const updatedSubitems = subitems.filter(
         (subitem) => subitem.inventoryID !== inventoryID
       );
-
-      // Set the updated subitems array
       setSubitems(updatedSubitems);
-
-      // Track deleted subitem IDs if needed
       setDeletedSubitemIds((prev) => [...prev, inventoryID]);
     }
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setProductModalVisibility(false);
 
-    const form = e.currentTarget;
-    const formData = new FormData(form);
-    const formJson = Object.fromEntries(formData.entries());
+    // If there's a file to upload, handle the upload first
+    if (file) {
+      setIsUploading(true);
+      setUploadingMessage("Don’t close. Uploading file...");
 
-    const updatedProduct: ProductDataTypes = {
-      productName: formJson.productName as string,
-      sellingPrice: parseFloat(formJson.sellingPrice as string),
-      categoryID: categoryID,
-      imageUrl: "/assets/images/MilkTea.jpg",
-      subitems: subitems.map((subitem, index) => ({
-        inventoryID: parseInt(formJson[`subitem-${index}`] as string),
-        quantityNeeded: parseFloat(
-          formJson[`quantityNeeded-${index}`] as string
-        ),
-      })),
-    };
-
-    console.log("Deleted Subitem IDs on submit:", deletedSubitemIds);
-
-    if (type === "edit" && menuProductToEdit?.productID) {
-      axios
-        .put(
-          `http://localhost:8081/menuManagement/putProduct/${menuProductToEdit.productID}`,
-          {
-            ...updatedProduct,
-            deletedSubitemIds,
-          }
-        )
-        .then((response) => {
-          console.log("Product updated:", updatedProduct);
-          if (setMenuProductHolder) {
-            setMenuProductHolder(updatedProduct);
-          }
-          form.reset();
-          window.location.reload();
-        })
-        .catch((error) => {
-          console.error("Error updating product:", error);
+      try {
+        const res = await edgestore.myPublicImages.upload({ file });
+        setUrls({
+          url: res.url,
+          thumbnailUrl: res.thumbnailUrl,
         });
-    } else {
-      axios
-        .post(
-          "http://localhost:8081/menuManagement/postProduct",
-          updatedProduct
-        )
-        .then((response) => {
-          console.log("Product added:", updatedProduct);
-          if (setMenuProductHolder) {
-            setMenuProductHolder(updatedProduct);
-          }
-          form.reset();
-          window.location.reload();
-        })
-        .catch((error) => {
-          console.error("Error adding product:", error);
-        });
+
+        console.log(res);
+
+        const form = e.target as HTMLFormElement;
+        const formData = new FormData(form);
+        const formJson = Object.fromEntries(formData.entries());
+
+        const updatedProduct: ProductDataTypes = {
+          productName: formJson.productName as string,
+          sellingPrice: parseFloat(formJson.sellingPrice as string),
+          categoryID: categoryID,
+          imageUrl: res.url, // Set the uploaded URL to imageUrl
+          subitems: subitems.map((subitem, index) => ({
+            inventoryID: parseInt(formJson[`subitem-${index}`] as string),
+            quantityNeeded: parseFloat(
+              formJson[`quantityNeeded-${index}`] as string
+            ),
+          })),
+        };
+
+        if (type === "edit" && menuProductToEdit?.productID) {
+          axios
+            .put(
+              `http://localhost:8081/menuManagement/putProduct/${menuProductToEdit.productID}`,
+              {
+                ...updatedProduct,
+                deletedSubitemIds,
+              }
+            )
+            .then((response) => {
+              console.log("Product updated:", updatedProduct);
+              if (setMenuProductHolder) {
+                setMenuProductHolder(updatedProduct);
+              }
+              form.reset();
+              setProductModalVisibility(false); // Close modal after updating
+              window.location.reload();
+            })
+            .catch((error) => {
+              console.error("Error updating product:", error);
+            });
+        } else {
+          axios
+            .post(
+              "http://localhost:8081/menuManagement/postProduct",
+              updatedProduct
+            )
+            .then((response) => {
+              console.log("Product added:", updatedProduct);
+              if (setMenuProductHolder) {
+                setMenuProductHolder(updatedProduct);
+              }
+              form.reset();
+              setProductModalVisibility(false); // Close modal after adding
+              window.location.reload();
+            })
+            .catch((error) => {
+              console.error("Error adding product:", error);
+            });
+        }
+      } catch (error) {
+        console.error("Upload failed:", error);
+      } finally {
+        setIsUploading(false); // Reset upload state
+        setUploadingMessage(null); // Clear upload message
+      }
     }
   };
 
@@ -154,10 +181,6 @@ const ProductModal: React.FC<ProductModalProps> = ({
         "Are you sure you want to delete this product? This action cannot be undone."
       );
       if (confirmDelete) {
-        console.log(
-          "Deleted Subitem IDs before product deletion:",
-          deletedSubitemIds
-        );
         axios
           .delete(
             `http://localhost:8081/menuManagement/deleteProduct/${menuProductToEdit.productID}`
@@ -202,7 +225,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
           name="productName"
           id="productName"
           placeholder="Enter product name"
-          className="border border-gray-300 rounded w-full p-3 mb-4 text-black placeholder-gray-400"
+          className="border border-gray rounded w-full p-3 mb-4 text-black placeholder-gray"
           defaultValue={type === "edit" ? menuProductToEdit?.productName : ""}
         />
 
@@ -214,10 +237,10 @@ const ProductModal: React.FC<ProductModalProps> = ({
           name="sellingPrice"
           id="sellingPrice"
           placeholder="Enter price"
-          className="border border-gray-300 rounded w-full p-3 mb-4 text-black placeholder-gray-400"
+          className="border border-gray rounded w-full p-3 mb-4 text-black placeholder-gray"
           defaultValue={type === "edit" ? menuProductToEdit?.sellingPrice : ""}
           onInput={(e) => {
-            const input = e.target as HTMLInputElement; // Typecast to HTMLInputElement
+            const input = e.target as HTMLInputElement;
             if (input.valueAsNumber < 0) {
               input.value = "0"; // Reset the value to 0 if negative
             }
@@ -231,7 +254,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
             className="flex justify-between items-center mb-4"
           >
             <select
-              className="border border-gray-300 rounded w-[60%] p-3 text-black mr-5 h-12"
+              className="border border-gray rounded w-[60%] p-3 text-black mr-5 h-12"
               defaultValue={subitem.inventoryID}
               name={`subitem-${index}`}
               id={`subitem-${index}`}
@@ -241,78 +264,80 @@ const ProductModal: React.FC<ProductModalProps> = ({
                 ?.filter((item) => item.inventoryCategory !== "Condiments")
                 .map((item) => (
                   <option value={item.inventoryID} key={item.inventoryID}>
-                    {item.inventoryName} ({item.unitOfMeasure})
+                    {item.inventoryName}
                   </option>
                 ))}
             </select>
+
             <input
               type="number"
               name={`quantityNeeded-${index}`}
               id={`quantityNeeded-${index}`}
               placeholder="Quantity"
-              className="border border-gray-300 rounded w-[30%] p-3 text-black placeholder-gray-400"
+              className="border border-gray rounded w-[30%] p-3 text-black"
               defaultValue={subitem.quantityNeeded}
-              onInput={(e) => {
-                const input = e.target as HTMLInputElement;
-                if (input.valueAsNumber < 0) {
-                  input.value = "0"; // Prevent negative values
-                }
-              }}
+              min={0}
             />
             <button
               type="button"
-              className="ml-2 flex items-center justify-center"
-              onClick={() => handleDeleteSubitem(subitem.inventoryID)} // Pass inventoryID instead of index
+              onClick={() => handleDeleteSubitem(subitem.inventoryID)}
+              className="text-black ml-4"
             >
-              <FaTrashAlt className="text-tealGreen text-2xl" />
+              <FaTrashAlt />
             </button>
           </div>
         ))}
-
         <button
           type="button"
           onClick={handleAddSubitem}
-          className="border border-black rounded px-4 py-2 w-full mb-4 text-black bg-white hover:bg-black hover:text-white"
+          className="bg-black hover:bg-black text-white font-semibold py-2 px-4 rounded w-full mb-4"
         >
-          Add Subitem
+          + Add Subitem
         </button>
 
-        <div className="justify-center">
+        <label htmlFor="imageUpload" className="block mb-2 text-black">
+          Upload Image
+        </label>
+        <input
+          type="file"
+          onChange={(e) => {
+            setFile(e.target.files?.[0]);
+          }}
+        />
+
+        {/* Save button with conditional disabled state */}
+        <button
+          type="submit"
+          className={`bg-tealGreen hover:bg-tealGreen text-white font-semibold py-2 px-4 rounded w-full ${
+            isUploading ? "opacity-50 cursor-not-allowed" : ""
+          }`}
+          disabled={isUploading}
+        >
+          Save
+        </button>
+
+        {type === "edit" && (
           <button
             type="button"
-            className="border border-black rounded mr-5 px-4 py-2 bg-lightTealGreen text-black hover:bg-tealGreen hover:text-white mb-5"
+            onClick={handleDelete}
+            className="bg-red hover:bg-red text-white font-semibold py-2 px-4 rounded w-full mt-4"
           >
-            Insert Image
+            Delete Product
           </button>
+        )}
 
-          {type === "edit" && (
-            <button
-              type="button"
-              onClick={handleDelete}
-              className="border border-lightRed rounded px-2 py-2 text-lightRed bg-white hover:bg-darkRed hover:text-white mb-5 ml-3"
-            >
-              Delete Product
-            </button>
-          )}
-        </div>
+        {/* Message indicating the upload status */}
+        {uploadingMessage && (
+          <p className="text-black text-center mt-4">{uploadingMessage}</p>
+        )}
 
-        <div className="flex justify-between">
-          <button
-            type="submit"
-            className="border border-black rounded px-5 py-2 text-black bg-lightTealGreen hover:bg-tealGreen hover:text-white mr-2"
-          >
-            Save
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setProductModalVisibility(false);
-              setSubitems([]);
-            }}
-            className="border border-black rounded px-2 py-2 text-black bg-lightTealGreen hover:bg-tealGreen hover:text-white ml-2"
+        <div className="mt-4 text-center">
+          <Link
+            href="/menuManagement"
+            className="bg-gray hover:bg-gray text-white font-semibold py-2 px-4 rounded"
           >
             Cancel
-          </button>
+          </Link>
         </div>
       </form>
     </Modal>
