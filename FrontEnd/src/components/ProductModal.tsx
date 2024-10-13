@@ -95,83 +95,107 @@ const ProductModal: React.FC<ProductModalProps> = ({
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    // If there's a file to upload, handle the upload first
-    if (file) {
-      setIsUploading(true);
-      setUploadingMessage("Don’t close. Uploading file...");
+    const form = e.target as HTMLFormElement;
+    const formData = new FormData(form);
+    const formJson = Object.fromEntries(formData.entries());
 
-      try {
-        const res = await edgestore.myPublicImages.upload({ file });
-        setUrls({
-          url: res.url,
-          thumbnailUrl: res.thumbnailUrl,
-        });
+    let validationErrors = [];
 
-        console.log(res);
+    // Product Name validation
+    if (!formJson.productName) {
+      validationErrors.push("Product Name is required.");
+    }
 
-        const form = e.target as HTMLFormElement;
-        const formData = new FormData(form);
-        const formJson = Object.fromEntries(formData.entries());
+    // Selling Price validation
+    const price = parseFloat(formJson.sellingPrice as string);
+    if (!formJson.sellingPrice || price <= -1) {
+      validationErrors.push("Price is required.");
+    }
 
-        const updatedProduct: ProductDataTypes = {
-          productName: formJson.productName as string,
-          sellingPrice: parseFloat(formJson.sellingPrice as string),
-          categoryID: categoryID,
-          imageUrl: res.url, // Set the uploaded URL to imageUrl
-          subitems: subitems.map((subitem, index) => ({
-            inventoryID: parseInt(formJson[`subitem-${index}`] as string),
-            quantityNeeded: parseFloat(
-              formJson[`quantityNeeded-${index}`] as string
-            ),
-          })),
-        };
+    // Subitems validation (at least one subitem should be selected)
+    if (subitems.length === 0) {
+      validationErrors.push("At least one subitem must be added.");
+    } else {
+      subitems.forEach((subitem, index) => {
+        const inventoryID = parseInt(formJson[`subitem-${index}`] as string);
+        const quantityNeeded = parseFloat(
+          formJson[`quantityNeeded-${index}`] as string
+        );
 
-        if (type === "edit" && menuProductToEdit?.productID) {
-          axios
-            .put(
-              `http://localhost:8081/menuManagement/putProduct/${menuProductToEdit.productID}`,
-              {
-                ...updatedProduct,
-                deletedSubitemIds,
-              }
-            )
-            .then((response) => {
-              console.log("Product updated:", updatedProduct);
-              if (setMenuProductHolder) {
-                setMenuProductHolder(updatedProduct);
-              }
-              form.reset();
-              setProductModalVisibility(false); // Close modal after updating
-              window.location.reload();
-            })
-            .catch((error) => {
-              console.error("Error updating product:", error);
-            });
-        } else {
-          axios
-            .post(
-              "http://localhost:8081/menuManagement/postProduct",
-              updatedProduct
-            )
-            .then((response) => {
-              console.log("Product added:", updatedProduct);
-              if (setMenuProductHolder) {
-                setMenuProductHolder(updatedProduct);
-              }
-              form.reset();
-              setProductModalVisibility(false); // Close modal after adding
-              window.location.reload();
-            })
-            .catch((error) => {
-              console.error("Error adding product:", error);
-            });
+        if (inventoryID === -1 || isNaN(inventoryID)) {
+          validationErrors.push(
+            `Please select a valid subitem for entry #${index + 1}.`
+          );
         }
-      } catch (error) {
-        console.error("Upload failed:", error);
-      } finally {
-        setIsUploading(false); // Reset upload state
-        setUploadingMessage(null); // Clear upload message
+
+        if (!quantityNeeded || isNaN(quantityNeeded) || quantityNeeded <= 0) {
+          validationErrors.push(
+            `Please enter a valid quantity for subitem ${index + 1}.`
+          );
+        }
+      });
+    }
+
+    // Image upload validation (only for adding a new product)
+    if (type === "add" && !file) {
+      validationErrors.push("Product Image is required.");
+    }
+
+    // If there are validation errors, display them and stop submission
+    if (validationErrors.length > 0) {
+      alert(validationErrors.join("\n"));
+      return;
+    }
+
+    const updatedProduct: ProductDataTypes = {
+      productName: formJson.productName as string,
+      sellingPrice: price,
+      categoryID: categoryID,
+      imageUrl: "", // Initially set as an empty string
+      subitems: subitems.map((subitem, index) => ({
+        inventoryID: parseInt(formJson[`subitem-${index}`] as string),
+        quantityNeeded: parseFloat(
+          formJson[`quantityNeeded-${index}`] as string
+        ),
+      })),
+    };
+
+    try {
+      if (file) {
+        setIsUploading(true);
+        setUploadingMessage("Don’t close. Uploading file...");
+        const res = await edgestore.myPublicImages.upload({ file });
+        updatedProduct.imageUrl = res.url;
+      } else if (type === "edit") {
+        updatedProduct.imageUrl = menuProductToEdit?.imageUrl || "";
       }
+
+      if (type === "edit" && menuProductToEdit?.productID) {
+        await axios.put(
+          `http://localhost:8081/menuManagement/putProduct/${menuProductToEdit.productID}`,
+          { ...updatedProduct, deletedSubitemIds }
+        );
+        console.log("Product updated:", updatedProduct);
+      } else {
+        await axios.post(
+          "http://localhost:8081/menuManagement/postProduct",
+          updatedProduct
+        );
+        console.log("Product added:", updatedProduct);
+      }
+
+      if (setMenuProductHolder) {
+        setMenuProductHolder(updatedProduct);
+      }
+
+      form.reset();
+      setProductModalVisibility(false);
+      window.location.reload();
+    } catch (error) {
+      console.error("Error submitting product:", error);
+    } finally {
+      setIsUploading(false);
+      setUploadingMessage(null);
     }
   };
 
@@ -198,6 +222,10 @@ const ProductModal: React.FC<ProductModalProps> = ({
           });
       }
     }
+  };
+
+  const handleCancel = () => {
+    setProductModalVisibility(false);
   };
 
   return (
@@ -229,7 +257,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
           defaultValue={type === "edit" ? menuProductToEdit?.productName : ""}
         />
 
-        <label htmlFor="price" className="block mb-2 text-black">
+        <label htmlFor="sellingPrice" className="block mb-2 text-black">
           Price
         </label>
         <input
@@ -299,7 +327,10 @@ const ProductModal: React.FC<ProductModalProps> = ({
           Upload Image
         </label>
         <input
+          id="imageUpload"
+          name="imageUpload"
           type="file"
+          className="cursor-pointer"
           onChange={(e) => {
             setFile(e.target.files?.[0]);
           }}
@@ -308,7 +339,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
         {/* Save button with conditional disabled state */}
         <button
           type="submit"
-          className={`bg-tealGreen hover:bg-tealGreen text-white font-semibold py-2 px-4 rounded w-full ${
+          className={`bg-tealGreen hover:bg-tealGreen text-white font-semibold py-2 px-4 rounded w-full mt-5 ${
             isUploading ? "opacity-50 cursor-not-allowed" : ""
           }`}
           disabled={isUploading}
@@ -332,12 +363,12 @@ const ProductModal: React.FC<ProductModalProps> = ({
         )}
 
         <div className="mt-4 text-center">
-          <Link
-            href="/menuManagement"
+          <button
             className="bg-gray hover:bg-gray text-white font-semibold py-2 px-4 rounded"
+            onClick={handleCancel}
           >
             Cancel
-          </Link>
+          </button>
         </div>
       </form>
     </Modal>
