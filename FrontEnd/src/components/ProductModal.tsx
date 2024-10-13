@@ -136,9 +136,16 @@ const ProductModal: React.FC<ProductModalProps> = ({
       });
     }
 
-    // Image upload validation (only for adding a new product)
+    // Image upload validation
     if (type === "add" && !file) {
       validationErrors.push("Product Image is required.");
+    }
+
+    // If an image file is provided, check its format for both "add" and "edit" cases
+    if (file && !["image/png", "image/jpeg"].includes(file.type)) {
+      validationErrors.push(
+        "Invalid file format. Only PNG and JPEG are allowed."
+      );
     }
 
     // If there are validation errors, display them and stop submission
@@ -324,7 +331,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
         </button>
 
         <label htmlFor="imageUpload" className="block mb-2 text-black">
-          Upload Image
+          Upload Image <span className="text-gray">(PNG or JPEG format)</span>
         </label>
         <input
           id="imageUpload"
@@ -332,7 +339,17 @@ const ProductModal: React.FC<ProductModalProps> = ({
           type="file"
           className="cursor-pointer"
           onChange={(e) => {
-            setFile(e.target.files?.[0]);
+            const selectedFile = e.target.files?.[0];
+            if (selectedFile) {
+              // Check file size (2MB = 2 * 1024 * 1024 = 2097152 bytes)
+              const maxSizeInBytes = 2 * 1024 * 1024;
+              if (selectedFile.size > maxSizeInBytes) {
+                alert("File size exceeds 2MB. Please upload a smaller file.");
+                e.target.value = ""; // Reset file input
+                return;
+              }
+              setFile(selectedFile); // Proceed if file size is valid
+            }
           }}
         />
 
