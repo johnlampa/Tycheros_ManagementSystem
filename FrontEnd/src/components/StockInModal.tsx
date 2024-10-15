@@ -224,7 +224,7 @@ const StockInModal: React.FC<StockInModalProps> = ({
                     <input
                       type="number"
                       placeholder="Quantity Ordered"
-                      value={item.quantityOrdered}
+                      value={item.quantityOrdered === 0 ? "" : item.quantityOrdered}
                       min="0"
                       onChange={(e) =>
                         updateInventoryItem(index, {
@@ -236,7 +236,7 @@ const StockInModal: React.FC<StockInModalProps> = ({
                     <input
                       type="number"
                       placeholder="Actual Quantity"
-                      value={item.actualQuantity}
+                      value={item.actualQuantity === 0 ? "" : item.actualQuantity}
                       min="0"
                       onChange={(e) =>
                         updateInventoryItem(index, {
@@ -250,7 +250,7 @@ const StockInModal: React.FC<StockInModalProps> = ({
                   <input
                     type="number"
                     placeholder="Price Per Unit"
-                    value={item.pricePerUnit}
+                    value={item.pricePerUnit === 0 ? "" : item.pricePerUnit}
                     min="0"
                     onChange={(e) =>
                       updateInventoryItem(index, {
@@ -259,10 +259,12 @@ const StockInModal: React.FC<StockInModalProps> = ({
                     }
                     className="mb-2 p-2 w-full text-black border border-black"
                   />
+                  <text className="text-black">Expiry Date </text>
                   <input
                     type="date"
                     placeholder="Expiry Date"
-                    value={item.expiryDate}
+                    value={item.expiryDate === "dd/mm/yyyy" ? "" : item.expiryDate}
+                    defaultValue="dd/mm/yyyy"
                     onChange={(e) =>
                       updateInventoryItem(index, {
                         expiryDate: e.target.value,
