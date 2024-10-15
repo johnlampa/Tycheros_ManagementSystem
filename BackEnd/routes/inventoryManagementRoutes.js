@@ -36,51 +36,25 @@ router.get('/getSubitem', async (req, res) => {
             inv.inventoryCategory,
             inv.reorderPoint,
             inv.unitOfMeasure,
-            si.quantityRemaining,  -- Show quantityRemaining per subinventory entry
             SUM(CASE WHEN si.quantityRemaining > 0 THEN si.quantityRemaining ELSE 0 END) 
-                OVER (PARTITION BY inv.inventoryID) AS totalQuantity,  -- Total positive quantityRemaining for each inventoryID
-            poi.quantityOrdered,
-            poi.actualQuantity,
-            poi.pricePerUnit,
-            poi.expiryDate,
-            po.stockInDate,
-            s.supplierName,
-            CONCAT(e.firstName, ' ', e.lastName) AS employeeName,  -- Full employee name as firstName + lastName
-            ROW_NUMBER() OVER (PARTITION BY inv.inventoryID ORDER BY poi.expiryDate ASC) AS row_num  -- For ordering by expiryDate within each inventoryID
+                OVER (PARTITION BY inv.inventoryID) AS totalQuantity  -- Total positive quantityRemaining for each inventoryID
         FROM 
             inventory inv
         LEFT JOIN 
             subinventory si ON inv.inventoryID = si.inventoryID AND si.quantityRemaining > 0 -- Include only positive quantities
-        LEFT JOIN 
-            purchaseorderitem poi ON si.subinventoryID = poi.subinventoryID
-        LEFT JOIN 
-            purchaseorder po ON poi.purchaseOrderID = po.purchaseOrderID
-        LEFT JOIN 
-            supplier s ON po.supplierID = s.supplierID
-        LEFT JOIN 
-            employees e ON po.employeeID = e.employeeID
     )
-    SELECT 
+    SELECT DISTINCT
         inventoryID,  -- Always retain inventoryID for each row
-        CASE WHEN row_num = 1 THEN inventoryName ELSE NULL END AS inventoryName,
-        CASE WHEN row_num = 1 THEN inventoryCategory ELSE NULL END AS inventoryCategory,
-        CASE WHEN row_num = 1 THEN reorderPoint ELSE NULL END AS reorderPoint,
-        CASE WHEN row_num = 1 THEN unitOfMeasure ELSE NULL END AS unitOfMeasure,
-        CASE WHEN row_num = 1 THEN totalQuantity ELSE NULL END AS totalQuantity,
-        quantityRemaining,  -- Quantity remaining per subinventory entry
-        quantityOrdered,
-        actualQuantity,
-        pricePerUnit,
-        expiryDate,
-        stockInDate,
-        supplierName,
-        employeeName
+        inventoryName,
+        inventoryCategory,
+        reorderPoint,
+        unitOfMeasure,
+        totalQuantity
     FROM 
         InventoryData
     ORDER BY 
-        COALESCE(inventoryName, (SELECT inventoryName FROM InventoryData WHERE inventoryID = InventoryData.inventoryID AND row_num = 1)) ASC,  -- Order by inventoryName alphabetically, group NULLs with their corresponding inventoryName
-        inventoryID ASC,     -- Group all entries with the same inventoryID together
-        row_num ASC;         -- Then order by row number (earliest expiryDate first)
+        inventoryName ASC,  -- Order by inventoryName alphabetically
+        inventoryID ASC;     -- Group all entries with the same inventoryID together
   `;
 
   try {
@@ -88,6 +62,45 @@ router.get('/getSubitem', async (req, res) => {
     res.json(result);
   } catch (err) {
     console.error("Error fetching inventory data:", err);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+// GET Subitem Details by Inventory ID
+router.get('/getSubitemDetails/:inventoryID', async (req, res) => {
+  const { inventoryID } = req.params;
+  const query = `
+    SELECT 
+      si.subinventoryID,
+      si.quantityRemaining,
+      poi.quantityOrdered,
+      poi.actualQuantity,
+      poi.pricePerUnit,
+      poi.expiryDate,
+      po.stockInDate,
+      s.supplierName,
+      CONCAT(e.firstName, ' ', e.lastName) AS employeeName
+    FROM 
+      subinventory si
+    LEFT JOIN 
+      purchaseorderitem poi ON si.subinventoryID = poi.subinventoryID
+    LEFT JOIN 
+      purchaseorder po ON poi.purchaseOrderID = po.purchaseOrderID
+    LEFT JOIN 
+      supplier s ON po.supplierID = s.supplierID
+    LEFT JOIN 
+      employees e ON po.employeeID = e.employeeID
+    WHERE 
+      si.inventoryID = ?
+      AND quantityRemaining > 0
+    ORDER BY 
+        expiryDate ASC;      -- Then order by row number (earliest expiryDate first)
+  `;
+  try {
+    const [result] = await pool.query(query, [inventoryID]);
+    res.json(result);
+  } catch (err) {
+    console.error("Error fetching subitem details:", err);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
