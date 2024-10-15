@@ -1,10 +1,28 @@
-import React from "react";
+import React, { useState } from "react";
+
+// Validation Dialog Component
+const ValidationDialog: React.FC<{ message: string; onClose: () => void }> = ({ message, onClose }) => (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+    <div className="bg-white p-5 rounded-lg w-80">
+      <h2 className="text-red-500 font-bold mb-4">Validation Error</h2>
+      <div className="text-black whitespace-pre-wrap">{message}</div>
+      <div className="flex justify-end mt-4">
+        <button
+          onClick={onClose}
+          className="bg-tealGreen text-black py-2 px-4 rounded cursor-pointer"
+        >
+          OK
+        </button>
+      </div>
+    </div>
+  </div>
+);
 
 interface SubitemModalProps {
   modalTitle: string;
   subitemData: {
     inventoryName: string;
-    inventoryCategory: string;  
+    inventoryCategory: string;
     reorderPoint: number;
     unitOfMeasure: string;
   };
@@ -20,6 +38,39 @@ const SubitemModal: React.FC<SubitemModalProps> = ({
   onSave,
   onCancel,
 }) => {
+  const [validationMessage, setValidationMessage] = useState<string | null>(null);
+
+  const validateForm = () => {
+    const missingFields: string[] = [];
+
+    if (!subitemData.inventoryName.trim()) {
+      missingFields.push("Inventory Name");
+    }
+    if (!subitemData.inventoryCategory.trim()) {
+      missingFields.push("Inventory Category");
+    }
+    if (subitemData.reorderPoint <= 0) {
+      missingFields.push("Reorder Point");
+    }
+    if (!subitemData.unitOfMeasure.trim()) {
+      missingFields.push("Unit of Measure");
+    }
+
+    if (missingFields.length > 0) {
+      setValidationMessage(`Please fill out the following:\n${missingFields.join("\n")}`);
+      return false;
+    }
+
+    setValidationMessage(null);
+    return true;
+  };
+
+  const handleSave = () => {
+    if (validateForm()) {
+      onSave();
+    }
+  };
+
   return (
     <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center">
       <div className="bg-white p-5 rounded-lg w-72">
@@ -82,7 +133,7 @@ const SubitemModal: React.FC<SubitemModalProps> = ({
 
           <div className="flex justify-between">
             <button
-              onClick={onSave}
+              onClick={handleSave}
               className="bg-black text-white py-2 px-4 rounded cursor-pointer"
             >
               Save
@@ -96,6 +147,10 @@ const SubitemModal: React.FC<SubitemModalProps> = ({
           </div>
         </div>
       </div>
+
+      {validationMessage && (
+        <ValidationDialog message={validationMessage} onClose={() => setValidationMessage(null)} />
+      )}
     </div>
   );
 };
