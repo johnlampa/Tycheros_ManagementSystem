@@ -146,6 +146,7 @@ export default function InventoryManagementPage() {
           "http://localhost:8081/inventoryManagement/getSubitem"
         ).then((res) => res.json());
         setInventoryData(updatedInventory);
+        window.location.reload();
       } else {
         const errorData = await response.json();
         alert("Error: " + errorData.message);
@@ -172,13 +173,18 @@ export default function InventoryManagementPage() {
 
   const [showStockOutOverlay, setShowStockOutOverlay] = useState(false);
   const [stockOutData, setStockOutData] = useState({
-    inventoryID: "",
+    inventoryID: 0,
     quantity: 0,
     reason: "",
+    stockOutDate: "",
   });
 
-  const handleStockOut = (inventoryID: string) => {
-    setStockOutData({ ...stockOutData, inventoryID });
+  const handleStockOut = (inventoryID: number) => {
+    setStockOutData({
+      ...stockOutData,
+      inventoryID,
+      stockOutDate: new Date().toISOString().split("T")[0], // Initialize with today's date
+    });
     setShowStockOutOverlay(true);
   };
 
@@ -375,7 +381,7 @@ export default function InventoryManagementPage() {
             onClick={() => setShowAddOverlay(true)}
             className="bg-black text-white py-2 px-3 text-xs rounded mr-2"
           >
-            Add Subitem
+            Add Item
           </button>
           <button
             onClick={() => {
@@ -386,7 +392,7 @@ export default function InventoryManagementPage() {
             }}
             className="bg-black text-white py-2 px-3 text-xs rounded mr-2"
           >
-            Edit Subitem
+            Edit Item
           </button>
 
           <button
@@ -400,13 +406,13 @@ export default function InventoryManagementPage() {
                   setItemToDelete(item);
                   setShowDeleteOverlay(true);
                 } else {
-                  alert("Subitem not found");
+                  alert("Item not found");
                 }
               }
             }}
             className="bg-black text-white py-2 px-3 text-xs rounded"
           >
-            Delete Subitem
+            Delete Item
           </button>
 
           <button
@@ -433,7 +439,7 @@ export default function InventoryManagementPage() {
             onClick={() => {
               const id = prompt("Enter Inventory ID to Stock Out:");
               if (id) {
-                handleStockOut(id);
+                handleStockOut(Number(id));
               }
             }}
             className="bg-black text-white py-2 px-3 text-xs rounded"
@@ -443,7 +449,7 @@ export default function InventoryManagementPage() {
         </div>
 
         {inventoryData.length === 0 ? (
-          <p className="text-sm">No inventory items found</p>
+          <p className="text-sm text-black">No inventory items found</p>
         ) : (
           <table className="w-full text-black text-xs">
             <thead>
@@ -513,7 +519,7 @@ export default function InventoryManagementPage() {
 
         {showAddOverlay && (
           <SubitemModal
-            modalTitle="Add Inventory Subitem"
+            modalTitle="Add Inventory Item"
             subitemData={newItem}
             setSubitemData={setNewItem}
             onSave={async () => {
@@ -529,7 +535,7 @@ export default function InventoryManagementPage() {
 
         {showEditOverlay && itemToEdit && (
           <SubitemModal
-            modalTitle="Edit Inventory Subitem"
+            modalTitle="Edit Inventory Item"
             subitemData={itemToEdit}
             setSubitemData={setItemToEdit}
             onSave={async () => {
@@ -542,7 +548,7 @@ export default function InventoryManagementPage() {
         {showDeleteOverlay && itemToDelete && (
           <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center">
             <div className="bg-white p-4 rounded-lg w-72">
-              <h2 className="text-black text-sm">Delete Inventory Subitem</h2>
+              <h2 className="text-black text-sm">Delete Inventory Item</h2>
               <p className="text-black text-xs">
                 Are you sure you want to delete the following item?
               </p>
@@ -612,6 +618,7 @@ export default function InventoryManagementPage() {
             setStockOutData={setStockOutData}
             handleStockOutSubmit={handleStockOutSubmit}
             onClose={() => setShowStockOutOverlay(false)}
+            inventoryNames={inventoryNames}
           />
         )}
 
