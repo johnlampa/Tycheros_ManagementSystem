@@ -126,9 +126,19 @@ export default function InventoryManagementPage() {
   });
 
   const handleUpdateStock = (inventoryID: string) => {
-    setUpdateStockData({ ...updateStockData, inventoryID });
-    setShowUpdateStockOverlay(true);
+    // Find the item in inventoryData based on the entered inventoryID
+    const item = inventoryData.find((item) => item.inventoryID.toString() === inventoryID);
+    
+    if (item) {
+      // If the item is found, proceed with setting update stock data
+      setUpdateStockData({ ...updateStockData, inventoryID });
+      setShowUpdateStockOverlay(true);
+    } else {
+      // If the item is not found, alert the user
+      alert("Item not found");
+    }
   };
+  
 
   const handleUpdateStockSubmit = async () => {
     try {
@@ -180,12 +190,21 @@ export default function InventoryManagementPage() {
   });
 
   const handleStockOut = (inventoryID: number) => {
-    setStockOutData({
-      ...stockOutData,
-      inventoryID,
-      stockOutDate: new Date().toISOString().split("T")[0], // Initialize with today's date
-    });
-    setShowStockOutOverlay(true);
+    // Find the item in inventoryData based on the entered inventoryID
+    const item = inventoryData.find((item) => item.inventoryID === inventoryID);
+    
+    if (item) {
+      // If the item is found, proceed with setting stock out data
+      setStockOutData({
+        ...stockOutData,
+        inventoryID,
+        stockOutDate: new Date().toISOString().split("T")[0], // Initialize with today's date
+      });
+      setShowStockOutOverlay(true);
+    } else {
+      // If the item is not found, alert the user
+      alert("Item not found");
+    }
   };
 
   const handleStockOutSubmit = async () => {
@@ -278,7 +297,7 @@ export default function InventoryManagementPage() {
       setItemToEdit(item);
       setShowEditOverlay(true);
     } else {
-      alert("Subitem not found");
+      alert("Item not found");
     }
   };
 
@@ -415,18 +434,17 @@ export default function InventoryManagementPage() {
             Delete Item
           </button>
 
-          <button
-            onClick={() => {
-              const id = prompt("Enter Inventory ID to Update Stock:");
-              if (id) {
-                setUpdateStockData({ inventoryID: id, quantity: 0 });
-                setShowUpdateStockOverlay(true);
-              }
-            }}
-            className="bg-black text-white py-2 px-3 text-xs rounded"
-          >
-            Update Stock
-          </button>
+         <button
+          onClick={() => {
+            const id = prompt("Enter Inventory ID to Update Stock:");
+            if (id) {
+              handleUpdateStock(id);
+            }
+          }}
+          className="bg-black text-white py-2 px-3 text-xs rounded"
+        >
+          Update Stock
+        </button>
 
           <button
             onClick={() => setShowStockInOverlay(true)}
@@ -439,7 +457,7 @@ export default function InventoryManagementPage() {
             onClick={() => {
               const id = prompt("Enter Inventory ID to Stock Out:");
               if (id) {
-                handleStockOut(Number(id));
+                handleStockOut(Number(id)); // Validate and handle stock out
               }
             }}
             className="bg-black text-white py-2 px-3 text-xs rounded"
