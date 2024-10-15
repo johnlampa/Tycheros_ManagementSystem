@@ -3,6 +3,24 @@ import { IoIosArrowUp, IoIosArrowDown } from "react-icons/io";
 import { format } from 'date-fns';
 import { MultiItemStockInData } from "../../lib/types/InventoryItemDataTypes";
 
+// Validation Dialog Component
+const ValidationDialog: React.FC<{ message: string; onClose: () => void }> = ({ message, onClose }) => (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+    <div className="bg-white p-5 rounded-lg w-80">
+      <h2 className="text-red-500 font-bold mb-4">Validation Error</h2>
+      <div className="text-black whitespace-pre-wrap">{message}</div>
+      <div className="flex justify-end mt-4">
+        <button
+          onClick={onClose}
+          className="bg-tealGreen text-black py-2 px-4 rounded cursor-pointer"
+        >
+          OK
+        </button>
+      </div>
+    </div>
+  </div>
+);
+
 interface StockInModalProps {
   stockInData: MultiItemStockInData;
   setStockInData: (data: MultiItemStockInData) => void;
@@ -27,6 +45,8 @@ const StockInModal: React.FC<StockInModalProps> = ({
       expanded: true
     }))
   );
+
+  const [validationMessage, setValidationMessage] = useState<string | null>(null);  // For dialog visibility
 
   const addInventoryItem = () => {
     setInventoryItems([...inventoryItems, {
@@ -59,6 +79,64 @@ const StockInModal: React.FC<StockInModalProps> = ({
     }));
     setInventoryItems(newInventoryItems);
     setStockInData({ ...stockInData, inventoryItems: newInventoryItems });
+  };
+
+  const validateForm = () => {
+    const missingFields: string[] = [];
+
+    // Validate stockInData fields
+    if (!stockInData.stockInDate || stockInData.stockInDate.trim() === "") {
+      missingFields.push("Stock In Date");
+    }
+
+    if (!stockInData.supplierName || stockInData.supplierName.trim() === "") {
+      missingFields.push("Supplier Name");
+    }
+
+    if (!stockInData.employeeID) {
+      missingFields.push("Employee");
+    }
+
+    // Validate each inventory item
+    inventoryItems.forEach((item, index) => {
+      const inventoryName = inventoryNames.find(inv => inv.inventoryID === item.inventoryID)?.inventoryName || `Item ${index + 1}`;
+
+      if (!item.inventoryID || item.inventoryID === 0) {
+        missingFields.push(`Inventory Name: ${inventoryName}`);
+      }
+
+      if (item.quantityOrdered <= 0) {
+        missingFields.push(`Quantity Ordered for ${inventoryName}`);
+      }
+
+      if (item.actualQuantity <= 0) {
+        missingFields.push(`Actual Quantity for ${inventoryName}`);
+      }
+
+      if (!item.pricePerUnit || item.pricePerUnit <= 0) {
+        missingFields.push(`Price Per Unit for ${inventoryName}`);
+      }
+
+      if (!item.expiryDate || item.expiryDate.trim() === "") {
+        missingFields.push(`Expiry Date for ${inventoryName}`);
+      }
+    });
+
+    if (missingFields.length > 0) {
+      setValidationMessage(`Please fill out the following:\n${missingFields.join("\n")}`);
+      return false;
+    }
+
+    setValidationMessage(null);
+    return true;
+  };
+
+  const handleSubmit = async () => {
+    if (validateForm()) {
+      console.log("Stock In Data:", inventoryItems);
+      await handleStockIn();
+      onClose();
+    }
   };
 
   return (
@@ -110,6 +188,7 @@ const StockInModal: React.FC<StockInModalProps> = ({
               </option>
             ))}
           </select>
+
           {inventoryItems.map((item, index) => (
             <div key={index} className="inventoryItem mb-4 border border-black bg-cream p-2">
               <div className="flex justify-between items-center">
@@ -203,11 +282,7 @@ const StockInModal: React.FC<StockInModalProps> = ({
           </button>
           <div className="flex justify-between">
             <button
-              onClick={async () => {
-                console.log("Stock In Data:", inventoryItems);
-                await handleStockIn();
-                onClose();
-              }}
+              onClick={handleSubmit}
               className="bg-tealGreen text-black py-2 px-4 rounded border-none cursor-pointer"
             >
               Stock In
@@ -221,6 +296,9 @@ const StockInModal: React.FC<StockInModalProps> = ({
           </div>
         </div>
       </div>
+      {validationMessage && (
+        <ValidationDialog message={validationMessage} onClose={() => setValidationMessage(null)} />
+      )}
     </div>
   );
 };

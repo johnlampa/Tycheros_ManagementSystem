@@ -13,6 +13,7 @@ export default function InventoryManagementPage() {
   const [inventoryData, setInventoryData] = useState<InventoryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const [collapsedRows, setCollapsedRows] = useState<number[]>([]); // State to track which rows are collapsed
   const [showAddOverlay, setShowAddOverlay] = useState(false);
   const [showEditOverlay, setShowEditOverlay] = useState(false);
   const [showDeleteOverlay, setShowDeleteOverlay] = useState(false);
@@ -61,8 +62,6 @@ export default function InventoryManagementPage() {
 
   const handleStockIn = async () => {
     try {
-      console.log("StockIn Data before request:", stockInData); // Log data before making the request
-  
       const response = await fetch(
         "http://localhost:8081/inventoryManagement/stockInInventoryItem",
         {
@@ -73,19 +72,18 @@ export default function InventoryManagementPage() {
           body: JSON.stringify(stockInData),
         }
       );
-  
+
       if (!response.ok) {
         throw new Error("Failed to stock in subitem");
       }
-  
+
       const updatedInventory = await fetch(
         "http://localhost:8081/inventoryManagement/getSubitem"
       ).then((res) => res.json());
       setInventoryData(updatedInventory);
-      console.log("Stock In Data after success:", stockInData); // Log data after successful stocking in
-  
+
       alert("Subitem stocked in successfully");
-  
+
       // Reset data only after successful stock-in
       setStockInData({
         supplierName: "",
@@ -113,17 +111,11 @@ export default function InventoryManagementPage() {
       try {
         const response = await axios.get('http://localhost:8081/employeemanagement/getEmployee');
         setEmployees(response.data);
-  
-        // Log the employee names to the console
-        response.data.forEach((employee: { firstName: any; lastName: any; }) => {
-          console.log(`${employee.firstName} ${employee.lastName}`);
-        });
-  
       } catch (error) {
         console.error('Error fetching employees:', error);
       }
     };
-  
+
     fetchEmployees();
   }, []);
 
@@ -147,10 +139,9 @@ export default function InventoryManagementPage() {
         },
         body: JSON.stringify(updateStockData),
       });
-  
+
       if (response.ok) {
         alert("Stock updated successfully");
-        // Refresh the inventory data
         const updatedInventory = await fetch(
           "http://localhost:8081/inventoryManagement/getSubitem"
         ).then((res) => res.json());
@@ -164,8 +155,6 @@ export default function InventoryManagementPage() {
       alert("Error updating stock");
     }
   };
-  
-
 
   const [inventoryNames, setInventoryNames] = useState<{ inventoryID: number; inventoryName: string }[]>([]);
   useEffect(() => {
@@ -177,7 +166,7 @@ export default function InventoryManagementPage() {
         console.error('Error fetching inventory names:', error);
       }
     };
-  
+
     fetchInventoryNames();
   }, []);
 
@@ -209,14 +198,13 @@ export default function InventoryManagementPage() {
       if (response.ok) {
         alert("Stock-out recorded successfully");
         window.location.reload();
-        // You might want to refresh the inventory list or update the UI here
       } else {
         const errorData = await response.json();
         alert("Error: " + errorData.message);
       }
     } catch (err) {
       console.error("Error during stock-out:", err);
-      alert("Error during stock-out: ");
+      alert("Error during stock-out");
     }
   };
 
@@ -346,6 +334,30 @@ export default function InventoryManagementPage() {
     }
   };
 
+  const [detailedData, setDetailedData] = useState<{ [key: number]: any }>({}); // Store details for each inventoryID
+
+  const toggleRow = async (inventoryID: number) => {
+    if (collapsedRows.includes(inventoryID)) {
+      // Collapse row
+      setCollapsedRows(collapsedRows.filter(id => id !== inventoryID));
+    } else {
+      // Expand row and fetch details if not already fetched
+      if (!detailedData[inventoryID]) {
+        try {
+          const response = await axios.get(`http://localhost:8081/inventoryManagement/getSubitemDetails/${inventoryID}`);
+          setDetailedData({
+            ...detailedData,
+            [inventoryID]: response.data,
+          });
+        } catch (error) {
+          console.error(`Error fetching details for inventory ID ${inventoryID}:`, error);
+        }
+      }
+      setCollapsedRows([...collapsedRows, inventoryID]);
+    }
+  };
+  
+
   if (loading) {
     return <p>Loading...</p>;
   }
@@ -354,261 +366,264 @@ export default function InventoryManagementPage() {
     return <p>Error: {error.message}</p>;
   }
 
-  const formatDate = (dateString?: string | null) => {
-    if (!dateString) {
-      return "";
-    }
-    const date = new Date(dateString);
-    return isNaN(date.getTime()) ? "" : format(date, "yyyy-MM-dd");
-  };
-
   return (
-    <div className="bg-white p-5 rounded-lg shadow-md">
-      <h1>Inventory Management</h1>
-      <div style={{ marginBottom: "20px" }}>
-        <button
-          onClick={() => setShowAddOverlay(true)}
-          className="bg-black text-white py-3 px-5 rounded cursor-pointer mr-2"
-        >
-          Add Subitem
-        </button>
-        <button
-          onClick={() => {
-            const id = prompt("Enter Inventory ID to Edit:");
-            if (id) {
-              handleEditItem(Number(id));
-            }
-          }}
-          className="bg-black text-white py-3 px-5 rounded cursor-pointer mr-2"
-        >
-          Edit Subitem
-        </button>
-        <button
-          onClick={() => {
-            const id = prompt("Enter Inventory ID to Delete:");
-            if (id) {
-              const item = inventoryData.find(
-                (item) => item.inventoryID === Number(id)
-              );
-              if (item) {
-                setItemToDelete(item);
-                setShowDeleteOverlay(true);
-              } else {
-                alert("Subitem not found");
+    <div className="flex justify-center items-center w-full pb-7 min-h-screen">
+      <div className="w-[360px] flex flex-col items-center bg-white min-h-screen p-4 rounded-lg shadow-md">
+        <h1 className="text-center text-sm mb-4 text-black">Inventory Management</h1>
+        <div className="mb-4 w-full flex flex-wrap justify-between">
+          <button
+            onClick={() => setShowAddOverlay(true)}
+            className="bg-black text-white py-2 px-3 text-xs rounded mr-2"
+          >
+            Add Subitem
+          </button>
+          <button
+            onClick={() => {
+              const id = prompt("Enter Inventory ID to Edit:");
+              if (id) {
+                handleEditItem(Number(id));
               }
-            }
-          }}
-          className="bg-black text-white py-3 px-5 rounded cursor-pointer mr-10"
-        >
-          Delete Subitem
-        </button>
-        <button
-          onClick={() => {
-            const id = prompt("Enter Inventory ID to Update Stock:");
-            if (id) {
-              setUpdateStockData({ inventoryID: id, quantity: 0 });
-              setShowUpdateStockOverlay(true);
-            }
-          }}
-          className="bg-black text-white py-3 px-5 rounded cursor-pointer mr-2"
-        >
-          Update Stock
-        </button>
-        <button
-          onClick={() => setShowStockInOverlay(true)}
-          className="bg-black text-white py-3 px-5 rounded cursor-pointer mr-2"
-        >
-          Stock In
-        </button>
-        <button
-          onClick={() => {
-            const id = prompt("Enter Inventory ID to Stock Out:");
-            if (id) {
-              handleStockOut(id); // Pass the ID directly
-            }
-          }}
-          className="bg-black text-white py-3 px-5 rounded cursor-pointer mr-2"
-        >
-          Stock Out
-        </button>
-      </div>
+            }}
+            className="bg-black text-white py-2 px-3 text-xs rounded mr-2"
+          >
+            Edit Subitem
+          </button>
 
-      {inventoryData.length === 0 ? (
-        <p>No inventory items found</p>
-      ) : (
-        <table className="w-full text-black border border-black border-collapse">
-          <thead>
-            <tr>
-              <th className="border border-black p-2.5">Inventory ID</th>
-              <th className="border border-black p-2.5">Inventory Name</th>
-              <th className="border border-black p-2.5">Category</th>
-              <th className="border border-black p-2.5">Reorder Point</th>
-              <th className="border border-black p-2.5">Total Quantity</th>
-              <th className="border border-black p-2.5">Quantity Remaining</th>
-              <th className="border border-black p-2.5">Price Per Unit</th>
-              <th className="border border-black p-2.5">Stock In Date</th>
-              <th className="border border-black p-2.5">Expiry Date</th>
-              <th className="border border-black p-2.5">Supplier Name</th>
-              <th className="border border-black p-2.5">Employee Name</th>
-            </tr>
-          </thead>
-          <tbody>
-            {inventoryData.map((item) => (
-              <tr
-              key={item.inventoryID}
-              className={item.totalQuantity !== null && item.totalQuantity <= item.reorderPoint ? "bg-low-quantity" : ""}
-              >
-                <td className="border border-black p-2.5">
-                  {item.inventoryID}
-                </td>
-                <td className="border border-black p-2.5">
-                  {item.inventoryName}
-                </td>
-                <td className="border border-black p-2.5">
-                  {item.inventoryCategory}
-                </td>
-                <td className="border border-black p-2.5">
-                  {item.inventoryName ? item.reorderPoint + " " + item.unitOfMeasure : ""}
-                </td>
-                <td className="border border-black p-2.5">
-                  {item.totalQuantity}
-                </td>
-                <td className="border border-black p-2.5">
-                  {item.quantityRemaining}
-                </td>
-                <td className="border border-black p-2.5">
-                  {item.pricePerUnit}
-                </td>
-                <td className="border border-black p-2.5">
-                  {formatDate(item.stockInDate)}
-                </td>
-                <td className="border border-black p-2.5">
-                  {formatDate(item.expiryDate)}
-                </td>
-                <td className="border border-black p-2.5">
-                  {item.supplierName}
-                </td>
-                <td className="border border-black p-2.5">
-                  {item.employeeName}
-                </td>
+          <button
+            onClick={() => {
+              const id = prompt("Enter Inventory ID to Delete:");
+              if (id) {
+                const item = inventoryData.find(
+                  (item) => item.inventoryID === Number(id)
+                );
+                if (item) {
+                  setItemToDelete(item);
+                  setShowDeleteOverlay(true);
+                } else {
+                  alert("Subitem not found");
+                }
+              }
+            }}
+            className="bg-black text-white py-2 px-3 text-xs rounded"
+          >
+            Delete Subitem
+          </button>
+
+          <button
+            onClick={() => {
+              const id = prompt("Enter Inventory ID to Update Stock:");
+              if (id) {
+                setUpdateStockData({ inventoryID: id, quantity: 0 });
+                setShowUpdateStockOverlay(true);
+              }
+            }}
+            className="bg-black text-white py-2 px-3 text-xs rounded"
+          >
+            Update Stock
+          </button>
+
+          <button
+            onClick={() => setShowStockInOverlay(true)}
+            className="bg-black text-white py-2 px-3 text-xs rounded"
+          >
+            Stock In
+          </button>
+
+          <button
+            onClick={() => {
+              const id = prompt("Enter Inventory ID to Stock Out:");
+              if (id) {
+                handleStockOut(id);
+              }
+            }}
+            className="bg-black text-white py-2 px-3 text-xs rounded"
+          >
+            Stock Out
+          </button>
+        </div>
+
+        {inventoryData.length === 0 ? (
+          <p className="text-sm">No inventory items found</p>
+        ) : (
+          <table className="w-full text-black text-xs">
+            <thead>
+              <tr>
+                <th className="border p-1">ID</th>
+                <th className="border p-1">Name</th>
+                <th className="border p-1">Category</th>
+                <th className="border p-1">Reorder Point</th>
+                <th className="border p-1">Total Qty</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+            </thead>
+            <tbody>
+              {inventoryData.map((item) => (
+                <React.Fragment key={item.inventoryID}>
+                  <tr
+                    onClick={() => toggleRow(item.inventoryID)} // Click to toggle
+                    className={`cursor-pointer ${
+                      collapsedRows.includes(item.inventoryID)
+                        ? "bg-cream"
+                        : item.totalQuantity <= item.reorderPoint
+                        ? "bg-lightRed text-black" // Add background and text color for low stock
+                        : ""
+                    }`}
+                  >
+                    <td className="border p-1">{item.inventoryID}</td>
+                    <td className="border p-1">{item.inventoryName}</td>
+                    <td className="border p-1">{item.inventoryCategory}</td>
+                    <td className="border p-1">
+                      {item.reorderPoint} {item.unitOfMeasure}
+                    </td>
+                    <td className="border p-1">
+                      {item.totalQuantity} {item.unitOfMeasure}
+                    </td>
+                  </tr>
+                  {collapsedRows.includes(item.inventoryID) && detailedData[item.inventoryID] && (
+                    <tr>
+                    <td colSpan={5} className="p-1 border bg-cream">
+                        <div className="text-xs mb-2">
+                          <strong>Details:</strong>
+                          {detailedData[item.inventoryID] && detailedData[item.inventoryID].length > 0 ? (
+                            <ul>
+                              {detailedData[item.inventoryID].map((detail: any, index: number) => (
+                                <li key={index} className="mt-2">
+                                  <strong>Subinventory ID:</strong> {detail.subinventoryID} <br />
+                                  <strong>Qty Remaining:</strong> {detail.quantityRemaining} <br />
+                                  <strong>Price per Unit:</strong> {detail.pricePerUnit} <br />
+                                  <strong>Expiry Date:</strong> {detail.expiryDate ? format(new Date(detail.expiryDate), "yyyy-MM-dd") : "N/A"} <br />
+                                  <strong>Stock-in Date:</strong> {detail.stockInDate ? format(new Date(detail.stockInDate), "yyyy-MM-dd") : "N/A"} <br />
+                                  <strong>Supplier:</strong> {detail.supplierName} <br />
+                                  <strong>Handled by:</strong> {detail.employeeName}
+                                </li>
+                              ))}
+                            </ul>
+                          ) : (
+                            <p>No Stock Available</p>
+                          )}
+                        </div>
+                      </td>
+                    </tr> 
+                  )}
 
-      {showAddOverlay && (
-        <SubitemModal
-          modalTitle="Add Inventory Subitem"
-          subitemData={newItem}
-          setSubitemData={setNewItem}
-          onSave={async () => {
-            await handleAddItem();
-            resetNewItem();
-          }}
-          onCancel={() => {
-            setShowAddOverlay(false);
-            resetNewItem();
-          }}
-        />
-      )}
+                </React.Fragment>
+              ))}
+            </tbody>
+          </table>
+        )}
 
-      {showEditOverlay && itemToEdit && (
-        <SubitemModal
-          modalTitle="Edit Inventory Subitem"
-          subitemData={itemToEdit}
-          setSubitemData={setItemToEdit}
-          onSave={async () => {
-            await handleSaveChanges();
-          }}
-          onCancel={() => setShowEditOverlay(false)}
-        />
-      )}
+        {showAddOverlay && (
+          <SubitemModal
+            modalTitle="Add Inventory Subitem"
+            subitemData={newItem}
+            setSubitemData={setNewItem}
+            onSave={async () => {
+              await handleAddItem();
+              resetNewItem();
+            }}
+            onCancel={() => {
+              setShowAddOverlay(false);
+              resetNewItem();
+            }}
+          />
+        )}
 
-      {showDeleteOverlay && itemToDelete && (
-        <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white p-5 rounded-lg w-72">
-            <h2 className="text-black">Delete Inventory Subitem</h2>
-            <p className="text-black">
-              Are you sure you want to delete the following item?
-            </p>
-            <p className="text-black">
-              <strong>Inventory ID:</strong> {itemToDelete.inventoryID}
-            </p>
-            <p className="text-black">
-              <strong>Name:</strong> {itemToDelete.inventoryName}
-            </p>
-            <p className="text-black">
-              <strong>Inventory Category:</strong>{" "}
-              {itemToDelete.inventoryCategory}
-            </p>
-            <p className="text-black">
-              <strong>Reorder Point:</strong> {itemToDelete.reorderPoint}
-            </p>
-            <p className="text-black">
-              <strong>Unit of Measure:</strong> {itemToDelete.unitOfMeasure}
-            </p>
-            <div className="flex justify-between">
-              <button
-                onClick={async () => {
-                  await handleDeleteItem();
-                  setShowDeleteOverlay(false);
-                }}
-                className="bg-black text-white py-2 px-4 rounded cursor-pointer"
-              >
-                Confirm
-              </button>
-              <button
-                onClick={() => setShowDeleteOverlay(false)}
-                className="bg-black text-white py-2 px-4 rounded cursor-pointer"
-              >
-                Cancel
-              </button>
+        {showEditOverlay && itemToEdit && (
+          <SubitemModal
+            modalTitle="Edit Inventory Subitem"
+            subitemData={itemToEdit}
+            setSubitemData={setItemToEdit}
+            onSave={async () => {
+              await handleSaveChanges();
+            }}
+            onCancel={() => setShowEditOverlay(false)}
+          />
+        )}
+
+        {showDeleteOverlay && itemToDelete && (
+          <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center">
+            <div className="bg-white p-4 rounded-lg w-72">
+              <h2 className="text-black text-sm">Delete Inventory Subitem</h2>
+              <p className="text-black text-xs">
+                Are you sure you want to delete the following item?
+              </p>
+              <p className="text-black text-xs">
+                <strong>ID:</strong> {itemToDelete.inventoryID}
+              </p>
+              <p className="text-black text-xs">
+                <strong>Name:</strong> {itemToDelete.inventoryName}
+              </p>
+              <p className="text-black text-xs">
+                <strong>Category:</strong> {itemToDelete.inventoryCategory}
+              </p>
+              <p className="text-black text-xs">
+                <strong>Reorder Point:</strong> {itemToDelete.reorderPoint}
+              </p>
+              <p className="text-black text-xs">
+                <strong>Unit:</strong> {itemToDelete.unitOfMeasure}
+              </p>
+              <div className="flex justify-between">
+                <button
+                  onClick={async () => {
+                    await handleDeleteItem();
+                    setShowDeleteOverlay(false);
+                  }}
+                  className="bg-black text-white py-1 px-2 text-xs rounded"
+                >
+                  Confirm
+                </button>
+                <button
+                  onClick={() => setShowDeleteOverlay(false)}
+                  className="bg-black text-white py-1 px-2 text-xs rounded"
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {showStockInOverlay && (
-        <StockInModal
-          stockInData={stockInData}
-          setStockInData={(data) => {
-            setStockInData((prevData) => ({
-              ...prevData,
-              ...data,
-              inventoryItems: data.inventoryItems.map((item) => ({
-                ...item,
-                expiryDate: item.expiryDate ? format(new Date(item.expiryDate), 'yyyy-MM-dd') : "",
-              })),
-            }));
-          }}
-          employees={employees}
-          inventoryNames={inventoryNames}
-          handleStockIn={handleStockIn}
-          onClose={() => {
-            console.log("StockInData on close:", stockInData);
-            setShowStockInOverlay(false);
-          }}
-        />
-      )}
+        {showStockInOverlay && (
+          <StockInModal
+            stockInData={stockInData}
+            setStockInData={(data) => {
+              setStockInData((prevData) => ({
+                ...prevData,
+                ...data,
+                inventoryItems: data.inventoryItems.map((item) => ({
+                  ...item,
+                  expiryDate: item.expiryDate
+                    ? format(new Date(item.expiryDate), "yyyy-MM-dd")
+                    : "",
+                })),
+              }));
+            }}
+            employees={employees}
+            inventoryNames={inventoryNames}
+            handleStockIn={handleStockIn}
+            onClose={() => {
+              setShowStockInOverlay(false);
+            }}
+          />
+        )}
 
-      {showStockOutOverlay && (
-        <StockOutModal
-          stockOutData={stockOutData}
-          setStockOutData={setStockOutData}
-          handleStockOutSubmit={handleStockOutSubmit}
-          onClose={() => setShowStockOutOverlay(false)}
-        />
-      )}
+        {showStockOutOverlay && (
+          <StockOutModal
+            stockOutData={stockOutData}
+            setStockOutData={setStockOutData}
+            handleStockOutSubmit={handleStockOutSubmit}
+            onClose={() => setShowStockOutOverlay(false)}
+          />
+        )}
 
-      {showUpdateStockOverlay && (
-        <UpdateStockModal
-          updateStockData={updateStockData} // Make sure this prop matches the expected prop name in UpdateStockModal
-          setUpdateStockData={setUpdateStockData} // Update to match prop name
-          handleUpdateStockSubmit={handleUpdateStockSubmit}
-          onClose={() => setShowUpdateStockOverlay(false)}
-        />
-      )}
+        {showUpdateStockOverlay && (
+          <UpdateStockModal
+            updateStockData={updateStockData}
+            setUpdateStockData={setUpdateStockData}
+            handleUpdateStockSubmit={handleUpdateStockSubmit}
+            onClose={() => setShowUpdateStockOverlay(false)}
+          />
+        )}
+      </div>
     </div>
   );
 }

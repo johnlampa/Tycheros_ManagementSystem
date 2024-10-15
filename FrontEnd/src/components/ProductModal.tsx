@@ -299,7 +299,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
                 ?.filter((item) => item.inventoryCategory !== "Condiments")
                 .map((item) => (
                   <option value={item.inventoryID} key={item.inventoryID}>
-                    {item.inventoryName}
+                    {item.inventoryName} ({item.unitOfMeasure})
                   </option>
                 ))}
             </select>
