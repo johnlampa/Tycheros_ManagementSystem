@@ -1,22 +1,5 @@
+import ValidationDialog from "@/components/ValidationDialog";
 import React, { useState } from "react";
-
-// Validation Dialog Component
-const ValidationDialog: React.FC<{ message: string; onClose: () => void }> = ({ message, onClose }) => (
-  <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-    <div className="bg-white p-5 rounded-lg w-80">
-      <h2 className="text-red-500 font-bold mb-4">Validation Error</h2>
-      <div className="text-black whitespace-pre-wrap">{message}</div>
-      <div className="flex justify-end mt-4">
-        <button
-          onClick={onClose}
-          className="bg-tealGreen text-black py-2 px-4 rounded cursor-pointer"
-        >
-          OK
-        </button>
-      </div>
-    </div>
-  </div>
-);
 
 interface StockOutModalProps {
   stockOutData: {
@@ -38,10 +21,13 @@ const StockOutModal: React.FC<StockOutModalProps> = ({
   onClose,
   inventoryNames,
 }) => {
-  const [validationMessage, setValidationMessage] = useState<string | null>(null);
+  const [validationMessage, setValidationMessage] = useState<string | null>(
+    null
+  );
 
   const inventoryName =
-    inventoryNames.find((inv) => inv.inventoryID === stockOutData.inventoryID)?.inventoryName || "Unknown Item";
+    inventoryNames.find((inv) => inv.inventoryID === stockOutData.inventoryID)
+      ?.inventoryName || "Unknown Item";
 
   const validateForm = () => {
     const missingFields: string[] = [];
@@ -60,7 +46,9 @@ const StockOutModal: React.FC<StockOutModalProps> = ({
     }
 
     if (missingFields.length > 0) {
-      setValidationMessage(`Please fill out the following:\n${missingFields.join("\n")}`);
+      setValidationMessage(
+        `Please fill out the following:\n${missingFields.join("\n")}`
+      );
       return false;
     }
 
@@ -107,7 +95,9 @@ const StockOutModal: React.FC<StockOutModalProps> = ({
 
         {/* Quantity Input */}
         <div className="mb-2">
-          <label htmlFor="quantity" className="text-black">Quantity:</label>
+          <label htmlFor="quantity" className="text-black">
+            Quantity:
+          </label>
           <input
             type="number"
             id="quantity"
@@ -126,7 +116,9 @@ const StockOutModal: React.FC<StockOutModalProps> = ({
 
         {/* Reason Input */}
         <div className="mb-2">
-          <label htmlFor="reason" className="text-black">Reason:</label>
+          <label htmlFor="reason" className="text-black">
+            Reason:
+          </label>
           <input
             type="text"
             id="reason"
@@ -155,10 +147,13 @@ const StockOutModal: React.FC<StockOutModalProps> = ({
           </button>
         </div>
       </div>
-      
+
       {/* Validation Dialog */}
       {validationMessage && (
-        <ValidationDialog message={validationMessage} onClose={() => setValidationMessage(null)} />
+        <ValidationDialog
+          message={validationMessage}
+          onClose={() => setValidationMessage(null)}
+        />
       )}
     </div>
   );

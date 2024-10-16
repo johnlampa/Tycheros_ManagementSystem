@@ -1,25 +1,8 @@
 import React, { useState } from "react";
 import { IoIosArrowUp, IoIosArrowDown } from "react-icons/io";
-import { format } from 'date-fns';
+import { format } from "date-fns";
 import { MultiItemStockInData } from "../../lib/types/InventoryItemDataTypes";
-
-// Validation Dialog Component
-const ValidationDialog: React.FC<{ message: string; onClose: () => void }> = ({ message, onClose }) => (
-  <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-    <div className="bg-white p-5 rounded-lg w-80">
-      <h2 className="text-red-500 font-bold mb-4">Validation Error</h2>
-      <div className="text-black whitespace-pre-wrap">{message}</div>
-      <div className="flex justify-end mt-4">
-        <button
-          onClick={onClose}
-          className="bg-tealGreen text-black py-2 px-4 rounded cursor-pointer"
-        >
-          OK
-        </button>
-      </div>
-    </div>
-  </div>
-);
+import ValidationDialog from "@/components/ValidationDialog";
 
 interface StockInModalProps {
   stockInData: MultiItemStockInData;
@@ -39,24 +22,32 @@ const StockInModal: React.FC<StockInModalProps> = ({
   onClose,
 }) => {
   const [inventoryItems, setInventoryItems] = useState(
-    stockInData.inventoryItems.map(item => ({
+    stockInData.inventoryItems.map((item) => ({
       ...item,
-      expiryDate: typeof item.expiryDate === 'string' ? item.expiryDate : format(item.expiryDate, 'yyyy-MM-dd'),
-      expanded: true
+      expiryDate:
+        typeof item.expiryDate === "string"
+          ? item.expiryDate
+          : format(item.expiryDate, "yyyy-MM-dd"),
+      expanded: true,
     }))
   );
 
-  const [validationMessage, setValidationMessage] = useState<string | null>(null);  // For dialog visibility
+  const [validationMessage, setValidationMessage] = useState<string | null>(
+    null
+  ); // For dialog visibility
 
   const addInventoryItem = () => {
-    setInventoryItems([...inventoryItems, {
-      inventoryID: 0,
-      quantityOrdered: 0,
-      actualQuantity: 0,
-      pricePerUnit: 0,
-      expiryDate: format(new Date(), 'yyyy-MM-dd'),
-      expanded: true,
-    }]);
+    setInventoryItems([
+      ...inventoryItems,
+      {
+        inventoryID: 0,
+        quantityOrdered: 0,
+        actualQuantity: 0,
+        pricePerUnit: 0,
+        expiryDate: format(new Date(), "yyyy-MM-dd"),
+        expanded: true,
+      },
+    ]);
   };
 
   const toggleExpandItem = (index: number) => {
@@ -73,9 +64,9 @@ const StockInModal: React.FC<StockInModalProps> = ({
   };
 
   const updateAllInventoryItems = (updatedData: any) => {
-    const newInventoryItems = inventoryItems.map(item => ({
+    const newInventoryItems = inventoryItems.map((item) => ({
       ...item,
-      ...updatedData
+      ...updatedData,
     }));
     setInventoryItems(newInventoryItems);
     setStockInData({ ...stockInData, inventoryItems: newInventoryItems });
@@ -99,7 +90,9 @@ const StockInModal: React.FC<StockInModalProps> = ({
 
     // Validate each inventory item
     inventoryItems.forEach((item, index) => {
-      const inventoryName = inventoryNames.find(inv => inv.inventoryID === item.inventoryID)?.inventoryName || `Item ${index + 1}`;
+      const inventoryName =
+        inventoryNames.find((inv) => inv.inventoryID === item.inventoryID)
+          ?.inventoryName || `Item ${index + 1}`;
 
       if (!item.inventoryID || item.inventoryID === 0) {
         missingFields.push(`Inventory Name: ${inventoryName}`);
@@ -123,7 +116,9 @@ const StockInModal: React.FC<StockInModalProps> = ({
     });
 
     if (missingFields.length > 0) {
-      setValidationMessage(`Please fill out the following:\n${missingFields.join("\n")}`);
+      setValidationMessage(
+        `Please fill out the following:\n${missingFields.join("\n")}`
+      );
       return false;
     }
 
@@ -151,7 +146,7 @@ const StockInModal: React.FC<StockInModalProps> = ({
             <input
               type="date"
               id="stockInDate"
-              value={stockInData.stockInDate ? stockInData.stockInDate : ''}
+              value={stockInData.stockInDate ? stockInData.stockInDate : ""}
               onChange={(e) => {
                 const newValue = e.target.value;
                 setStockInData({ ...stockInData, stockInDate: newValue });
@@ -183,14 +178,20 @@ const StockInModal: React.FC<StockInModalProps> = ({
               Select Employee
             </option>
             {employees.map((employee) => (
-              <option key={employee.employeeID} value={employee.employeeID.toString()}>
+              <option
+                key={employee.employeeID}
+                value={employee.employeeID.toString()}
+              >
                 {`${employee.firstName} ${employee.lastName}`}
               </option>
             ))}
           </select>
 
           {inventoryItems.map((item, index) => (
-            <div key={index} className="inventoryItem mb-4 border border-black bg-cream p-2">
+            <div
+              key={index}
+              className="inventoryItem mb-4 border border-black bg-cream p-2"
+            >
               <div className="flex justify-between items-center">
                 <select
                   value={item.inventoryID}
@@ -205,12 +206,18 @@ const StockInModal: React.FC<StockInModalProps> = ({
                     Select Item
                   </option>
                   {inventoryNames.map((inventory) => (
-                    <option key={inventory.inventoryID} value={inventory.inventoryID}>
+                    <option
+                      key={inventory.inventoryID}
+                      value={inventory.inventoryID}
+                    >
                       {inventory.inventoryName}
                     </option>
                   ))}
                 </select>
-                <button onClick={() => toggleExpandItem(index)} className="ml-2">
+                <button
+                  onClick={() => toggleExpandItem(index)}
+                  className="ml-2"
+                >
                   {item.expanded ? (
                     <IoIosArrowUp className="text-black" />
                   ) : (
@@ -224,7 +231,9 @@ const StockInModal: React.FC<StockInModalProps> = ({
                     <input
                       type="number"
                       placeholder="Quantity Ordered"
-                      value={item.quantityOrdered === 0 ? "" : item.quantityOrdered}
+                      value={
+                        item.quantityOrdered === 0 ? "" : item.quantityOrdered
+                      }
                       min="0"
                       onChange={(e) =>
                         updateInventoryItem(index, {
@@ -236,7 +245,9 @@ const StockInModal: React.FC<StockInModalProps> = ({
                     <input
                       type="number"
                       placeholder="Actual Quantity"
-                      value={item.actualQuantity === 0 ? "" : item.actualQuantity}
+                      value={
+                        item.actualQuantity === 0 ? "" : item.actualQuantity
+                      }
                       min="0"
                       onChange={(e) =>
                         updateInventoryItem(index, {
@@ -263,7 +274,9 @@ const StockInModal: React.FC<StockInModalProps> = ({
                   <input
                     type="date"
                     placeholder="Expiry Date"
-                    value={item.expiryDate === "dd/mm/yyyy" ? "" : item.expiryDate}
+                    value={
+                      item.expiryDate === "dd/mm/yyyy" ? "" : item.expiryDate
+                    }
                     defaultValue="dd/mm/yyyy"
                     onChange={(e) =>
                       updateInventoryItem(index, {
@@ -299,7 +312,10 @@ const StockInModal: React.FC<StockInModalProps> = ({
         </div>
       </div>
       {validationMessage && (
-        <ValidationDialog message={validationMessage} onClose={() => setValidationMessage(null)} />
+        <ValidationDialog
+          message={validationMessage}
+          onClose={() => setValidationMessage(null)}
+        />
       )}
     </div>
   );
