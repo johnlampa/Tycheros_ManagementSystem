@@ -7,16 +7,20 @@ import SubitemModal from "@/components/SubitemModal";
 import StockInModal from "@/components/StockInModal";
 import StockOutModal from "@/components/StockOutModal";
 import UpdateStockModal from "@/components/UpdateStockModal";
+import ValidationDialog from "@/components/ValidationDialog";
 import axios from "axios";
 
 export default function InventoryManagementPage() {
   const [inventoryData, setInventoryData] = useState<InventoryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const [selectedInventoryID, setSelectedInventoryID] = useState<number | null>(null);
   const [collapsedRows, setCollapsedRows] = useState<number[]>([]); // State to track which rows are collapsed
   const [showAddOverlay, setShowAddOverlay] = useState(false);
   const [showEditOverlay, setShowEditOverlay] = useState(false);
   const [showDeleteOverlay, setShowDeleteOverlay] = useState(false);
+  const [validationDialogVisible, setValidationDialogVisible] = useState(false);
+  const [validationMessage, setValidationMessage] = useState<string>("");
 
   const initialItemState = {
     inventoryName: "",
@@ -381,7 +385,15 @@ export default function InventoryManagementPage() {
       setCollapsedRows([...collapsedRows, inventoryID]);
     }
   };
-  
+
+  const handleRadioChange = (inventoryID: number) => {
+    setSelectedInventoryID(inventoryID);
+  };
+
+  const handleValidationDialogClose = () => {
+    setValidationDialogVisible(false); // Close the dialog when the user clicks "OK"
+  };
+
 
   if (loading) {
     return <p>Loading...</p>;
@@ -402,11 +414,15 @@ export default function InventoryManagementPage() {
           >
             Add Item
           </button>
+
           <button
             onClick={() => {
-              const id = prompt("Enter Inventory ID to Edit:");
-              if (id) {
-                handleEditItem(Number(id));
+              if (selectedInventoryID !== null) {
+                handleEditItem(selectedInventoryID); // Use the selected radio button's inventory ID
+              } else {
+                // Set the message and show the validation dialog
+                setValidationMessage("Please select an inventory item to edit.");
+                setValidationDialogVisible(true);
               }
             }}
             className="bg-black text-white py-2 px-3 text-xs rounded mr-2"
@@ -416,17 +432,22 @@ export default function InventoryManagementPage() {
 
           <button
             onClick={() => {
-              const id = prompt("Enter Inventory ID to Delete:");
-              if (id) {
+              if (selectedInventoryID !== null) {
                 const item = inventoryData.find(
-                  (item) => item.inventoryID === Number(id)
+                  (item) => item.inventoryID === selectedInventoryID
                 );
                 if (item) {
                   setItemToDelete(item);
                   setShowDeleteOverlay(true);
                 } else {
-                  alert("Item not found");
+                  // Show validation dialog when the item is not found
+                  setValidationMessage("Item not found");
+                  setValidationDialogVisible(true);
                 }
+              } else {
+                // Show validation dialog when no item is selected
+                setValidationMessage("Please select an inventory item to delete.");
+                setValidationDialogVisible(true);
               }
             }}
             className="bg-black text-white py-2 px-3 text-xs rounded"
@@ -434,17 +455,20 @@ export default function InventoryManagementPage() {
             Delete Item
           </button>
 
-         <button
-          onClick={() => {
-            const id = prompt("Enter Inventory ID to Update Stock:");
-            if (id) {
-              handleUpdateStock(id);
-            }
-          }}
-          className="bg-black text-white py-2 px-3 text-xs rounded"
-        >
-          Update Stock
-        </button>
+          <button
+            onClick={() => {
+              if (selectedInventoryID !== null) {
+                handleUpdateStock(selectedInventoryID.toString());
+              } else {
+                // Show validation dialog when no item is selected
+                setValidationMessage("Please select an inventory item to update.");
+                setValidationDialogVisible(true);
+              }
+            }}
+            className="bg-black text-white py-2 px-3 text-xs rounded"
+          >
+            Update Stock
+          </button>
 
           <button
             onClick={() => setShowStockInOverlay(true)}
@@ -455,9 +479,12 @@ export default function InventoryManagementPage() {
 
           <button
             onClick={() => {
-              const id = prompt("Enter Inventory ID to Stock Out:");
-              if (id) {
-                handleStockOut(Number(id)); // Validate and handle stock out
+              if (selectedInventoryID !== null) {
+                handleStockOut(selectedInventoryID);
+              } else {
+                // Show validation dialog when no item is selected
+                setValidationMessage("Please select an inventory item to stock out.");
+                setValidationDialogVisible(true);
               }
             }}
             className="bg-black text-white py-2 px-3 text-xs rounded"
@@ -472,7 +499,7 @@ export default function InventoryManagementPage() {
           <table className="w-full text-black text-xs">
             <thead>
               <tr>
-                <th className="border p-1">ID</th>
+                <th className="border p-1"></th>
                 <th className="border p-1">Name</th>
                 <th className="border p-1">Category</th>
                 <th className="border p-1">Reorder Point</th>
@@ -483,7 +510,13 @@ export default function InventoryManagementPage() {
               {inventoryData.map((item) => (
                 <React.Fragment key={item.inventoryID}>
                   <tr
-                    onClick={() => toggleRow(item.inventoryID)} // Click to toggle
+                    onClick={(e) => {
+                      const target = e.target as HTMLInputElement; // Cast the target to HTMLInputElement
+                      if (target && target.type !== "radio") {
+                        // Only toggle the row if the clicked target is not a radio button
+                        toggleRow(item.inventoryID);
+                      }
+                    }}
                     className={`cursor-pointer ${
                       collapsedRows.includes(item.inventoryID)
                         ? "bg-cream"
@@ -492,7 +525,18 @@ export default function InventoryManagementPage() {
                         : ""
                     }`}
                   >
-                    <td className="border p-1">{item.inventoryID}</td>
+                    <td className="border p-1">
+                      <input
+                        type="radio"
+                        name="inventoryItem"
+                        value={item.inventoryID}
+                        checked={selectedInventoryID === item.inventoryID}
+                        onChange={(e) => {
+                          e.stopPropagation(); // Prevent event propagation to the row click
+                          handleRadioChange(item.inventoryID);
+                        }}
+                      />
+                    </td>
                     <td className="border p-1">{item.inventoryName}</td>
                     <td className="border p-1">{item.inventoryCategory}</td>
                     <td className="border p-1">
@@ -504,8 +548,8 @@ export default function InventoryManagementPage() {
                   </tr>
                   {collapsedRows.includes(item.inventoryID) && detailedData[item.inventoryID] && (
                     <tr>
-                    <td colSpan={5} className="p-1 border bg-cream">
-                        <div className="text-xs mb-2">
+                      <td colSpan={5} className="p-1 border bg-cream">
+                        <div className="text-xs mb-2 ml-5">
                           <strong>Details:</strong>
                           {detailedData[item.inventoryID] && detailedData[item.inventoryID].length > 0 ? (
                             <ul>
@@ -526,12 +570,12 @@ export default function InventoryManagementPage() {
                           )}
                         </div>
                       </td>
-                    </tr> 
+                    </tr>
                   )}
-
                 </React.Fragment>
               ))}
             </tbody>
+
           </table>
         )}
 
@@ -646,6 +690,13 @@ export default function InventoryManagementPage() {
             setUpdateStockData={setUpdateStockData}
             handleUpdateStockSubmit={handleUpdateStockSubmit}
             onClose={() => setShowUpdateStockOverlay(false)}
+          />
+        )}
+
+        {validationDialogVisible && (
+          <ValidationDialog
+            message={validationMessage}
+            onClose={handleValidationDialogClose}
           />
         )}
       </div>
