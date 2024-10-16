@@ -8,7 +8,7 @@ const Modal: React.FC<ModalProps> = ({
   return (
     <>
       {modalIsVisible && (
-        <div className="fixed inset-0 z-50 flex justify-center items-center w-full h-full">
+        <div className="fixed inset-0 z-50 flex justify-center items-center w-full h-full overflow-y-auto">
           {/* Background Overlay */}
           <div
             onClick={() => setModalVisibility(false)}
@@ -18,7 +18,7 @@ const Modal: React.FC<ModalProps> = ({
           {/* Modal Content */}
           <div
             onClick={(e) => e.stopPropagation()}
-            className="relative bg-white rounded-xl shadow-lg p-0 m-0" // Removed all padding/margin
+            className="relative bg-white rounded-xl shadow-lg p-0 m-0 max-h-[90vh] overflow-y-auto overflow-x-hidden" // Removed all padding/margin
           >
             {children}
           </div>
