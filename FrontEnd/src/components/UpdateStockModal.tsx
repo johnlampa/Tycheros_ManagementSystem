@@ -1,29 +1,14 @@
+import ValidationDialog from "@/components/ValidationDialog";
 import React, { useState } from "react";
-
-// Validation Dialog Component
-const ValidationDialog: React.FC<{ message: string; onClose: () => void }> = ({ message, onClose }) => (
-  <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-    <div className="bg-white p-5 rounded-lg w-80">
-      <h2 className="text-red-500 font-bold mb-4">Validation Error</h2>
-      <div className="text-black whitespace-pre-wrap">{message}</div>
-      <div className="flex justify-end mt-4">
-        <button
-          onClick={onClose}
-          className="bg-tealGreen text-black py-2 px-4 rounded cursor-pointer"
-        >
-          OK
-        </button>
-      </div>
-    </div>
-  </div>
-);
 
 interface UpdateStockModalProps {
   updateStockData: {
     inventoryID: string;
     quantity: number;
   };
-  setUpdateStockData: React.Dispatch<React.SetStateAction<{ inventoryID: string; quantity: number }>>;
+  setUpdateStockData: React.Dispatch<
+    React.SetStateAction<{ inventoryID: string; quantity: number }>
+  >;
   handleUpdateStockSubmit: () => Promise<void>;
   onClose: () => void;
 }
@@ -34,7 +19,9 @@ const UpdateStockModal: React.FC<UpdateStockModalProps> = ({
   handleUpdateStockSubmit,
   onClose,
 }) => {
-  const [validationMessage, setValidationMessage] = useState<string | null>(null); // For dialog visibility
+  const [validationMessage, setValidationMessage] = useState<string | null>(
+    null
+  ); // For dialog visibility
 
   const validateForm = () => {
     const missingFields: string[] = [];
@@ -67,7 +54,9 @@ const UpdateStockModal: React.FC<UpdateStockModalProps> = ({
           <input
             type="number"
             placeholder="Quantity"
-            value={updateStockData.quantity === 0 ? "" : updateStockData.quantity}
+            value={
+              updateStockData.quantity === 0 ? "" : updateStockData.quantity
+            }
             onChange={(e) =>
               setUpdateStockData({
                 ...updateStockData,
@@ -94,7 +83,10 @@ const UpdateStockModal: React.FC<UpdateStockModalProps> = ({
       </div>
 
       {validationMessage && (
-        <ValidationDialog message={validationMessage} onClose={() => setValidationMessage(null)} />
+        <ValidationDialog
+          message={validationMessage}
+          onClose={() => setValidationMessage(null)}
+        />
       )}
     </div>
   );
