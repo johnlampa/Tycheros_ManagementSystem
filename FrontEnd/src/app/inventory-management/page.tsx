@@ -7,6 +7,7 @@ import SubitemModal from "@/components/SubitemModal";
 import StockInModal from "@/components/StockInModal";
 import StockOutModal from "@/components/StockOutModal";
 import UpdateStockModal from "@/components/UpdateStockModal";
+import ValidationDialog from "@/components/ValidationDialog";
 import axios from "axios";
 
 export default function InventoryManagementPage() {
@@ -18,6 +19,8 @@ export default function InventoryManagementPage() {
   const [showAddOverlay, setShowAddOverlay] = useState(false);
   const [showEditOverlay, setShowEditOverlay] = useState(false);
   const [showDeleteOverlay, setShowDeleteOverlay] = useState(false);
+  const [validationDialogVisible, setValidationDialogVisible] = useState(false);
+  const [validationMessage, setValidationMessage] = useState<string>("");
 
   const initialItemState = {
     inventoryName: "",
@@ -387,6 +390,11 @@ export default function InventoryManagementPage() {
     setSelectedInventoryID(inventoryID);
   };
 
+  const handleValidationDialogClose = () => {
+    setValidationDialogVisible(false); // Close the dialog when the user clicks "OK"
+  };
+
+
   if (loading) {
     return <p>Loading...</p>;
   }
@@ -412,7 +420,9 @@ export default function InventoryManagementPage() {
               if (selectedInventoryID !== null) {
                 handleEditItem(selectedInventoryID); // Use the selected radio button's inventory ID
               } else {
-                alert("Please select an inventory item to edit.");
+                // Set the message and show the validation dialog
+                setValidationMessage("Please select an inventory item to edit.");
+                setValidationDialogVisible(true);
               }
             }}
             className="bg-black text-white py-2 px-3 text-xs rounded mr-2"
@@ -430,10 +440,14 @@ export default function InventoryManagementPage() {
                   setItemToDelete(item);
                   setShowDeleteOverlay(true);
                 } else {
-                  alert("Item not found");
+                  // Show validation dialog when the item is not found
+                  setValidationMessage("Item not found");
+                  setValidationDialogVisible(true);
                 }
               } else {
-                alert("Please select an inventory item to delete.");
+                // Show validation dialog when no item is selected
+                setValidationMessage("Please select an inventory item to delete.");
+                setValidationDialogVisible(true);
               }
             }}
             className="bg-black text-white py-2 px-3 text-xs rounded"
@@ -446,7 +460,9 @@ export default function InventoryManagementPage() {
               if (selectedInventoryID !== null) {
                 handleUpdateStock(selectedInventoryID.toString());
               } else {
-                alert("Please select an inventory item to update.");
+                // Show validation dialog when no item is selected
+                setValidationMessage("Please select an inventory item to update.");
+                setValidationDialogVisible(true);
               }
             }}
             className="bg-black text-white py-2 px-3 text-xs rounded"
@@ -466,14 +482,15 @@ export default function InventoryManagementPage() {
               if (selectedInventoryID !== null) {
                 handleStockOut(selectedInventoryID);
               } else {
-                alert("Please select an inventory item to stock out.");
+                // Show validation dialog when no item is selected
+                setValidationMessage("Please select an inventory item to stock out.");
+                setValidationDialogVisible(true);
               }
             }}
             className="bg-black text-white py-2 px-3 text-xs rounded"
           >
             Stock Out
           </button>
-
         </div>
 
         {inventoryData.length === 0 ? (
@@ -673,6 +690,13 @@ export default function InventoryManagementPage() {
             setUpdateStockData={setUpdateStockData}
             handleUpdateStockSubmit={handleUpdateStockSubmit}
             onClose={() => setShowUpdateStockOverlay(false)}
+          />
+        )}
+
+        {validationDialogVisible && (
+          <ValidationDialog
+            message={validationMessage}
+            onClose={handleValidationDialogClose}
           />
         )}
       </div>

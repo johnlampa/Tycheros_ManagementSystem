@@ -57,6 +57,7 @@ const UpdateStockModal: React.FC<UpdateStockModalProps> = ({
             value={
               updateStockData.quantity === 0 ? "" : updateStockData.quantity
             }
+            min="0"
             onChange={(e) =>
               setUpdateStockData({
                 ...updateStockData,
