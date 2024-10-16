@@ -3,6 +3,7 @@ import { OrderCardProps } from "../../lib/types/props/OrderCardProps";
 import { ProductDataTypes } from "../../lib/types/ProductDataTypes";
 import QuantityModal from "@/components/QuantityModal";
 import Link from "next/link";
+import { FaTrashAlt } from "react-icons/fa";
 
 const OrderCard: React.FC<OrderCardProps> = ({
   cart,
@@ -35,19 +36,31 @@ const OrderCard: React.FC<OrderCardProps> = ({
     setSubtotal(newSubtotal || 0);
   }, [cart, menuData, setSubtotal]);
 
+  // Function to delete a product from the cart
+  const handleDeleteProduct = (productID: number) => {
+    // Check if setCart is defined
+    if (setCart) {
+      const updatedCart = cart.filter((item) => item.productID !== productID);
+      setCart(updatedCart);
+
+      // Update localStorage after deleting the product
+      localStorage.setItem("cart", JSON.stringify(updatedCart));
+    } else {
+      console.error("setCart is undefined");
+    }
+  };
+
   return (
     <>
       <div className="rounded-lg mt-[25px]">
-        <div className="w-[303.75px] rounded-md p-2 grid grid-cols-[1fr_2fr_1fr] bg-[#59988D] ">
+        <div className="w-[303.75px] rounded-md p-2 grid grid-cols-[1fr_2fr_1fr_1fr] bg-[#59988D] ">
           <div className="flex items-center justify-center">
             <span className="text-[15px] text-white font-semibold">
               Quantity
             </span>
           </div>
           <div className="flex items-center justify-center">
-            <span className="text-[15px] text-white font-semibold">
-              Name
-            </span>
+            <span className="text-[15px] text-white font-semibold">Name</span>
           </div>
           <div className="flex items-center justify-center">
             <span className="text-[15px] text-white font-semibold text-center">
@@ -63,7 +76,7 @@ const OrderCard: React.FC<OrderCardProps> = ({
 
             return (
               <div key={index}>
-                <div className="grid grid-cols-[1fr_2fr_1fr] w-[303.75px] rounded-sm p-2 h-[50px]">
+                <div className="grid grid-cols-[1fr_2fr_1fr_1fr] w-[303.75px] rounded-sm p-2 h-[50px]">
                   {type === "summary" ? (
                     <div className="flex items-center justify-center">
                       <button
@@ -88,7 +101,7 @@ const OrderCard: React.FC<OrderCardProps> = ({
                       <span className="text-[11px]">{quantity}</span>
                     </div>
                   )}
-                  <div className="flex items-center justify-center text-sm italic text-[11px]">
+                  <div className="flex items-center justify-center text-sm italic text-[11px] overflow-hidden">
                     <span className="text-[12px]">
                       {product?.productName || "Unknown"}
                     </span>
@@ -97,6 +110,19 @@ const OrderCard: React.FC<OrderCardProps> = ({
                     <span className="text-[12px]">
                       {product ? product.sellingPrice * quantity : "N/A"}
                     </span>
+                  </div>
+                  <div className="flex justify-center items-center">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (product?.productID !== undefined) {
+                          handleDeleteProduct(product.productID);
+                        }
+                      }}
+                      className="text-black ml-4"
+                    >
+                      <FaTrashAlt />
+                    </button>
                   </div>
                   <QuantityModal
                     productToAdd={productToAdd}
