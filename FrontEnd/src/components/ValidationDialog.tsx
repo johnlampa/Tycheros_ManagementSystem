@@ -11,7 +11,7 @@ const ValidationDialog: React.FC<ValidationDialogProps> = ({
 }) => (
   <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
     <div className="bg-white p-5 rounded-lg w-80">
-      <h2 className="text-red-500 font-bold mb-4">Validation Error</h2>
+      <h2 className="text-black font-bold mb-4 text-2xl">Error</h2>
       <div className="text-black whitespace-pre-wrap">{message}</div>
       <div className="flex justify-end mt-4">
         <button
