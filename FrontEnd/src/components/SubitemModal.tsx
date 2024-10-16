@@ -1,10 +1,11 @@
-import React from "react";
+import ValidationDialog from "@/components/ValidationDialog";
+import React, { useState } from "react";
 
 interface SubitemModalProps {
   modalTitle: string;
   subitemData: {
     inventoryName: string;
-    inventoryCategory: string;  
+    inventoryCategory: string;
     reorderPoint: number;
     unitOfMeasure: string;
   };
@@ -20,6 +21,43 @@ const SubitemModal: React.FC<SubitemModalProps> = ({
   onSave,
   onCancel,
 }) => {
+  const [validationMessage, setValidationMessage] = useState<string | null>(
+    null
+  );
+
+  const validateForm = () => {
+    const missingFields: string[] = [];
+
+    if (!subitemData.inventoryName.trim()) {
+      missingFields.push("Inventory Name");
+    }
+    if (!subitemData.inventoryCategory.trim()) {
+      missingFields.push("Inventory Category");
+    }
+    if (subitemData.reorderPoint <= 0) {
+      missingFields.push("Reorder Point");
+    }
+    if (!subitemData.unitOfMeasure.trim()) {
+      missingFields.push("Unit of Measure");
+    }
+
+    if (missingFields.length > 0) {
+      setValidationMessage(
+        `Please fill out the following:\n${missingFields.join("\n")}`
+      );
+      return false;
+    }
+
+    setValidationMessage(null);
+    return true;
+  };
+
+  const handleSave = () => {
+    if (validateForm()) {
+      onSave();
+    }
+  };
+
   return (
     <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center">
       <div className="bg-white p-5 rounded-lg w-72">
@@ -44,7 +82,9 @@ const SubitemModal: React.FC<SubitemModalProps> = ({
             }
             className="mb-2 p-2 w-full text-black"
           >
-            <option value="" disabled>Select Inventory Category</option>
+            <option value="" disabled>
+              Select Inventory Category
+            </option>
             <option value="Produce">Produce</option>
             <option value="Dairy and Eggs">Dairy and Eggs</option>
             <option value="Meat and Poultry">Meat and Poultry</option>
@@ -58,7 +98,9 @@ const SubitemModal: React.FC<SubitemModalProps> = ({
           <input
             type="number"
             placeholder="Reorder Point"
-            value={subitemData.reorderPoint === 0 ? "" : subitemData.reorderPoint}
+            value={
+              subitemData.reorderPoint === 0 ? "" : subitemData.reorderPoint
+            }
             onChange={(e) =>
               setSubitemData({
                 ...subitemData,
@@ -82,7 +124,7 @@ const SubitemModal: React.FC<SubitemModalProps> = ({
 
           <div className="flex justify-between">
             <button
-              onClick={onSave}
+              onClick={handleSave}
               className="bg-black text-white py-2 px-4 rounded cursor-pointer"
             >
               Save
@@ -96,6 +138,13 @@ const SubitemModal: React.FC<SubitemModalProps> = ({
           </div>
         </div>
       </div>
+
+      {validationMessage && (
+        <ValidationDialog
+          message={validationMessage}
+          onClose={() => setValidationMessage(null)}
+        />
+      )}
     </div>
   );
 };

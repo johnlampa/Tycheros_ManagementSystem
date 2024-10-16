@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { IoIosArrowUp, IoIosArrowDown } from "react-icons/io";
-import { format } from 'date-fns';
+import { format } from "date-fns";
 import { MultiItemStockInData } from "../../lib/types/InventoryItemDataTypes";
+import ValidationDialog from "@/components/ValidationDialog";
 
 interface StockInModalProps {
   stockInData: MultiItemStockInData;
@@ -21,22 +22,32 @@ const StockInModal: React.FC<StockInModalProps> = ({
   onClose,
 }) => {
   const [inventoryItems, setInventoryItems] = useState(
-    stockInData.inventoryItems.map(item => ({
+    stockInData.inventoryItems.map((item) => ({
       ...item,
-      expiryDate: typeof item.expiryDate === 'string' ? item.expiryDate : format(item.expiryDate, 'yyyy-MM-dd'),
-      expanded: true
+      expiryDate:
+        typeof item.expiryDate === "string"
+          ? item.expiryDate
+          : format(item.expiryDate, "yyyy-MM-dd"),
+      expanded: true,
     }))
   );
 
+  const [validationMessage, setValidationMessage] = useState<string | null>(
+    null
+  ); // For dialog visibility
+
   const addInventoryItem = () => {
-    setInventoryItems([...inventoryItems, {
-      inventoryID: 0,
-      quantityOrdered: 0,
-      actualQuantity: 0,
-      pricePerUnit: 0,
-      expiryDate: format(new Date(), 'yyyy-MM-dd'),
-      expanded: true,
-    }]);
+    setInventoryItems([
+      ...inventoryItems,
+      {
+        inventoryID: 0,
+        quantityOrdered: 0,
+        actualQuantity: 0,
+        pricePerUnit: 0,
+        expiryDate: format(new Date(), "yyyy-MM-dd"),
+        expanded: true,
+      },
+    ]);
   };
 
   const toggleExpandItem = (index: number) => {
@@ -53,12 +64,74 @@ const StockInModal: React.FC<StockInModalProps> = ({
   };
 
   const updateAllInventoryItems = (updatedData: any) => {
-    const newInventoryItems = inventoryItems.map(item => ({
+    const newInventoryItems = inventoryItems.map((item) => ({
       ...item,
-      ...updatedData
+      ...updatedData,
     }));
     setInventoryItems(newInventoryItems);
     setStockInData({ ...stockInData, inventoryItems: newInventoryItems });
+  };
+
+  const validateForm = () => {
+    const missingFields: string[] = [];
+
+    // Validate stockInData fields
+    if (!stockInData.stockInDate || stockInData.stockInDate.trim() === "") {
+      missingFields.push("Stock In Date");
+    }
+
+    if (!stockInData.supplierName || stockInData.supplierName.trim() === "") {
+      missingFields.push("Supplier Name");
+    }
+
+    if (!stockInData.employeeID) {
+      missingFields.push("Employee");
+    }
+
+    // Validate each inventory item
+    inventoryItems.forEach((item, index) => {
+      const inventoryName =
+        inventoryNames.find((inv) => inv.inventoryID === item.inventoryID)
+          ?.inventoryName || `Item ${index + 1}`;
+
+      if (!item.inventoryID || item.inventoryID === 0) {
+        missingFields.push(`Inventory Name: ${inventoryName}`);
+      }
+
+      if (item.quantityOrdered <= 0) {
+        missingFields.push(`Quantity Ordered for ${inventoryName}`);
+      }
+
+      if (item.actualQuantity <= 0) {
+        missingFields.push(`Actual Quantity for ${inventoryName}`);
+      }
+
+      if (!item.pricePerUnit || item.pricePerUnit <= 0) {
+        missingFields.push(`Price Per Unit for ${inventoryName}`);
+      }
+
+      if (!item.expiryDate || item.expiryDate.trim() === "") {
+        missingFields.push(`Expiry Date for ${inventoryName}`);
+      }
+    });
+
+    if (missingFields.length > 0) {
+      setValidationMessage(
+        `Please fill out the following:\n${missingFields.join("\n")}`
+      );
+      return false;
+    }
+
+    setValidationMessage(null);
+    return true;
+  };
+
+  const handleSubmit = async () => {
+    if (validateForm()) {
+      console.log("Stock In Data:", inventoryItems);
+      await handleStockIn();
+      onClose();
+    }
   };
 
   return (
@@ -73,7 +146,7 @@ const StockInModal: React.FC<StockInModalProps> = ({
             <input
               type="date"
               id="stockInDate"
-              value={stockInData.stockInDate ? stockInData.stockInDate : ''}
+              value={stockInData.stockInDate ? stockInData.stockInDate : ""}
               onChange={(e) => {
                 const newValue = e.target.value;
                 setStockInData({ ...stockInData, stockInDate: newValue });
@@ -105,13 +178,20 @@ const StockInModal: React.FC<StockInModalProps> = ({
               Select Employee
             </option>
             {employees.map((employee) => (
-              <option key={employee.employeeID} value={employee.employeeID.toString()}>
+              <option
+                key={employee.employeeID}
+                value={employee.employeeID.toString()}
+              >
                 {`${employee.firstName} ${employee.lastName}`}
               </option>
             ))}
           </select>
+
           {inventoryItems.map((item, index) => (
-            <div key={index} className="inventoryItem mb-4 border border-black bg-cream p-2">
+            <div
+              key={index}
+              className="inventoryItem mb-4 border border-black bg-cream p-2"
+            >
               <div className="flex justify-between items-center">
                 <select
                   value={item.inventoryID}
@@ -126,12 +206,18 @@ const StockInModal: React.FC<StockInModalProps> = ({
                     Select Item
                   </option>
                   {inventoryNames.map((inventory) => (
-                    <option key={inventory.inventoryID} value={inventory.inventoryID}>
+                    <option
+                      key={inventory.inventoryID}
+                      value={inventory.inventoryID}
+                    >
                       {inventory.inventoryName}
                     </option>
                   ))}
                 </select>
-                <button onClick={() => toggleExpandItem(index)} className="ml-2">
+                <button
+                  onClick={() => toggleExpandItem(index)}
+                  className="ml-2"
+                >
                   {item.expanded ? (
                     <IoIosArrowUp className="text-black" />
                   ) : (
@@ -145,7 +231,9 @@ const StockInModal: React.FC<StockInModalProps> = ({
                     <input
                       type="number"
                       placeholder="Quantity Ordered"
-                      value={item.quantityOrdered}
+                      value={
+                        item.quantityOrdered === 0 ? "" : item.quantityOrdered
+                      }
                       min="0"
                       onChange={(e) =>
                         updateInventoryItem(index, {
@@ -157,7 +245,9 @@ const StockInModal: React.FC<StockInModalProps> = ({
                     <input
                       type="number"
                       placeholder="Actual Quantity"
-                      value={item.actualQuantity}
+                      value={
+                        item.actualQuantity === 0 ? "" : item.actualQuantity
+                      }
                       min="0"
                       onChange={(e) =>
                         updateInventoryItem(index, {
@@ -171,7 +261,7 @@ const StockInModal: React.FC<StockInModalProps> = ({
                   <input
                     type="number"
                     placeholder="Price Per Unit"
-                    value={item.pricePerUnit}
+                    value={item.pricePerUnit === 0 ? "" : item.pricePerUnit}
                     min="0"
                     onChange={(e) =>
                       updateInventoryItem(index, {
@@ -180,10 +270,14 @@ const StockInModal: React.FC<StockInModalProps> = ({
                     }
                     className="mb-2 p-2 w-full text-black border border-black"
                   />
+                  <text className="text-black">Expiry Date </text>
                   <input
                     type="date"
                     placeholder="Expiry Date"
-                    value={item.expiryDate}
+                    value={
+                      item.expiryDate === "dd/mm/yyyy" ? "" : item.expiryDate
+                    }
+                    defaultValue="dd/mm/yyyy"
                     onChange={(e) =>
                       updateInventoryItem(index, {
                         expiryDate: e.target.value,
@@ -203,11 +297,7 @@ const StockInModal: React.FC<StockInModalProps> = ({
           </button>
           <div className="flex justify-between">
             <button
-              onClick={async () => {
-                console.log("Stock In Data:", inventoryItems);
-                await handleStockIn();
-                onClose();
-              }}
+              onClick={handleSubmit}
               className="bg-tealGreen text-black py-2 px-4 rounded border-none cursor-pointer"
             >
               Stock In
@@ -221,6 +311,12 @@ const StockInModal: React.FC<StockInModalProps> = ({
           </div>
         </div>
       </div>
+      {validationMessage && (
+        <ValidationDialog
+          message={validationMessage}
+          onClose={() => setValidationMessage(null)}
+        />
+      )}
     </div>
   );
 };
