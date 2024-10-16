@@ -13,6 +13,7 @@ export default function InventoryManagementPage() {
   const [inventoryData, setInventoryData] = useState<InventoryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const [selectedInventoryID, setSelectedInventoryID] = useState<number | null>(null);
   const [collapsedRows, setCollapsedRows] = useState<number[]>([]); // State to track which rows are collapsed
   const [showAddOverlay, setShowAddOverlay] = useState(false);
   const [showEditOverlay, setShowEditOverlay] = useState(false);
@@ -381,7 +382,10 @@ export default function InventoryManagementPage() {
       setCollapsedRows([...collapsedRows, inventoryID]);
     }
   };
-  
+
+  const handleRadioChange = (inventoryID: number) => {
+    setSelectedInventoryID(inventoryID);
+  };
 
   if (loading) {
     return <p>Loading...</p>;
@@ -402,11 +406,13 @@ export default function InventoryManagementPage() {
           >
             Add Item
           </button>
+
           <button
             onClick={() => {
-              const id = prompt("Enter Inventory ID to Edit:");
-              if (id) {
-                handleEditItem(Number(id));
+              if (selectedInventoryID !== null) {
+                handleEditItem(selectedInventoryID); // Use the selected radio button's inventory ID
+              } else {
+                alert("Please select an inventory item to edit.");
               }
             }}
             className="bg-black text-white py-2 px-3 text-xs rounded mr-2"
@@ -416,10 +422,9 @@ export default function InventoryManagementPage() {
 
           <button
             onClick={() => {
-              const id = prompt("Enter Inventory ID to Delete:");
-              if (id) {
+              if (selectedInventoryID !== null) {
                 const item = inventoryData.find(
-                  (item) => item.inventoryID === Number(id)
+                  (item) => item.inventoryID === selectedInventoryID
                 );
                 if (item) {
                   setItemToDelete(item);
@@ -427,6 +432,8 @@ export default function InventoryManagementPage() {
                 } else {
                   alert("Item not found");
                 }
+              } else {
+                alert("Please select an inventory item to delete.");
               }
             }}
             className="bg-black text-white py-2 px-3 text-xs rounded"
@@ -434,17 +441,18 @@ export default function InventoryManagementPage() {
             Delete Item
           </button>
 
-         <button
-          onClick={() => {
-            const id = prompt("Enter Inventory ID to Update Stock:");
-            if (id) {
-              handleUpdateStock(id);
-            }
-          }}
-          className="bg-black text-white py-2 px-3 text-xs rounded"
-        >
-          Update Stock
-        </button>
+          <button
+            onClick={() => {
+              if (selectedInventoryID !== null) {
+                handleUpdateStock(selectedInventoryID.toString());
+              } else {
+                alert("Please select an inventory item to update.");
+              }
+            }}
+            className="bg-black text-white py-2 px-3 text-xs rounded"
+          >
+            Update Stock
+          </button>
 
           <button
             onClick={() => setShowStockInOverlay(true)}
@@ -455,15 +463,17 @@ export default function InventoryManagementPage() {
 
           <button
             onClick={() => {
-              const id = prompt("Enter Inventory ID to Stock Out:");
-              if (id) {
-                handleStockOut(Number(id)); // Validate and handle stock out
+              if (selectedInventoryID !== null) {
+                handleStockOut(selectedInventoryID);
+              } else {
+                alert("Please select an inventory item to stock out.");
               }
             }}
             className="bg-black text-white py-2 px-3 text-xs rounded"
           >
             Stock Out
           </button>
+
         </div>
 
         {inventoryData.length === 0 ? (
@@ -472,7 +482,7 @@ export default function InventoryManagementPage() {
           <table className="w-full text-black text-xs">
             <thead>
               <tr>
-                <th className="border p-1">ID</th>
+                <th className="border p-1"></th>
                 <th className="border p-1">Name</th>
                 <th className="border p-1">Category</th>
                 <th className="border p-1">Reorder Point</th>
@@ -483,7 +493,13 @@ export default function InventoryManagementPage() {
               {inventoryData.map((item) => (
                 <React.Fragment key={item.inventoryID}>
                   <tr
-                    onClick={() => toggleRow(item.inventoryID)} // Click to toggle
+                    onClick={(e) => {
+                      const target = e.target as HTMLInputElement; // Cast the target to HTMLInputElement
+                      if (target && target.type !== "radio") {
+                        // Only toggle the row if the clicked target is not a radio button
+                        toggleRow(item.inventoryID);
+                      }
+                    }}
                     className={`cursor-pointer ${
                       collapsedRows.includes(item.inventoryID)
                         ? "bg-cream"
@@ -492,7 +508,18 @@ export default function InventoryManagementPage() {
                         : ""
                     }`}
                   >
-                    <td className="border p-1">{item.inventoryID}</td>
+                    <td className="border p-1">
+                      <input
+                        type="radio"
+                        name="inventoryItem"
+                        value={item.inventoryID}
+                        checked={selectedInventoryID === item.inventoryID}
+                        onChange={(e) => {
+                          e.stopPropagation(); // Prevent event propagation to the row click
+                          handleRadioChange(item.inventoryID);
+                        }}
+                      />
+                    </td>
                     <td className="border p-1">{item.inventoryName}</td>
                     <td className="border p-1">{item.inventoryCategory}</td>
                     <td className="border p-1">
@@ -504,8 +531,8 @@ export default function InventoryManagementPage() {
                   </tr>
                   {collapsedRows.includes(item.inventoryID) && detailedData[item.inventoryID] && (
                     <tr>
-                    <td colSpan={5} className="p-1 border bg-cream">
-                        <div className="text-xs mb-2">
+                      <td colSpan={5} className="p-1 border bg-cream">
+                        <div className="text-xs mb-2 ml-5">
                           <strong>Details:</strong>
                           {detailedData[item.inventoryID] && detailedData[item.inventoryID].length > 0 ? (
                             <ul>
@@ -526,12 +553,12 @@ export default function InventoryManagementPage() {
                           )}
                         </div>
                       </td>
-                    </tr> 
+                    </tr>
                   )}
-
                 </React.Fragment>
               ))}
             </tbody>
+
           </table>
         )}
 
