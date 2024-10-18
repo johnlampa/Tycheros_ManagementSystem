@@ -9,6 +9,8 @@ import StockOutModal from "@/components/StockOutModal";
 import UpdateStockModal from "@/components/UpdateStockModal";
 import ValidationDialog from "@/components/ValidationDialog";
 import axios from "axios";
+import Toggle from "react-toggle"; 
+import "react-toggle/style.css"
 
 export default function InventoryManagementPage() {
   const [inventoryData, setInventoryData] = useState<InventoryItem[]>([]);
@@ -21,12 +23,14 @@ export default function InventoryManagementPage() {
   const [showDeleteOverlay, setShowDeleteOverlay] = useState(false);
   const [validationDialogVisible, setValidationDialogVisible] = useState(false);
   const [validationMessage, setValidationMessage] = useState<string>("");
+  const [status, setStatus] = useState<{ [key: number]: boolean }>({});
 
   const initialItemState = {
     inventoryName: "",
     inventoryCategory: "",
     reorderPoint: 0,
     unitOfMeasure: "",
+    inventoryStatus: 1,
   };
 
   const resetNewItem = () => {
@@ -38,11 +42,13 @@ export default function InventoryManagementPage() {
     inventoryCategory: string;
     unitOfMeasure: string;
     reorderPoint: number;
+    inventoryStatus: number;
   }>({
     inventoryName: "",
     inventoryCategory: "",
     unitOfMeasure: "",
     reorderPoint: 0,
+    inventoryStatus: 1,
   });
 
   const [itemToEdit, setItemToEdit] = useState<InventoryItem | null>(null);
@@ -280,6 +286,7 @@ export default function InventoryManagementPage() {
         inventoryCategory: "",
         unitOfMeasure: "",
         reorderPoint: 0,
+        inventoryStatus: 1,
       });
 
       const updatedInventory = await fetch(
@@ -394,6 +401,24 @@ export default function InventoryManagementPage() {
     setValidationDialogVisible(false); // Close the dialog when the user clicks "OK"
   };
 
+  const handleStatusToggle = async (inventoryID: number, newStatus: boolean) => {
+    const updatedStatus = newStatus ? 1 : 0;
+    try {
+      await axios.put(`http://localhost:8081/inventoryManagement/updateStatus/${inventoryID}`, {
+        inventoryStatus: updatedStatus
+      });
+      
+      setInventoryData((prevData) => prevData.map((item) => 
+        item.inventoryID === inventoryID 
+          ? { ...item, inventoryStatus: updatedStatus } 
+          : item
+      ));
+    } catch (error) {
+      console.error("Error updating inventory status:", error);
+      alert("Failed to update inventory status");
+    }
+  };
+  
 
   if (loading) {
     return <p>Loading...</p>;
@@ -504,6 +529,7 @@ export default function InventoryManagementPage() {
                 <th className="border p-1">Category</th>
                 <th className="border p-1">Reorder Point</th>
                 <th className="border p-1">Total Qty</th>
+                <th className="border p-1">Status</th> {/* New Status Column */}
               </tr>
             </thead>
             <tbody>
@@ -511,9 +537,9 @@ export default function InventoryManagementPage() {
                 <React.Fragment key={item.inventoryID}>
                   <tr
                     onClick={(e) => {
-                      const target = e.target as HTMLInputElement; // Cast the target to HTMLInputElement
-                      if (target && target.type !== "radio") {
-                        // Only toggle the row if the clicked target is not a radio button
+                      const target = e.target as HTMLInputElement;
+                      if (target && target.type !== "radio" && target.type !== "checkbox") {
+                        // Only toggle the row if the clicked target is not a radio button or a toggle button
                         toggleRow(item.inventoryID);
                       }
                     }}
@@ -521,7 +547,7 @@ export default function InventoryManagementPage() {
                       collapsedRows.includes(item.inventoryID)
                         ? "bg-cream"
                         : item.totalQuantity <= item.reorderPoint
-                        ? "bg-lightRed text-black" // Add background and text color for low stock
+                        ? "bg-lightRed text-black"
                         : ""
                     }`}
                   >
@@ -532,7 +558,7 @@ export default function InventoryManagementPage() {
                         value={item.inventoryID}
                         checked={selectedInventoryID === item.inventoryID}
                         onChange={(e) => {
-                          e.stopPropagation(); // Prevent event propagation to the row click
+                          e.stopPropagation(); // Prevent row collapse when clicking on the radio button
                           handleRadioChange(item.inventoryID);
                         }}
                       />
@@ -545,10 +571,22 @@ export default function InventoryManagementPage() {
                     <td className="border p-1">
                       {item.totalQuantity} {item.unitOfMeasure}
                     </td>
+                    <td className="border p-1">
+                      {/* Toggle button for inventoryStatus */}
+                      <Toggle
+                        checked={item.inventoryStatus === 1}
+                        icons={false}
+                        onChange={(e) => {
+                          e.stopPropagation(); // Prevent row collapse when clicking on the toggle button
+                          handleStatusToggle(item.inventoryID, e.target.checked);
+                        }}
+                      />
+                      {item.inventoryStatus === 1 ? "Active" : "Inactive"}
+                    </td>
                   </tr>
                   {collapsedRows.includes(item.inventoryID) && detailedData[item.inventoryID] && (
                     <tr>
-                      <td colSpan={5} className="p-1 border bg-cream">
+                      <td colSpan={6} className="p-1 border bg-cream">
                         <div className="text-xs mb-2 ml-5">
                           <strong>Details:</strong>
                           {detailedData[item.inventoryID] && detailedData[item.inventoryID].length > 0 ? (
