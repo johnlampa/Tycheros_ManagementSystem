@@ -200,11 +200,12 @@ router.put('/updateOrderStatus', (req, res) => {
 });
 
 router.post('/cancelOrder', (req, res) => {
-  const { orderID, cancellationReason, subitemsUsed } = req.body;
+  const { orderID, cancellationReason, cancellationType, subitemsUsed} = req.body;
 
   console.log("Request received for cancelling order:", {
     orderID,
     cancellationReason,
+    cancellationType,
     subitemsUsed,
   });
 
