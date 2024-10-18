@@ -84,15 +84,15 @@ export default function InventoryManagementPage() {
       );
 
       if (!response.ok) {
-        throw new Error("Failed to stock in subitem");
+        throw new Error("Failed to stock in item");
       }
 
       const updatedInventory = await fetch(
-        "http://localhost:8081/inventoryManagement/getSubitem"
+        "http://localhost:8081/inventoryManagement/getInventoryItem"
       ).then((res) => res.json());
       setInventoryData(updatedInventory);
 
-      alert("Subitem stocked in successfully");
+      alert("Item stocked in successfully");
 
       // Reset data only after successful stock-in
       setStockInData({
@@ -163,7 +163,7 @@ export default function InventoryManagementPage() {
       if (response.ok) {
         alert("Stock updated successfully");
         const updatedInventory = await fetch(
-          "http://localhost:8081/inventoryManagement/getSubitem"
+          "http://localhost:8081/inventoryManagement/getInventoryItem"
         ).then((res) => res.json());
         setInventoryData(updatedInventory);
         window.location.reload();
@@ -247,7 +247,7 @@ export default function InventoryManagementPage() {
     const fetchInventory = async () => {
       try {
         const response = await fetch(
-          "http://localhost:8081/inventoryManagement/getSubitem"
+          "http://localhost:8081/inventoryManagement/getInventoryItem"
         );
         if (!response.ok) {
           throw new Error("Network response was not ok");
@@ -290,7 +290,7 @@ export default function InventoryManagementPage() {
       });
 
       const updatedInventory = await fetch(
-        "http://localhost:8081/inventoryManagement/getSubitem"
+        "http://localhost:8081/inventoryManagement/getInventoryItem"
       ).then((res) => res.json());
       setInventoryData(updatedInventory);
       setShowAddOverlay(false);
@@ -331,7 +331,7 @@ export default function InventoryManagementPage() {
         }
 
         const updatedInventory = await fetch(
-          "http://localhost:8081/inventoryManagement/getSubitem"
+          "http://localhost:8081/inventoryManagement/getInventoryItem"
         ).then((res) => res.json());
         setInventoryData(updatedInventory);
 
@@ -358,7 +358,7 @@ export default function InventoryManagementPage() {
         }
 
         const updatedInventory = await fetch(
-          "http://localhost:8081/inventoryManagement/getSubitem"
+          "http://localhost:8081/inventoryManagement/getInventoryItem"
         ).then((res) => res.json());
         setInventoryData(updatedInventory);
 
@@ -380,7 +380,7 @@ export default function InventoryManagementPage() {
       // Expand row and fetch details if not already fetched
       if (!detailedData[inventoryID]) {
         try {
-          const response = await axios.get(`http://localhost:8081/inventoryManagement/getSubitemDetails/${inventoryID}`);
+          const response = await axios.get(`http://localhost:8081/inventoryManagement/getInventoryItemDetails/${inventoryID}`);
           setDetailedData({
             ...detailedData,
             [inventoryID]: response.data,
