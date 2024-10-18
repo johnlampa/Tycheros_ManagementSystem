@@ -131,7 +131,7 @@ router.get('/getMenuData', (req, res) => {
 
 // POST /processPayment endpoint
 router.post('/processPayment', (req, res) => {
-  const { orderID, amount, method, referenceNumber, discount, discountAmount } = req.body;
+  const { orderID, amount, method, referenceNumber, discountType, discountAmount } = req.body;
 
   // Start a transaction
   db.beginTransaction(err => {
@@ -139,9 +139,9 @@ router.post('/processPayment', (req, res) => {
 
     // Insert into Payment table
     const insertPaymentQuery = `
-      INSERT INTO payment (amount, method, referenceNumber, discount, discountAmount)
+      INSERT INTO payment (amount, method, referenceNumber, discountType, discountAmount)
       VALUES (?, ?, ?, ?, ?)`;
-    db.query(insertPaymentQuery, [amount, method, referenceNumber, discount, discountAmount], (err, results) => {
+    db.query(insertPaymentQuery, [amount, method, referenceNumber, discountType, discountAmount], (err, results) => {
       if (err) {
         return db.rollback(() => res.status(500).json({ error: "Failed to insert payment" }));
       }
@@ -200,11 +200,12 @@ router.put('/updateOrderStatus', (req, res) => {
 });
 
 router.post('/cancelOrder', (req, res) => {
-  const { orderID, cancellationReason, subitemsUsed } = req.body;
+  const { orderID, cancellationReason, cancellationType, subitemsUsed} = req.body;
 
   console.log("Request received for cancelling order:", {
     orderID,
     cancellationReason,
+    cancellationType,
     subitemsUsed,
   });
 
