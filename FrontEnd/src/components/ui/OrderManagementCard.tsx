@@ -71,15 +71,6 @@ const OrderManagementCard: React.FC<OrderManagementCardProps> = React.memo(
       }
     };
 
-    const handleConfirmPayment = useCallback(async () => {
-      try {
-        // API call to confirm payment
-        await updateOrderStatus("Pending");
-      } catch (error) {
-        console.error("Error confirming payment:", error);
-      }
-    }, [order]);
-
     const handleCompleteOrder = useCallback(async () => {
       try {
         // API call to complete order
@@ -208,7 +199,6 @@ const OrderManagementCard: React.FC<OrderManagementCardProps> = React.memo(
                     >
                       <button
                         className="px-2 py-1 rounded-md mt-1 float-right text-xs w-[130px] h-[28px] font-semibold bg-tealGreen text-white hover:text-tealGreen hover:bg-white hover:border hover:border-tealGreen duration-200"
-                        onClick={handleConfirmPayment}
                       >
                         Confirm Payment
                       </button>
