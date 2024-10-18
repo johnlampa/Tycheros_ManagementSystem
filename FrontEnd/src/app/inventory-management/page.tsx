@@ -531,7 +531,7 @@ export default function InventoryManagementPage() {
                 <th className="border p-1">Total Qty</th>
                 <th className="border p-1">Status</th> {/* New Status Column */}
               </tr>
-            </thead>
+            </thead> 
             <tbody>
               {inventoryData.map((item) => (
                 <React.Fragment key={item.inventoryID}>
@@ -613,7 +613,6 @@ export default function InventoryManagementPage() {
                 </React.Fragment>
               ))}
             </tbody>
-
           </table>
         )}
 
