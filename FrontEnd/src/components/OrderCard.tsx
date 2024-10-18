@@ -52,8 +52,14 @@ const OrderCard: React.FC<OrderCardProps> = ({
 
   return (
     <>
-      <div className="rounded-lg mt-[25px]">
-        <div className="w-[303.75px] rounded-md p-2 grid grid-cols-[1fr_2fr_1fr_1fr] bg-[#59988D] ">
+      <div className="rounded-lg mt-[25px] bg-cream p-2">
+        <div
+          className={`w-[303.75px] rounded-md p-2 grid ${
+            type === "summary" && cart.length > 0
+              ? "grid-cols-[1fr_2fr_1fr_1fr]"
+              : "grid-cols-[1fr_2fr_1fr]"
+          } bg-[#59988D] `}
+        >
           <div className="flex items-center justify-center">
             <span className="text-[15px] text-white font-semibold">
               Quantity
@@ -69,14 +75,20 @@ const OrderCard: React.FC<OrderCardProps> = ({
           </div>
         </div>
 
-        <div className="flex flex-col items-center justify-center bg-cream text-black">
+        <div className="flex flex-col items-center justify-center text-black">
           {cart.map((item, index) => {
             const { productID, quantity } = item;
             const product = menuData.find((p) => p.productID === productID);
 
             return (
               <div key={index}>
-                <div className="grid grid-cols-[1fr_2fr_1fr_1fr] w-[303.75px] rounded-sm p-2 h-[50px]">
+                <div
+                  className={`grid ${
+                    type === "summary"
+                      ? "grid-cols-[1fr_2fr_1fr_1fr]"
+                      : "grid-cols-[1fr_2fr_1fr]"
+                  } w-[303.75px] rounded-sm p-2 h-[50px]`}
+                >
                   {type === "summary" ? (
                     <div className="flex items-center justify-center">
                       <button
@@ -111,19 +123,22 @@ const OrderCard: React.FC<OrderCardProps> = ({
                       {product ? product.sellingPrice * quantity : "N/A"}
                     </span>
                   </div>
-                  <div className="flex justify-center items-center">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (product?.productID !== undefined) {
-                          handleDeleteProduct(product.productID);
-                        }
-                      }}
-                      className="text-black ml-4"
-                    >
-                      <FaTrashAlt />
-                    </button>
-                  </div>
+                  {type === "summary" && (
+                    <div className="flex justify-center items-center">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (product?.productID !== undefined) {
+                            handleDeleteProduct(product.productID);
+                          }
+                        }}
+                        className="text-black ml-4"
+                      >
+                        <FaTrashAlt />
+                      </button>
+                    </div>
+                  )}
+
                   <QuantityModal
                     productToAdd={productToAdd}
                     quantityModalIsVisible={quantityModalIsVisible}
@@ -134,7 +149,12 @@ const OrderCard: React.FC<OrderCardProps> = ({
                     // setCartState={setCart}
                   />
                 </div>
-                <div className="h-[1px] w-full bg-[#59988D]"></div>
+                {type === "summary" ? (
+                  <div className="h-[1px] w-full bg-[#59988D] mt-[-6px]"></div>
+                ) : null}
+                {type !== "summary" && index < cart.length - 1 ? (
+                  <div className="h-[1px] w-full bg-[#59988D]"></div>
+                ) : null}
               </div>
             );
           })}
@@ -149,9 +169,7 @@ const OrderCard: React.FC<OrderCardProps> = ({
               </div>
             </Link>
           </div>
-        ) : (
-          ""
-        )}
+        ) : null}
       </div>
     </>
   );
