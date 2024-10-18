@@ -86,7 +86,7 @@ function PaymentDetailsPage() {
     setTotal(calculatedTotal || 0);
   }, [order, menuData]);
 
-  const handleCompleteOrder = async () => {
+  const handleConfirmPayment = async () => {
     const finalAmount = total - discountAmount;
 
     try {
@@ -103,7 +103,7 @@ function PaymentDetailsPage() {
             amount: finalAmount,
             method: paymentMethod,
             referenceNumber,
-            discount: discountType,
+            discountType: discountType,
             discountAmount: discountAmount,
           }),
         }
@@ -263,7 +263,7 @@ function PaymentDetailsPage() {
               <Link href={"order-management"}>
                 <button
                   className="w-full h-[39px] bg-tealGreen rounded-md p-3 flex justify-center items-center"
-                  onClick={handleCompleteOrder}
+                  onClick={handleConfirmPayment}
                 >
                   <span className="font-pattaya text-[20px] text-white">
                     Confirm Payment
