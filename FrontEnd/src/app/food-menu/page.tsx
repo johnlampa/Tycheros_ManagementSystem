@@ -68,11 +68,14 @@ export default function Page() {
     <>
       <div className="w-[362px] min-h-screen border mx-auto relative bg-white text-black">
         {/* Parent container has relative positioning */}
-        <MenuHeaderSection
-          menuType="food"
-          categories={categories}
-        ></MenuHeaderSection>
-        <div className="p-6">
+        <div className="fixed top-0 z-50 w-[360px]">
+          <MenuHeaderSection
+            menuType="food"
+            categories={categories}
+          ></MenuHeaderSection>
+        </div>
+
+        <div className="px-6 pb-6 pt-[215px]">
           {categories.map((category) => (
             <div
               key={category.categoryName}
