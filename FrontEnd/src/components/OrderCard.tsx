@@ -118,8 +118,9 @@ const OrderCard: React.FC<OrderCardProps> = ({
                       {product?.productName || "Unknown"}
                     </span>
                   </div>
-                  <div className="flex items-center justify-center text-sm text-[11px] font-bold">
+                  <div className="flex items-center justify-center text-sm text-[11px]">
                     <span className="text-[12px]">
+                      &#8369;{" "}
                       {product ? product.sellingPrice * quantity : "N/A"}
                     </span>
                   </div>

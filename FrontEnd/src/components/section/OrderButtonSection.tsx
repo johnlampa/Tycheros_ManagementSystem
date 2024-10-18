@@ -11,9 +11,13 @@ const OrderButtonSection: React.FC<OrderButtonSectionProps> = ({
         <div className="flex justify-between items-center w-[315px] ml-[2.5px] mb-2">
           <div>
             <span className="font-bold text-[14px] text-black">Subtotal</span>
-            <span className="text-[10px] ml-[3px] text-primaryBrown">(incl. tax)</span>
+            <span className="text-[10px] ml-[3px] text-primaryBrown">
+              (incl. tax)
+            </span>
           </div>
-          <div className="font-bold text-[14px] text-black">Php {subtotal}</div>
+          <div className="font-bold text-[14px] text-black">
+            &#8369; {subtotal.toFixed(2)}
+          </div>
         </div>
         <Link href={"/checkout"}>
           <button
