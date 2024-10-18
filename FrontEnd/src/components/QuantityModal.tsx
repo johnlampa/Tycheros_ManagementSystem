@@ -44,7 +44,7 @@ const QuantityModal: React.FC<QuantityModalProps> = ({
     const fetchInventory = async () => {
       try {
         const response = await fetch(
-          "http://localhost:8081/inventoryManagement/getSubitem"
+          "http://localhost:8081/inventoryManagement/getInventoryItem"
         );
         if (!response.ok) {
           throw new Error("Network response was not ok");

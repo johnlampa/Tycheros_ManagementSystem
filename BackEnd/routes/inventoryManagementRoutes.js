@@ -27,7 +27,7 @@ router.get('/getInventoryName', async (req, res) => {
 });
 
 // GET INVENTORY DATA ENDPOINT
-router.get('/getSubitem', async (req, res) => {
+router.get('/getInventoryItem', async (req, res) => {
   const query = `
     WITH InventoryData AS (
         SELECT 
@@ -69,7 +69,7 @@ router.get('/getSubitem', async (req, res) => {
 });
 
 // GET Subitem Details by Inventory ID
-router.get('/getSubitemDetails/:inventoryID', async (req, res) => {
+router.get('/getInventoryItemDetails/:inventoryID', async (req, res) => {
   const { inventoryID } = req.params;
   const query = `
     SELECT 
