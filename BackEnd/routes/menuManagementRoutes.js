@@ -44,7 +44,7 @@ router.get('/getProduct', (req, res) => {
   });
 });
 
-router.get('/getAllSubitems', (req, res) => {
+router.get('/getAllInventoryItems', (req, res) => {
   const query = `
     SELECT * FROM inventory;
   `;
