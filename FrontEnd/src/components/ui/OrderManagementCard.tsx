@@ -3,6 +3,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import { OrderManagementCardProps } from "../../../lib/types/props/OrderManagementCardProps";
 import Link from "next/link";
 import { Order } from "../../../lib/types/OrderDataTypes";
+import { Payment } from "../../../lib/types/PaymentDataTypes";
 
 const OrderManagementCard: React.FC<OrderManagementCardProps> = React.memo(
   ({
@@ -10,6 +11,7 @@ const OrderManagementCard: React.FC<OrderManagementCardProps> = React.memo(
     menuData,
     orders,
     setOrders,
+    payments,
     type,
     discountAmount,
     setCancelOrderModalVisibility,
@@ -30,6 +32,10 @@ const OrderManagementCard: React.FC<OrderManagementCardProps> = React.memo(
       // Apply the discount to the final total once
       setTotal(calculatedTotal ? calculatedTotal - (discountAmount || 0) : 0);
     }, [order, menuData, discountAmount]);
+
+    const payment = payments?.find(
+      (p: Payment) => p.paymentID === order.paymentID
+    );
 
     const updateOrderStatus = async (
       newStatus: "Unpaid" | "Pending" | "Completed" | "Cancelled"
@@ -121,6 +127,24 @@ const OrderManagementCard: React.FC<OrderManagementCardProps> = React.memo(
               <span>{order.date.substring(0, 10)}</span>
             </div>
           </div>
+
+          {order.status === "Pending" || order.status === "Completed" ? (
+            <>
+              <div className="flex justify-between px-1 mb-3 text-sm text-black">
+                <div>
+                  <span className="font-semibold">MOP: </span>
+                  <span>{payment?.method}</span>
+                </div>
+                {payment?.referenceNumber && (
+                  <div>
+                    <span className="font-semibold">Reference: </span>
+                    <span>{payment?.referenceNumber}</span>
+                  </div>
+                )}
+              </div>
+            </>
+          ) : null}
+
           <div className="rounded-md p-3 bg-cream text-black">
             <div className="py-1 px-2 rounded-md bg-primaryBrown w-min text-xs text-white mb-2">
               {orderStatusLabel}
@@ -174,6 +198,17 @@ const OrderManagementCard: React.FC<OrderManagementCardProps> = React.memo(
               </div>
             </div>
           )}
+
+          {type === "management" &&
+            order.paymentID &&
+            payment?.discountType && (
+              <div className="w-[320px] bg-cream rounded-md mt-1 px-3 py-1 flex justify-between text-black">
+                <div className="text-sm">Discount ({payment.discountType})</div>
+                <div className="text-right text-[12px]">
+                  &#8369; {payment.discountAmount}
+                </div>
+              </div>
+            )}
 
           <div className="w-[320px] bg-cream rounded-md mt-1 px-3 py-1 grid grid-cols-[3fr_1fr_1fr_2fr] gap-2 text-black">
             <div className="text-sm">Total</div>
