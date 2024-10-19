@@ -87,7 +87,7 @@ function PaymentDetailsPage() {
   }, [order, menuData]);
 
   const handleConfirmPayment = async () => {
-    const finalAmount = total - discountAmount;
+    const finalAmount = total - (discountAmount || 0);
 
     try {
       // Process payment
@@ -154,17 +154,34 @@ function PaymentDetailsPage() {
                 <FaArrowLeft className="text-tealGreen group-hover:text-white transition-colors duration-300" />
               </button>
             </Link>
-
           </Header>
           <div className="w-[320px] text-black">
             <div className="w-full bg-cream rounded-md p-3 mb-4">
-              <p className="font-semibold">Vouchers and Discounts</p>
-              <div className="flex justify-center items-center ">
+              <p className="font-semibold">Discounts</p>
+              <div className="grid grid-cols-[2fr_1fr] gap-x-2 justify-center items-center ">
+                <label htmlFor="discountTypeInput" className="text-xs">
+                  Type
+                </label>
+                <label htmlFor="discountAmountInput" className="text-xs">
+                  Amount
+                </label>
                 <input
                   className="text-black rounded-md w-full my-1 text-xs py-1 px-2"
-                  placeholder="Enter Voucher or Discount Code Here"
+                  placeholder="Enter Discount Type Here"
                   value={discountType}
                   onChange={(e) => setDiscountType(e.target.value)}
+                  id="discountTypeInput"
+                  name="discountTypeInput"
+                />
+                <input
+                  className="text-black rounded-md w-full my-1 text-xs py-1 px-2"
+                  value={discountType}
+                  type="number"
+                  onChange={(e) =>
+                    setDiscountAmount(parseFloat(e.target.value))
+                  }
+                  id="discountAmountInput"
+                  name="discountAmountInput"
                 />
               </div>
             </div>
@@ -186,9 +203,7 @@ function PaymentDetailsPage() {
                       GCash
                     </label>
                   </div>
-                  <div>
-                  &#8369; {total.toFixed(2)}
-                  </div>
+                  <div>&#8369; {total.toFixed(2)}</div>
                 </div>
 
                 <div className="flex justify-between items-center">
@@ -205,9 +220,7 @@ function PaymentDetailsPage() {
                       Card
                     </label>
                   </div>
-                  <div>
-                  &#8369; {total.toFixed(2)}
-                  </div>
+                  <div>&#8369; {total.toFixed(2)}</div>
                 </div>
 
                 <div className="flex justify-between items-center">
@@ -224,10 +237,7 @@ function PaymentDetailsPage() {
                       Cash
                     </label>
                   </div>
-                  <div>
-                  &#8369; {total.toFixed(2)}
-                  </div>
-                  
+                  <div>&#8369; {total.toFixed(2)}</div>
                 </div>
 
                 <div className="flex gap-3 mt-3">
@@ -248,7 +258,9 @@ function PaymentDetailsPage() {
             </div>
 
             <div className="w-full flex flex-col">
-              <div className="mb-3 font-semibold text-[25px]">Order Summary</div>
+              <div className="mb-3 font-semibold text-[25px]">
+                Order Summary
+              </div>
               <OrderManagementCard
                 menuData={menuData}
                 order={order}
