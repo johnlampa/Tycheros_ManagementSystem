@@ -44,7 +44,7 @@ router.get('/getProduct', (req, res) => {
   });
 });
 
-router.get('/getAllSubitems', (req, res) => {
+router.get('/getAllInventoryItems', (req, res) => {
   const query = `
     SELECT * FROM inventory;
   `;
@@ -118,18 +118,19 @@ router.get('/getSpecificSubitems/:productID', (req, res) => {
   const productID = req.params.productID;
 
   const query = `
-      SELECT 
-          si.subitemID, 
-          si.inventoryID, 
-          si.quantityNeeded,
-          i.inventoryName,
-          i.unitOfMeasure
-      FROM 
-          subitem si
-      JOIN 
-          inventory i ON si.inventoryID = i.inventoryID
-      WHERE 
-          si.productID = ?
+    SELECT 
+        si.subitemID, 
+        si.productID,   
+        si.inventoryID, 
+        si.quantityNeeded,
+        i.inventoryName,
+        i.unitOfMeasure
+    FROM 
+        subitem si
+    JOIN 
+        inventory i ON si.inventoryID = i.inventoryID
+    WHERE 
+        si.productID = ?
   `;
 
   db.query(query, [productID], (err, result) => {
