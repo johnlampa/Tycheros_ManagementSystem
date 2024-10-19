@@ -9,10 +9,12 @@ import Link from "next/link";
 import { FaArrowLeft } from "react-icons/fa";
 import CancelOrderModal from "@/components/CancelOrderModal";
 import axios from "axios";
+import { Payment } from "../../../lib/types/PaymentDataTypes";
 
 export default function Page() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [menuData, setMenuData] = useState<ProductDataTypes[]>([]);
+  const [payments, setPayments] = useState<Payment[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -47,8 +49,11 @@ export default function Page() {
       }
     };
 
+    //const fetchPayments
+
     fetchOrders();
     fetchMenuData();
+    //fetchPayments();
   }, []);
 
   useEffect(() => {
@@ -82,23 +87,31 @@ export default function Page() {
           <div className="w-max grid grid-cols-3 gap-x-5 gap-y-5">
             {/* Status Links */}
             <Link href={"/order-management/unpaid"}>
-              <div className={`w-[88px] h-[25px] rounded-sm border border-white flex justify-center items-center font-pattaya text-white`}>
+              <div
+                className={`w-[88px] h-[25px] rounded-sm border border-white flex justify-center items-center font-pattaya text-white`}
+              >
                 Unpaid
               </div>
             </Link>
             <Link href={"/order-management/pending"}>
-              <div className={`w-[88px] h-[25px] rounded-sm border border-white flex justify-center items-center font-pattaya text-white`}>
+              <div
+                className={`w-[88px] h-[25px] rounded-sm border border-white flex justify-center items-center font-pattaya text-white`}
+              >
                 Pending
               </div>
             </Link>
             <Link href={"/order-management/completed"}>
-              <div className={`w-[88px] h-[25px] rounded-sm border border-white flex justify-center items-center font-pattaya text-white`}>
+              <div
+                className={`w-[88px] h-[25px] rounded-sm border border-white flex justify-center items-center font-pattaya text-white`}
+              >
                 Completed
               </div>
             </Link>
             <div></div>
             <Link href={"/order-management/cancelled"}>
-              <div className={`w-[88px] h-[25px] rounded-sm border border-white flex justify-center items-center font-pattaya text-white`}>
+              <div
+                className={`w-[88px] h-[25px] rounded-sm border border-white flex justify-center items-center font-pattaya text-white`}
+              >
                 Cancelled
               </div>
             </Link>
@@ -114,6 +127,7 @@ export default function Page() {
               type={"management"}
               setCancelOrderModalVisibility={() => handleCancelOrder(order)}
               setOrderToEdit={setOrderToEdit}
+              payments={payments}
             />
           </div>
         ))}
