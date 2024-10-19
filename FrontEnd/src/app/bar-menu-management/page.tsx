@@ -23,7 +23,7 @@ export default function Page() {
 
   useEffect(() => {
     // Fetch Inventory Data
-    axios.get('http://localhost:8081/menuManagement/getAllSubitems')
+    axios.get('http://localhost:8081/menuManagement/getAllInventoryItems')
       .then(response => {
         setInventoryData(response.data);
       })

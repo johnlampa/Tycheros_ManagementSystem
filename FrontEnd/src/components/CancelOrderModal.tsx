@@ -60,7 +60,7 @@ const CancelOrderModal: React.FC<CancelOrderModalProps> = ({
 
   useEffect(() => {
     axios
-      .get("http://localhost:8081/menuManagement/getAllSubitems")
+      .get("http://localhost:8081/menuManagement/getAllInventoryItems")
       .then((response) => {
         setInventoryData(response.data);
       })
@@ -121,10 +121,13 @@ const CancelOrderModal: React.FC<CancelOrderModalProps> = ({
       if (orderToEdit.orderItems) {
         // Use forEach to populate the lookup map
         orderToEdit.orderItems.forEach((orderItem) => {
-          console.log(`ProductID: ${orderItem.productID}, Quantity: ${orderItem.quantity}`);
+          console.log(`OrderItem ProductID: ${orderItem.productID}, Quantity: ${orderItem.quantity}`);
           orderItemQuantities[orderItem.productID] = orderItem.quantity;
         });
       }
+    
+      // Log subitems to verify productIDs and ensure we're working with the correct data
+      console.log("Subitems:", subitems);
     
       // Now use subitems.map to calculate the quantityUsed by looking up from the map
       updatedSubitemsUsed = subitems.map((subitem) => {
@@ -135,6 +138,7 @@ const CancelOrderModal: React.FC<CancelOrderModalProps> = ({
           console.log(`Subitem ProductID: ${subitem.productID}, Order Quantity: ${orderItemQuantity}`);
         } else {
           console.warn(`No matching order item found for Subitem ProductID: ${subitem.productID}`);
+          console.warn("Subitem Details: ", subitem);  // Add more details to understand the subitem data
         }
     
         // Multiply quantityNeeded by the orderItem's quantity (or default to 1 if no match found)
