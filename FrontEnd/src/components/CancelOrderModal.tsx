@@ -75,70 +75,109 @@ const CancelOrderModal: React.FC<CancelOrderModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
+  
     if (!orderToEdit) {
       console.error("orderToEdit is not defined. Cannot proceed with update.");
       return;
     }
 
+    // Log the quantity of each order item
+    if (orderToEdit.orderItems) {
+      orderToEdit.orderItems.forEach((orderItem) => {
+        console.log(`ProductID: ${orderItem.productID}, Quantity: ${orderItem.quantity}`);
+      });
+    }
+  
     // 1. Update the order status to "Cancelled"
     try {
       await axios.put("http://localhost:8081/orderManagement/updateOrderStatus", {
         orderID: orderToEdit.orderID,
         newStatus: "Cancelled",
       });
-
+  
       console.log("Order status updated to 'Cancelled'");
     } catch (error) {
       console.error("Error updating order status:", error);
       return;
     }
-
+  
     // 2. Prepare cancellation data for /cancelOrder API
     const cancellationReason = orderToEdit.status === "Unpaid" ? "Cancelled Order" : (e.target as any).cancellationReason.value;
     const cancellationType = orderToEdit.status;
+  
     let updatedSubitemsUsed: SubitemUsed[] = [];
-
+  
+    // Handle subitems logic based on order status
     if (orderToEdit.status === "Pending") {
+      // If the order is pending, use user input for the subitem quantity
       updatedSubitemsUsed = subitemsUsed.map((subitemUsed, index) => ({
         subitemID: parseInt((e.target as any)[`subitemUsed-${index}`].value),
         quantityUsed: parseFloat((e.target as any)[`quantityUsed-${index}`].value),
       }));
     } else if (orderToEdit.status === "Completed") {
-      updatedSubitemsUsed = subitems.map((subitem) => ({
-        subitemID: subitem.subitemID,
-        quantityUsed: subitem.quantityNeeded,
-      }));
+      // Create a map to quickly lookup the quantity by productID from orderItems
+      const orderItemQuantities: { [productID: number]: number } = {};
+    
+      if (orderToEdit.orderItems) {
+        // Use forEach to populate the lookup map
+        orderToEdit.orderItems.forEach((orderItem) => {
+          console.log(`ProductID: ${orderItem.productID}, Quantity: ${orderItem.quantity}`);
+          orderItemQuantities[orderItem.productID] = orderItem.quantity;
+        });
+      }
+    
+      // Now use subitems.map to calculate the quantityUsed by looking up from the map
+      updatedSubitemsUsed = subitems.map((subitem) => {
+        // Retrieve the quantity from the lookup map for the current subitem's productID
+        const orderItemQuantity = orderItemQuantities[subitem.productID];
+    
+        if (orderItemQuantity !== undefined) {
+          console.log(`Subitem ProductID: ${subitem.productID}, Order Quantity: ${orderItemQuantity}`);
+        } else {
+          console.warn(`No matching order item found for Subitem ProductID: ${subitem.productID}`);
+        }
+    
+        // Multiply quantityNeeded by the orderItem's quantity (or default to 1 if no match found)
+        return {
+          subitemID: subitem.subitemID,
+          quantityUsed: subitem.quantityNeeded * (orderItemQuantity || 1),
+        };
+      });
     } else if (orderToEdit.status === "Unpaid") {
+      // If the order is unpaid, set quantityUsed to 0
       updatedSubitemsUsed = subitems.map((subitem) => ({
         subitemID: subitem.subitemID,
         quantityUsed: 0,
       }));
     }
-
+  
     const cancelOrderData = {
       orderID: orderToEdit.orderID,
       cancellationReason,
       cancellationType,
       subitemsUsed: updatedSubitemsUsed,
     };
-
+  
     try {
       // 3. Call the /cancelOrder API
       const response = await axios.post(
         "http://localhost:8081/orderManagement/cancelOrder",
         cancelOrderData
       );
-
+  
       if (response.status === 200) {
         console.log("Order cancelled successfully");
-
+  
         const updatedOrder: Order = {
           ...orderToEdit,
           status: "Cancelled",
         };
-
-        setOrders?.(orders.map((o) => (o.orderID === orderToEdit.orderID ? updatedOrder : o)));
+  
+        setOrders?.(
+          orders.map((o) =>
+            o.orderID === orderToEdit.orderID ? updatedOrder : o
+          )
+        );
         setCancelOrderModalVisibility(false);
       } else {
         console.error("Failed to cancel order:", response.data);
@@ -147,6 +186,8 @@ const CancelOrderModal: React.FC<CancelOrderModalProps> = ({
       console.error("Error cancelling order:", error);
     }
   };
+  
+  
 
   return (
     <Modal
