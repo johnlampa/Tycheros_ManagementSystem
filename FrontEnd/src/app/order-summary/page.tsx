@@ -162,7 +162,7 @@ function OrderSummaryPage() {
       console.log("Final updates to be sent to backend:", updates);
 
       const response = await fetch(
-        "http://localhost:8081/inventoryManagement/updateMultipleSubitemQuantities",
+        "http://localhost:8081/inventoryManagement/updateMultipleSubinventoryQuantities",
         {
           method: "PUT",
           headers: {
@@ -199,7 +199,7 @@ function OrderSummaryPage() {
         const allSubitems: SubitemForStockInDataTypes[] = response.data;
 
         // Log the fetched subitems needed for inventory update
-        console.log("Fetched subitems for inventory update:", allSubitems);
+        console.log("Fetched subinventory for inventory update:", allSubitems);
 
         await updateInventoryAfterOrder(allSubitems); // Update inventory quantities
       } catch (error) {

@@ -110,7 +110,7 @@ export default function InventoryManagementPage() {
         ],
       });
     } catch (error) {
-      console.error("Error stocking in subitem:", error);
+      console.error("Error stocking in inventory item:", error);
     }
   };
 
@@ -152,7 +152,7 @@ export default function InventoryManagementPage() {
 
   const handleUpdateStockSubmit = async () => {
     try {
-      const response = await fetch("http://localhost:8081/inventoryManagement/updateSubitemQuantity", {
+      const response = await fetch("http://localhost:8081/inventoryManagement/updateSubinventoryQuantity", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -220,7 +220,7 @@ export default function InventoryManagementPage() {
   const handleStockOutSubmit = async () => {
     try {
       const response = await fetch(
-        "http://localhost:8081/inventoryManagement/stockOutSubitem",
+        "http://localhost:8081/inventoryManagement/stockOutInventoryItem",
         {
           method: "POST",
           headers: {
@@ -267,7 +267,7 @@ export default function InventoryManagementPage() {
   const handleAddItem = async () => {
     try {
       const response = await fetch(
-        "http://localhost:8081/inventoryManagement/postSubitem",
+        "http://localhost:8081/inventoryManagement/postInventoryItem",
         {
           method: "POST",
           headers: {
@@ -316,7 +316,7 @@ export default function InventoryManagementPage() {
     if (itemToEdit) {
       try {
         const response = await fetch(
-          `http://localhost:8081/inventoryManagement/putSubitem/${itemToEdit.inventoryID}`,
+          `http://localhost:8081/inventoryManagement/putInventoryItem/${itemToEdit.inventoryID}`,
           {
             method: "PUT",
             headers: {
@@ -327,7 +327,7 @@ export default function InventoryManagementPage() {
         );
 
         if (!response.ok) {
-          throw new Error("Failed to update subitem");
+          throw new Error("Failed to update inventory item");
         }
 
         const updatedInventory = await fetch(
@@ -336,9 +336,9 @@ export default function InventoryManagementPage() {
         setInventoryData(updatedInventory);
 
         setShowEditOverlay(false);
-        alert("Subitem updated successfully");
+        alert("Inventory item updated successfully");
       } catch (error) {
-        console.error("Error updating subitem:", error);
+        console.error("Error updating inventory item:", error);
       }
     }
   };
@@ -347,14 +347,14 @@ export default function InventoryManagementPage() {
     if (itemToDelete) {
       try {
         const response = await fetch(
-          `http://localhost:8081/inventoryManagement/deleteSubitem/${itemToDelete.inventoryID}`,
+          `http://localhost:8081/inventoryManagement/deleteInventoryItem/${itemToDelete.inventoryID}`,
           {
             method: "DELETE",
           }
         );
 
         if (!response.ok) {
-          throw new Error("Failed to delete subitem");
+          throw new Error("Failed to delete inventory item");
         }
 
         const updatedInventory = await fetch(
@@ -363,9 +363,9 @@ export default function InventoryManagementPage() {
         setInventoryData(updatedInventory);
 
         setShowDeleteOverlay(false);
-        alert("Subitem deleted successfully");
+        alert("Inventory item deleted successfully");
       } catch (error) {
-        console.error("Error deleting subitem:", error);
+        console.error("Error deleting inventory item:", error);
       }
     }
   };

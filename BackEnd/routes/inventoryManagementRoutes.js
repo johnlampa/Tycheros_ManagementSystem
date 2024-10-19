@@ -68,7 +68,7 @@ router.get('/getInventoryItem', async (req, res) => {
   }
 });
 
-// GET Subitem Details by Inventory ID
+// GET Subinventory Details by Inventory ID
 router.get('/getInventoryItemDetails/:inventoryID', async (req, res) => {
   const { inventoryID } = req.params;
   const query = `
@@ -102,13 +102,13 @@ router.get('/getInventoryItemDetails/:inventoryID', async (req, res) => {
     const [result] = await pool.query(query, [inventoryID]);
     res.json(result);
   } catch (err) {
-    console.error("Error fetching subitem details:", err);
+    console.error("Error fetching inventory item details:", err);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
-// ADD SUBITEM ENDPOINT
-router.post('/postSubitem', async (req, res) => {
+// ADD INVENTORY ITEM ENDPOINT
+router.post('/postInventoryItem', async (req, res) => {
   const { inventoryName, inventoryCategory, unitOfMeasure, reorderPoint } = req.body;
 
   const newInventoryItem = {
@@ -127,8 +127,8 @@ router.post('/postSubitem', async (req, res) => {
   }
 });
 
-// UPDATE SUBITEM ENDPOINT
-router.put('/putSubitem/:inventoryID', async (req, res) => {
+// UPDATE INVENTORY ITEM ENDPOINT
+router.put('/putInventoryItem/:inventoryID', async (req, res) => {
   const inventoryID = req.params.inventoryID;
   const updatedData = req.body;
 
@@ -151,15 +151,15 @@ router.put('/putSubitem/:inventoryID', async (req, res) => {
 
   try {
     await pool.query(updateQuery, updateValues);
-    res.json({ message: "Subitem updated successfully" });
+    res.json({ message: "Inventory item updated successfully" });
   } catch (err) {
     console.error("Error updating inventory:", err);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
-// DELETE SUBITEM ENDPOINT
-router.delete('/deleteSubitem/:inventoryID', async (req, res) => {
+// DELETE INVENTORY ITEM ENDPOINT
+router.delete('/deleteInventoryItem/:inventoryID', async (req, res) => {
   const inventoryID = req.params.inventoryID;
 
   const deleteQuery = `
@@ -171,12 +171,12 @@ router.delete('/deleteSubitem/:inventoryID', async (req, res) => {
     const [result] = await pool.query(deleteQuery, [inventoryID]);
 
     if (result.affectedRows === 0) {
-      return res.status(404).json({ message: "Subitem not found" });
+      return res.status(404).json({ message: "Inventory item not found" });
     }
 
-    res.json({ message: "Subitem deleted successfully" });
+    res.json({ message: "Inventory item deleted successfully" });
   } catch (err) {
-    console.error("Error deleting subitem:", err);
+    console.error("Error deleting inventory item:", err);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
@@ -263,15 +263,15 @@ router.post('/stockInInventoryItem', async (req, res) => {
     });
   } catch (err) {
     await connection.rollback();
-    console.error('Error stocking in subitems:', err);
+    console.error('Error stocking in inventory item:', err);
     res.status(500).send(err);
   } finally {
     connection.release();
   }
 });
 
-// STOCK OUT SUBITEM ENDPOINT
-router.post('/stockOutSubitem', async (req, res) => {
+// STOCK OUT INVENTORY ITEM ENDPOINT
+router.post('/stockOutInventoryItem', async (req, res) => {
   const { inventoryID, quantity, reason } = req.body; // Assume inventoryID is provided
   const date = new Date();
 
@@ -327,8 +327,8 @@ router.post('/stockOutSubitem', async (req, res) => {
   }
 });
 
-// UPDATE SUBITEM QUANTITY
-router.put('/updateSubitemQuantity', async (req, res) => {
+// UPDATE SUBINVENTORY QUANTITY
+router.put('/updateSubinventoryQuantity', async (req, res) => {
   const { inventoryID, quantity } = req.body;
 
   const connection = await pool.getConnection();
@@ -423,7 +423,7 @@ router.post('/getSubinventoryDetails', async (req, res) => {
 });
 
 // UPDATE MULTIPLE SUBINVENTORY QUANTITIES
-router.put('/updateMultipleSubitemQuantities', async (req, res) => {
+router.put('/updateMultipleSubinventoryQuantities', async (req, res) => {
   const { updates } = req.body; // Array of updates, each with subinventoryID and quantity to reduce
 
   // Log the incoming updates array for debugging purposes
