@@ -18,24 +18,22 @@ const OrderManagementCard: React.FC<OrderManagementCardProps> = React.memo(
     const [total, setTotal] = useState(0);
 
     useEffect(() => {
-      // Calculate total price
+      // Calculate total price first without applying discount
       const calculatedTotal = order.orderItems?.reduce(
         (acc, { productID, quantity }) => {
           const product = menuData.find((item) => item.productID === productID);
-          if (discountAmount) {
-            return product
-              ? acc + product.sellingPrice * quantity - discountAmount
-              : acc;
-          } else {
-            return product ? acc + product.sellingPrice * quantity : acc;
-          }
+          return product ? acc + product.sellingPrice * quantity : acc;
         },
         0
       );
-      setTotal(calculatedTotal || 0);
+
+      // Apply the discount to the final total once
+      setTotal(calculatedTotal ? calculatedTotal - (discountAmount || 0) : 0);
     }, [order, menuData, discountAmount]);
 
-    const updateOrderStatus = async (newStatus: "Unpaid" | "Pending" | "Completed" | "Cancelled") => {
+    const updateOrderStatus = async (
+      newStatus: "Unpaid" | "Pending" | "Completed" | "Cancelled"
+    ) => {
       try {
         const response = await fetch(
           "http://localhost:8081/orderManagement/updateOrderStatus",
@@ -70,15 +68,6 @@ const OrderManagementCard: React.FC<OrderManagementCardProps> = React.memo(
         alert("Error updating order status");
       }
     };
-
-    const handleConfirmPayment = useCallback(async () => {
-      try {
-        // API call to confirm payment
-        await updateOrderStatus("Pending");
-      } catch (error) {
-        console.error("Error confirming payment:", error);
-      }
-    }, [order]);
 
     const handleCompleteOrder = useCallback(async () => {
       try {
@@ -206,10 +195,7 @@ const OrderManagementCard: React.FC<OrderManagementCardProps> = React.memo(
                         query: { order: JSON.stringify(order) },
                       }}
                     >
-                      <button
-                        className="px-2 py-1 rounded-md mt-1 float-right text-xs w-[130px] h-[28px] font-semibold bg-tealGreen text-white hover:text-tealGreen hover:bg-white hover:border hover:border-tealGreen duration-200"
-                        onClick={handleConfirmPayment}
-                      >
+                      <button className="px-2 py-1 rounded-md mt-1 float-right text-xs w-[130px] h-[28px] font-semibold bg-tealGreen text-white hover:text-tealGreen hover:bg-white hover:border hover:border-tealGreen duration-200">
                         Confirm Payment
                       </button>
                     </Link>

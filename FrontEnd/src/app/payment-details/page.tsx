@@ -9,6 +9,7 @@ import Header from "@/components/Header";
 import OrderCard from "@/components/OrderCard";
 import OrderManagementCard from "@/components/ui/OrderManagementCard";
 import { FaArrowLeft } from "react-icons/fa";
+import ValidationDialog from "@/components/ValidationDialog";
 
 function PaymentDetailsPage() {
   const [menuData, setMenuData] = useState<ProductDataTypes[]>([]);
@@ -23,6 +24,8 @@ function PaymentDetailsPage() {
   const [referenceNumber, setReferenceNumber] = useState("");
   const [discountType, setDiscountType] = useState("");
   const [discountAmount, setDiscountAmount] = useState(0);
+  const [showDialog, setShowDialog] = useState(false); // State for dialog visibility
+  const [validationMessage, setValidationMessage] = useState(""); // Message for the dialog
 
   const [orders, setOrders] = useState<Order[]>([]); //for component purposes. to remove when OrderManagementCard is refactored
 
@@ -86,8 +89,22 @@ function PaymentDetailsPage() {
     setTotal(calculatedTotal || 0);
   }, [order, menuData]);
 
-  const handleCompleteOrder = async () => {
-    const finalAmount = total - discountAmount;
+  const handleConfirmPayment = async () => {
+    // Check if payment method is Cash and reference number is provided
+    if (paymentMethod === "Cash" && referenceNumber) {
+      setValidationMessage("Cash payments don't have a reference number.");
+      setShowDialog(true);
+      return; // Stop further processing
+    }
+
+    const finalAmount = total - (discountAmount || 0);
+
+    console.log("orderID: ", order.orderID);
+    console.log("amount: ", finalAmount);
+    console.log("method: ", paymentMethod);
+    console.log("reference number: ", referenceNumber);
+    console.log("discount type: ", discountType);
+    console.log("discount amount: ", discountAmount);
 
     try {
       // Process payment
@@ -103,7 +120,7 @@ function PaymentDetailsPage() {
             amount: finalAmount,
             method: paymentMethod,
             referenceNumber,
-            discount: discountType,
+            discountType: discountType,
             discountAmount: discountAmount,
           }),
         }
@@ -140,8 +157,45 @@ function PaymentDetailsPage() {
     }
   };
 
+  const handleDiscountAmountChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const value = e.target.value;
+
+    // If the input is empty, set discountAmount to 0, but allow the field to appear empty
+    if (value === "") {
+      setDiscountAmount(0);
+      setValidationMessage(""); // Clear validation message if input is empty
+      return;
+    }
+
+    // Perform validation for non-numeric input
+    const parsedValue = parseFloat(value);
+
+    if (isNaN(parsedValue)) {
+      setValidationMessage(
+        "Invalid discount amount. Please enter a valid number."
+      );
+      setShowDialog(true); // Show validation dialog
+    } else if (parsedValue < 0) {
+      setValidationMessage(
+        "Invalid discount amount. Discount cannot be negative."
+      );
+      setShowDialog(true); // Show validation dialog
+    } else {
+      setDiscountAmount(parsedValue);
+      setValidationMessage(""); // Clear validation message if input is valid
+    }
+  };
+
   return (
     <>
+      {showDialog && (
+        <ValidationDialog
+          message={validationMessage}
+          onClose={() => setShowDialog(false)}
+        />
+      )}
       <div className="w-full flex justify-center items-center">
         <div className="w-[360px] flex flex-col justify-center items-center gap-3 pb-3 border bg-white">
           <Header
@@ -154,23 +208,38 @@ function PaymentDetailsPage() {
                 <FaArrowLeft className="text-tealGreen group-hover:text-white transition-colors duration-300" />
               </button>
             </Link>
-
           </Header>
           <div className="w-[320px] text-black">
             <div className="w-full bg-cream rounded-md p-3 mb-4">
-              <p className="font-semibold">Vouchers and Discounts</p>
-              <div className="flex justify-center items-center ">
+              <p className="font-semibold mb-1">Discounts</p>
+              <div className="grid grid-cols-[2fr_1fr] gap-x-2 justify-center items-center ">
+                <label htmlFor="discountTypeInput" className="text-xs">
+                  Type
+                </label>
+                <label htmlFor="discountAmountInput" className="text-xs">
+                  Amount
+                </label>
                 <input
                   className="text-black rounded-md w-full my-1 text-xs py-1 px-2"
-                  placeholder="Enter Voucher or Discount Code Here"
+                  placeholder="Enter Discount Type Here"
                   value={discountType}
                   onChange={(e) => setDiscountType(e.target.value)}
+                  id="discountTypeInput"
+                  name="discountTypeInput"
+                />
+                <input
+                  className="text-black rounded-md w-full my-1 text-xs py-1 px-2"
+                  value={discountAmount}
+                  type="text" // Change this to text to allow full control
+                  onChange={handleDiscountAmountChange}
+                  id="discountAmountInput"
+                  name="discountAmountInput"
                 />
               </div>
             </div>
 
             <div className="w-full bg-cream rounded-md p-3 mb-7">
-              <p className="font-semibold">Payment Method</p>
+              <p className="font-semibold mb-2">Payment Method</p>
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
                   <div>
@@ -186,9 +255,7 @@ function PaymentDetailsPage() {
                       GCash
                     </label>
                   </div>
-                  <div>
-                  &#8369; {total.toFixed(2)}
-                  </div>
+                  <div>&#8369; {total.toFixed(2)}</div>
                 </div>
 
                 <div className="flex justify-between items-center">
@@ -205,12 +272,10 @@ function PaymentDetailsPage() {
                       Card
                     </label>
                   </div>
-                  <div>
-                  &#8369; {total.toFixed(2)}
-                  </div>
+                  <div>&#8369; {total.toFixed(2)}</div>
                 </div>
 
-                <div className="flex justify-between items-center">
+                <div className="flex justify-between items-center mb-3">
                   <div>
                     <input
                       type="radio"
@@ -224,31 +289,29 @@ function PaymentDetailsPage() {
                       Cash
                     </label>
                   </div>
-                  <div>
-                  &#8369; {total.toFixed(2)}
-                  </div>
-                  
+                  <div>&#8369; {total.toFixed(2)}</div>
                 </div>
-
-                <div className="flex gap-3 mt-3">
-                  <div className="flex flex-col ">
-                    <div className="text-xs font-semibold w-max">
-                      Enter Reference Number:
-                    </div>
-                    <div className="text-xs">(for GCash or Card)</div>
+              </div>
+              <div className="flex gap-3 mt-4">
+                <div className="flex flex-col justify-center">
+                  <div className="text-xs font-semibold w-max">
+                    Enter Reference Number:
                   </div>
-                  <input
-                    className="text-black rounded-md w-full my-1 text-xs py-1 px-2"
-                    value={referenceNumber}
-                    onChange={(e) => setReferenceNumber(e.target.value)}
-                    placeholder="Reference"
-                  />
+                  <div className="text-xs">(for GCash or Card)</div>
                 </div>
+                <input
+                  className="text-black rounded-md w-full my-1 text-xs py-1 px-2"
+                  value={referenceNumber}
+                  onChange={(e) => setReferenceNumber(e.target.value)}
+                  placeholder="Reference"
+                />
               </div>
             </div>
 
             <div className="w-full flex flex-col">
-              <div className="mb-3 font-semibold text-[25px]">Order Summary</div>
+              <div className="mb-1  font-semibold text-[25px]">
+                Order Summary
+              </div>
               <OrderManagementCard
                 menuData={menuData}
                 order={order}
@@ -260,16 +323,14 @@ function PaymentDetailsPage() {
             </div>
 
             <div className="mt-5">
-              <Link href={"order-management"}>
-                <button
-                  className="w-full h-[39px] bg-tealGreen rounded-md p-3 flex justify-center items-center"
-                  onClick={handleCompleteOrder}
-                >
-                  <span className="font-pattaya text-[20px] text-white">
-                    Confirm Payment
-                  </span>
-                </button>
-              </Link>
+              <button
+                className="w-full h-[39px] bg-tealGreen rounded-md p-3 flex justify-center items-center"
+                onClick={handleConfirmPayment}
+              >
+                <span className="font-pattaya text-[20px] text-white">
+                  Confirm Payment
+                </span>
+              </button>
             </div>
           </div>
         </div>

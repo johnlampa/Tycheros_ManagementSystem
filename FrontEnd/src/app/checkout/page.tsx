@@ -87,8 +87,8 @@ function OrderSummaryPage() {
   }
 
   return (
-    <div className="w-full flex justify-center items-center">
-      <div className="w-[360px] flex flex-col justify-center items-center gap-3 bg-white">
+    <div className="w-full flex justify-center items-center min-h-screen">
+      <div className="w-[360px] flex flex-col items-center gap-3 bg-white min-h-screen">
         <Header text="Checkout" color={"tealGreen"} type={"checkout"}>
           <Link
             href={{
@@ -115,7 +115,7 @@ function OrderSummaryPage() {
           date={order.date}
           subtotal={subtotal}
         ></OrderDetailsSection>
-        <div className="w-[360px] h-[105px] mt-[50px] p-5  bg-cream drop-shadow-[0_-5px_3px_rgba(0,0,0,0.15)] drop">
+        <div className="w-[360px] h-[105px] p-5  bg-cream drop-shadow-[0_-5px_3px_rgba(0,0,0,0.15)] fixed bottom-0">
           <div className="flex justify-center items-center w-[315px] ml-[2.5px] mb-2">
             <span className="text-[20px] text-black font-semibold text-center">
               Please proceed to counter to finalize payment

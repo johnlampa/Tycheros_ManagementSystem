@@ -27,7 +27,7 @@ router.get('/getInventoryName', async (req, res) => {
 });
 
 // GET INVENTORY DATA ENDPOINT
-router.get('/getSubitem', async (req, res) => {
+router.get('/getInventoryItem', async (req, res) => {
   const query = `
     WITH InventoryData AS (
         SELECT 
@@ -36,6 +36,7 @@ router.get('/getSubitem', async (req, res) => {
             inv.inventoryCategory,
             inv.reorderPoint,
             inv.unitOfMeasure,
+            inv.inventoryStatus,  -- Include status attribute
             SUM(CASE WHEN si.quantityRemaining > 0 THEN si.quantityRemaining ELSE 0 END) 
                 OVER (PARTITION BY inv.inventoryID) AS totalQuantity  -- Total positive quantityRemaining for each inventoryID
         FROM 
@@ -49,7 +50,8 @@ router.get('/getSubitem', async (req, res) => {
         inventoryCategory,
         reorderPoint,
         unitOfMeasure,
-        totalQuantity
+        totalQuantity,
+        inventoryStatus  -- Include status in final result
     FROM 
         InventoryData
     ORDER BY 
@@ -67,7 +69,7 @@ router.get('/getSubitem', async (req, res) => {
 });
 
 // GET Subitem Details by Inventory ID
-router.get('/getSubitemDetails/:inventoryID', async (req, res) => {
+router.get('/getInventoryItemDetails/:inventoryID', async (req, res) => {
   const { inventoryID } = req.params;
   const query = `
     SELECT 
@@ -460,6 +462,45 @@ router.put('/updateMultipleSubitemQuantities', async (req, res) => {
     console.log('Database connection released.');
   }
 });
+
+// UPDATE INVENTORY STATUS
+router.put('/updateStatus/:inventoryID', async (req, res) => {
+  const { inventoryStatus } = req.body;
+  const { inventoryID } = req.params; // Get inventoryID from URL
+
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+
+    // Check if the inventoryID exists before updating
+    const [inventoryEntries] = await connection.query(`
+      SELECT inventoryID
+      FROM inventory
+      WHERE inventoryID = ?
+    `, [inventoryID]);
+
+    if (inventoryEntries.length === 0) {
+      throw new Error('No inventory found for the given inventoryID.');
+    }
+
+    // Update the inventoryStatus
+    await connection.query(`
+      UPDATE inventory
+      SET inventoryStatus = ?
+      WHERE inventoryID = ?
+    `, [inventoryStatus, inventoryID]);
+
+    await connection.commit();
+    res.status(200).send('Inventory status updated successfully');
+  } catch (err) {
+    await connection.rollback();
+    console.error('Error updating inventory status:', err);
+    res.status(500).send(`Error updating inventory status: ${err.message}`);
+  } finally {
+    connection.release();
+  }
+});
+
 
 
 module.exports = router;

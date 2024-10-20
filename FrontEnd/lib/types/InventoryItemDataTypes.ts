@@ -6,6 +6,7 @@ export type InventoryItem = {
     unitOfMeasure: string;
     purchaseOrderID: number;
     totalQuantity: number;
+    inventoryStatus: number;
     quantityRemaining: number;
     pricePerUnit: number;
     stockInDate: string;
