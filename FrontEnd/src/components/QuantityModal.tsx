@@ -179,9 +179,7 @@ const QuantityModal: React.FC<QuantityModalProps> = ({
     setQuantityModalVisibility(false);
     setQuantity(0);
 
-    if (pathname === "/order-summary") {
-      window.location.reload();
-    }
+    window.location.reload();
   };
 
   return (
