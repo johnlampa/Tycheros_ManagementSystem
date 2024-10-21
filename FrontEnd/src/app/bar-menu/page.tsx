@@ -68,21 +68,23 @@ export default function Page() {
 
   return (
     <>
-      <div className="w-[362px] min-h-screen border border-black mx-auto relative bg-white">
-        <div className="fixed top-0 z-50 w-[360px]">
+      <div className="w-[362px] min-h-screen border border-black mx-auto relative bg-white text-black">
+        <div className="z-50 w-[360px]">
           <MenuHeaderSection
             menuType="bar"
             categories={categories}
           ></MenuHeaderSection>
         </div>
-        <div className="px-6 pb-6 pt-[215px]">
+        <div className="p-6">
           {categories.map((category) => (
             <div
               key={category.categoryName}
               id={category.categoryName}
               className="mb-8 text-black"
             >
-              <p className="font-pattaya text-2xl">{category.categoryName}</p>
+              <p className="font-pattaya text-2xl mb-3">
+                {category.categoryName}
+              </p>
               <div className="grid grid-cols-2 gap-x-6 gap-y-3 content-center">
                 {menuData
                   .filter((item) => item.categoryName === category.categoryName)
