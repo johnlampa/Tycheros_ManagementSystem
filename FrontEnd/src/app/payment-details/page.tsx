@@ -90,6 +90,17 @@ function PaymentDetailsPage() {
   }, [order, menuData]);
 
   const handleConfirmPayment = async () => {
+    // Check if discount type is entered without a discount amount
+    if (discountType && discountAmount === 0) {
+      setValidationMessage("Please provide the discount amount.");
+      setShowDialog(true);
+      return; // Stop further processing
+    } else if (!discountType && discountAmount > 0) {
+      setValidationMessage("Please provide the discount type.");
+      setShowDialog(true);
+      return; // Stop further processing
+    }
+
     // Check if payment method is Cash and reference number is provided
     if (paymentMethod === "Cash" && referenceNumber) {
       setValidationMessage("Cash payments don't have a reference number.");

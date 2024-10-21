@@ -3,6 +3,6 @@ export type Payment = {
     amount: number,
     method: string,
     referenceNumber: string,
-    discount: string,
+    discountType: string,
     discountAmount: number
 }
