@@ -101,12 +101,37 @@ const QuantityModal: React.FC<QuantityModalProps> = ({
     }
   }, [correctType, quantityModalIsVisible, productToAdd, cart]);
 
+  // Fetch subitems for other products in the cart
   useEffect(() => {
-    // Calculate the maximum allowable quantity based on subitems and inventory
-    calculateMaxQuantity();
-  }, [subitems, inventoryData, productToAdd, cart]);
+    const fetchSubitemsForCart = async () => {
+      try {
+        const allSubitems = await Promise.all(
+          cart.map(async (cartItem) => {
+            const response = await axios.get(
+              `http://localhost:8081/menuManagement/getSpecificSubitems/${cartItem.productID}`
+            );
+            return {
+              productID: cartItem.productID.toString(),
+              subitems: response.data,
+            }; // Convert productID to string here
+          })
+        );
 
-  const calculateMaxQuantity = () => {
+        return allSubitems;
+      } catch (error) {
+        console.error("Error fetching subitems for cart:", error);
+        return [];
+      }
+    };
+
+    fetchSubitemsForCart().then((cartSubitems) => {
+      calculateMaxQuantity(cartSubitems);
+    });
+  }, [cart, subitems, inventoryData, productToAdd]);
+
+  const calculateMaxQuantity = (
+    cartSubitems: { productID: string; subitems: SubitemDataTypes[] }[]
+  ) => {
     if (
       subitems &&
       inventoryData &&
@@ -117,10 +142,36 @@ const QuantityModal: React.FC<QuantityModalProps> = ({
         const inventoryItem = inventoryData.find(
           (item) => item.inventoryID === subitem.inventoryID
         );
+
         if (inventoryItem) {
-          return Math.floor(
-            inventoryItem.totalQuantity / subitem.quantityNeeded
-          );
+          // Calculate reserved quantity by other products in the cart
+          const reservedQuantity = cartSubitems.reduce((total, cartItem) => {
+            if (cartItem.productID !== productToAdd.productID?.toString()) {
+              // Only consider other products in the cart
+              const matchingSubitem = cartItem.subitems.find(
+                (item) => item.inventoryID === subitem.inventoryID
+              );
+
+              if (matchingSubitem) {
+                // Add the quantity of this subitem needed for the cart item
+                const cartItemQuantity =
+                  cart.find(
+                    (item) => item.productID.toString() === cartItem.productID
+                  )?.quantity ?? 0;
+
+                return (
+                  total + matchingSubitem.quantityNeeded * cartItemQuantity
+                );
+              }
+            }
+            return total;
+          }, 0);
+
+          // Calculate available quantity for this subitem after subtracting reserved amount
+          const availableQuantity =
+            inventoryItem.totalQuantity - reservedQuantity;
+
+          return Math.floor(availableQuantity / subitem.quantityNeeded);
         }
         return 0;
       });
@@ -218,11 +269,11 @@ const QuantityModal: React.FC<QuantityModalProps> = ({
             </p>
           )}
           <button
-            className="w-full px-4 py-2 mt-3 rounded-md font-semibold text-white text-sm bg-tealGreen hover:bg-gray-500"
+            className="w-full px-4 py-2 rounded-full bg-secondaryBrown hover:scale-110 duration-200 active:bg-primaryBrown text-white font-bold text-sm shadow-lg"
             onClick={handleSave}
             disabled={quantity > maxQuantity || quantity === 0}
           >
-            Confirm
+            {correctType === "edit" ? "Confirm" : "Add to Order"}
           </button>
         </div>
       </Modal>
