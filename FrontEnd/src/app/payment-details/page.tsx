@@ -10,6 +10,7 @@ import OrderCard from "@/components/OrderCard";
 import OrderManagementCard from "@/components/ui/OrderManagementCard";
 import { FaArrowLeft } from "react-icons/fa";
 import ValidationDialog from "@/components/ValidationDialog";
+import { Payment } from "../../../lib/types/PaymentDataTypes";
 
 function PaymentDetailsPage() {
   const [menuData, setMenuData] = useState<ProductDataTypes[]>([]);
@@ -24,6 +25,9 @@ function PaymentDetailsPage() {
   const [referenceNumber, setReferenceNumber] = useState("");
   const [discountType, setDiscountType] = useState("");
   const [discountAmount, setDiscountAmount] = useState(0);
+
+  const [payments, setPayments] = useState<Payment[]>([]);
+
   const [showDialog, setShowDialog] = useState(false); // State for dialog visibility
   const [validationMessage, setValidationMessage] = useState(""); // Message for the dialog
 
@@ -90,6 +94,17 @@ function PaymentDetailsPage() {
   }, [order, menuData]);
 
   const handleConfirmPayment = async () => {
+    // Check if discount type is entered without a discount amount
+    if (discountType && discountAmount === 0) {
+      setValidationMessage("Please provide the discount amount.");
+      setShowDialog(true);
+      return; // Stop further processing
+    } else if (!discountType && discountAmount > 0) {
+      setValidationMessage("Please provide the discount type.");
+      setShowDialog(true);
+      return; // Stop further processing
+    }
+
     // Check if payment method is Cash and reference number is provided
     if (paymentMethod === "Cash" && referenceNumber) {
       setValidationMessage("Cash payments don't have a reference number.");
@@ -319,6 +334,7 @@ function PaymentDetailsPage() {
                 setOrders={setOrders}
                 type={"payment"}
                 discountAmount={discountAmount}
+                payments={payments}
               ></OrderManagementCard>
             </div>
 

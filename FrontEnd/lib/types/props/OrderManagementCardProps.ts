@@ -1,4 +1,5 @@
 import { Order } from "../OrderDataTypes"
+import { Payment } from "../PaymentDataTypes";
 import { ProductDataTypes } from "../ProductDataTypes"
 
 export type OrderManagementCardProps = {
@@ -12,4 +13,6 @@ export type OrderManagementCardProps = {
 
     setCancelOrderModalVisibility?: React.Dispatch<React.SetStateAction<boolean>>;
     setOrderToEdit?: React.Dispatch<React.SetStateAction<Order | undefined>> 
+
+    payments?: Payment[];
 }
