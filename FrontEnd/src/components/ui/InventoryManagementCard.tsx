@@ -85,7 +85,7 @@ const InventoryManagementCard: React.FC<InventoryManagementCardProps> = ({
           <button
             onClick={() => {
               if (inventoryItem?.inventoryID !== null) {
-                handleUpdateStock(inventoryItem.inventoryID); // Use the selected radio button's inventory ID
+                handleUpdateStock(inventoryItem.inventoryID.toString()); // Use the selected radio button's inventory ID
               }
             }}
             className="bg-primaryBrown text-white py-1 px-2 text-sm rounded"
