@@ -96,46 +96,76 @@ const InventoryManagementCard: React.FC<InventoryManagementCardProps> = ({
 
         {expandedRow === inventoryItem?.inventoryID &&
           detailedData[inventoryItem?.inventoryID] && (
-            <div className="text-xs flex flex-col justify-center items-center mb-1">
-              {detailedData[inventoryItem?.inventoryID] &&
-              detailedData[inventoryItem?.inventoryID].length > 0 ? (
-                <>
-                  <div className="w-full h-[2px] bg-primaryBrown my-4"></div>
-                  <strong>Stock in records:</strong>
-                  <ul>
-                    {detailedData[inventoryItem?.inventoryID].map(
-                      (detail: any, index: number) => (
-                        <li key={index} className="mt-2">
-                          <strong>Subinventory ID:</strong>{" "}
-                          {detail.subinventoryID} <br />
-                          <strong>Qty Remaining:</strong>{" "}
-                          {detail.quantityRemaining} <br />
-                          <strong>Price per Unit:</strong> {detail.pricePerUnit}{" "}
-                          <br />
-                          <strong>Expiry Date:</strong>{" "}
-                          {detail.expiryDate
-                            ? format(new Date(detail.expiryDate), "yyyy-MM-dd")
-                            : "N/A"}{" "}
-                          <br />
-                          <strong>Stock-in Date:</strong>{" "}
-                          {detail.stockInDate
-                            ? format(new Date(detail.stockInDate), "yyyy-MM-dd")
-                            : "N/A"}{" "}
-                          <br />
-                          <strong>Supplier:</strong> {detail.supplierName}{" "}
-                          <br />
-                          <strong>Handled by:</strong> {detail.employeeName}
-                        </li>
-                      )
-                    )}
-                  </ul>
-                </>
-              ) : (
-                <>
-                  <div className="h-[2px] w-full bg-primaryBrown my-4"></div>
-                  <p>No Stock Available</p>
-                </>
-              )}
+            <div className="mt-6 text-black">
+              <div className="flex justify-center items-center">
+                <p className="text-black font-semibold text-base mb-1">
+                  Stock In Records
+                </p>
+              </div>
+
+              <div className="text-xs flex flex-col items-center w-full ">
+                {detailedData[inventoryItem?.inventoryID] &&
+                detailedData[inventoryItem?.inventoryID].length > 0 ? (
+                  <>
+                    {/* <div className="w-full h-[2px] bg-primaryBrown my-4"></div> */}
+
+                    <ul>
+                      {detailedData[inventoryItem?.inventoryID].map(
+                        (detail: any, index: number) => (
+                          <div key={index} className="p-2 w-[300px]">
+                            <li className="w-full">
+                              <div>
+                                Date:{" "}
+                                {detail.expiryDate
+                                  ? format(
+                                      new Date(detail.expiryDate),
+                                      "yyyy-MM-dd"
+                                    )
+                                  : "N/A"}{" "}
+                                by {detail.employeeName}
+                              </div>
+                              <div className="mb-1"></div>
+                              <div className="grid grid-cols-[3fr_1fr]">
+                                <div>
+                                  <div className="text-base font-semibold">
+                                    {detail.supplierName}
+                                  </div>
+
+                                  <div className="border border-gray rounded-md p-0.5 w-fit">
+                                    {detail.quantityRemaining}{" "}
+                                    {inventoryItem.unitOfMeasure} in stock
+                                  </div>
+                                  <div className="text-gray mt-0.5">
+                                    best before{" "}
+                                    <span className="font-semibold">
+                                      {detail.expiryDate
+                                        ? format(
+                                            new Date(detail.expiryDate),
+                                            "yyyy-MM-dd"
+                                          )
+                                        : "N/A"}{" "}
+                                    </span>
+                                  </div>
+                                </div>
+                                <div className="flex justify-center items-center text-sm font-semibold">
+                                  &#8369; {detail.pricePerUnit} /{" "}
+                                  {inventoryItem.unitOfMeasure}
+                                </div>
+                              </div>
+                            </li>
+                            <div className="h-[2px] w-full bg-secondaryBrown mt-3"></div>
+                          </div>
+                        )
+                      )}
+                    </ul>
+                  </>
+                ) : (
+                  <>
+                    <div className="h-[2px] w-full bg-primaryBrown my-4"></div>
+                    <p>No Stock Available</p>
+                  </>
+                )}
+              </div>
             </div>
           )}
       </div>
