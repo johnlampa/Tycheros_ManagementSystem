@@ -62,6 +62,8 @@ export default function InventoryManagementPage() {
   });
 
   const [itemToEdit, setItemToEdit] = useState<InventoryItem | null>(null);
+  const [itemToEditID, setItemToEditID] = useState<number>(-1);
+
   const [itemToDelete, setItemToDelete] = useState<InventoryItem | null>(null);
 
   const [showStockInOverlay, setShowStockInOverlay] = useState(false);
@@ -328,7 +330,9 @@ export default function InventoryManagementPage() {
     const item = inventoryData.find((item) => item.inventoryID === id);
     if (item) {
       setItemToEdit(item);
+      setItemToEditID(item.inventoryID);
       setShowEditOverlay(true);
+      console.log("page, item.inventoryID: ", item.inventoryID);
     } else {
       alert("Item not found");
     }
@@ -684,6 +688,9 @@ export default function InventoryManagementPage() {
               await handleSaveChanges();
             }}
             onCancel={() => setShowEditOverlay(false)}
+            handleStatusToggle={handleStatusToggle}
+            inventoryData={inventoryData}
+            itemToEditID={itemToEditID}
           />
         )}
 

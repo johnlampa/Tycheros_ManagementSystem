@@ -1,5 +1,7 @@
 import ValidationDialog from "@/components/ValidationDialog";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import Toggle from "react-toggle";
+import { InventoryItem } from "../../lib/types/InventoryItemDataTypes";
 
 interface SubitemModalProps {
   modalTitle: string;
@@ -9,9 +11,14 @@ interface SubitemModalProps {
     reorderPoint: number;
     unitOfMeasure: string;
   };
+  itemToEditID?: number;
   setSubitemData: (newData: any) => void;
   onSave: () => void;
   onCancel: () => void;
+
+  handleStatusToggle?: Function;
+
+  inventoryData?: InventoryItem[];
 }
 
 const SubitemModal: React.FC<SubitemModalProps> = ({
@@ -20,10 +27,32 @@ const SubitemModal: React.FC<SubitemModalProps> = ({
   setSubitemData,
   onSave,
   onCancel,
+  handleStatusToggle,
+  inventoryData,
+  itemToEditID,
 }) => {
   const [validationMessage, setValidationMessage] = useState<string | null>(
     null
   );
+
+  const [subitemDataFromInventoryData, setSubitemDataFromInventoryData] =
+    useState<InventoryItem>();
+
+  useEffect(() => {
+    const matchingItem = inventoryData?.find(
+      (item) => item.inventoryID === itemToEditID
+    );
+
+    if (matchingItem) {
+      setSubitemDataFromInventoryData(matchingItem);
+    } else {
+      setSubitemDataFromInventoryData(undefined);
+    }
+
+    console.log("inventoryData: ", inventoryData);
+    console.log("itemToEditID: ", itemToEditID);
+    console.log("subitemDataFromInventoryData:", subitemDataFromInventoryData);
+  }, [inventoryData, itemToEditID]);
 
   const validateForm = () => {
     const missingFields: string[] = [];
@@ -121,6 +150,22 @@ const SubitemModal: React.FC<SubitemModalProps> = ({
             }
             className="mb-2 p-2 w-full text-black"
           />
+
+          <div className="flex gap-x-2 text-black">
+            <p>Status: </p>
+            <Toggle
+              checked={subitemDataFromInventoryData?.inventoryStatus === 1}
+              icons={false}
+              onChange={(e) => {
+                if (handleStatusToggle) {
+                  handleStatusToggle(
+                    subitemDataFromInventoryData?.inventoryID,
+                    e.target.checked
+                  );
+                }
+              }}
+            />
+          </div>
 
           <div className="flex justify-between">
             <button
