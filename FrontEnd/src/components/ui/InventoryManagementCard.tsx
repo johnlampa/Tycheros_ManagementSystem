@@ -59,7 +59,7 @@ const InventoryManagementCard: React.FC<InventoryManagementCardProps> = ({
           </IconContext.Provider>
         </div>
 
-        <div className="font-bold">
+        <div className="font-bold text-black">
           {inventoryItem?.inventoryName.toUpperCase()}
         </div>
         <div className="text-black text-sm">
