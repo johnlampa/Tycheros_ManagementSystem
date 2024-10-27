@@ -475,37 +475,39 @@ export default function InventoryManagementPage() {
           </Link>
         </Header>
         <div className="p-4">
-          <div className="mb-4 w-full flex flex-wrap justify-between">
+          <div className="mb-4 w-full">
             <button
               onClick={() => setShowAddOverlay(true)}
-              className="bg-black text-white py-2 px-3 text-xs rounded mr-2"
+              className="bg-tealGreen text-white py-2 px-3 text-sm font-semibold rounded w-full"
             >
-              Add Item
+              Add Inventory Item
             </button>
 
-            <button
-              onClick={() => setShowStockInOverlay(true)}
-              className="bg-black text-white py-2 px-3 text-xs rounded"
-            >
-              Stock In
-            </button>
+            <div className="grid grid-cols-2 gap-x-2 mt-2">
+              <button
+                onClick={() => setShowStockInOverlay(true)}
+                className="bg-white border-2 border-tealGreen text-tealGreen py-1 px-3 text-sm font-semibold rounded w-full"
+              >
+                Stock In
+              </button>
 
-            <button
-              onClick={() => {
-                if (selectedInventoryID !== null) {
-                  handleStockOut(selectedInventoryID);
-                } else {
-                  // Show validation dialog when no item is selected
-                  setValidationMessage(
-                    "Please select an inventory item to stock out."
-                  );
-                  setValidationDialogVisible(true);
-                }
-              }}
-              className="bg-black text-white py-2 px-3 text-xs rounded"
-            >
-              Stock Out
-            </button>
+              <button
+                onClick={() => {
+                  if (selectedInventoryID !== null) {
+                    handleStockOut(selectedInventoryID);
+                  } else {
+                    // Show validation dialog when no item is selected
+                    setValidationMessage(
+                      "Please select an inventory item to stock out."
+                    );
+                    setValidationDialogVisible(true);
+                  }
+                }}
+                className="bg-white border-2 border-tealGreen text-tealGreen py-1 px-3 text-sm font-semibold rounded w-full"
+              >
+                Stock Out
+              </button>
+            </div>
           </div>
 
           {inventoryData.length === 0 ? (
