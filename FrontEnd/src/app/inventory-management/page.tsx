@@ -2,21 +2,27 @@
 
 import React, { useEffect, useState } from "react";
 import { format } from "date-fns";
-import { MultiItemStockInData, InventoryItem } from "../../../lib/types/InventoryItemDataTypes";
+import {
+  MultiItemStockInData,
+  InventoryItem,
+} from "../../../lib/types/InventoryItemDataTypes";
 import SubitemModal from "@/components/SubitemModal";
 import StockInModal from "@/components/StockInModal";
 import StockOutModal from "@/components/StockOutModal";
 import UpdateStockModal from "@/components/UpdateStockModal";
 import ValidationDialog from "@/components/ValidationDialog";
 import axios from "axios";
-import Toggle from "react-toggle"; 
-import "react-toggle/style.css"
+import Toggle from "react-toggle";
+import "react-toggle/style.css";
+import InventoryManagementCard from "@/components/ui/InventoryManagementCard";
 
 export default function InventoryManagementPage() {
   const [inventoryData, setInventoryData] = useState<InventoryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-  const [selectedInventoryID, setSelectedInventoryID] = useState<number | null>(null);
+  const [selectedInventoryID, setSelectedInventoryID] = useState<number | null>(
+    null
+  );
   const [collapsedRows, setCollapsedRows] = useState<number[]>([]); // State to track which rows are collapsed
   const [showAddOverlay, setShowAddOverlay] = useState(false);
   const [showEditOverlay, setShowEditOverlay] = useState(false);
@@ -114,15 +120,19 @@ export default function InventoryManagementPage() {
     }
   };
 
-  const [employees, setEmployees] = useState<{ employeeID: number; firstName: string; lastName: string }[]>([]);
+  const [employees, setEmployees] = useState<
+    { employeeID: number; firstName: string; lastName: string }[]
+  >([]);
 
   useEffect(() => {
     const fetchEmployees = async () => {
       try {
-        const response = await axios.get('http://localhost:8081/employeemanagement/getEmployee');
+        const response = await axios.get(
+          "http://localhost:8081/employeemanagement/getEmployee"
+        );
         setEmployees(response.data);
       } catch (error) {
-        console.error('Error fetching employees:', error);
+        console.error("Error fetching employees:", error);
       }
     };
 
@@ -137,8 +147,10 @@ export default function InventoryManagementPage() {
 
   const handleUpdateStock = (inventoryID: string) => {
     // Find the item in inventoryData based on the entered inventoryID
-    const item = inventoryData.find((item) => item.inventoryID.toString() === inventoryID);
-    
+    const item = inventoryData.find(
+      (item) => item.inventoryID.toString() === inventoryID
+    );
+
     if (item) {
       // If the item is found, proceed with setting update stock data
       setUpdateStockData({ ...updateStockData, inventoryID });
@@ -148,17 +160,19 @@ export default function InventoryManagementPage() {
       alert("Item not found");
     }
   };
-  
 
   const handleUpdateStockSubmit = async () => {
     try {
-      const response = await fetch("http://localhost:8081/inventoryManagement/updateSubitemQuantity", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(updateStockData),
-      });
+      const response = await fetch(
+        "http://localhost:8081/inventoryManagement/updateSubitemQuantity",
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(updateStockData),
+        }
+      );
 
       if (response.ok) {
         alert("Stock updated successfully");
@@ -177,14 +191,18 @@ export default function InventoryManagementPage() {
     }
   };
 
-  const [inventoryNames, setInventoryNames] = useState<{ inventoryID: number; inventoryName: string }[]>([]);
+  const [inventoryNames, setInventoryNames] = useState<
+    { inventoryID: number; inventoryName: string }[]
+  >([]);
   useEffect(() => {
     const fetchInventoryNames = async () => {
       try {
-        const response = await axios.get('http://localhost:8081/inventoryManagement/getInventoryName');
+        const response = await axios.get(
+          "http://localhost:8081/inventoryManagement/getInventoryName"
+        );
         setInventoryNames(response.data);
       } catch (error) {
-        console.error('Error fetching inventory names:', error);
+        console.error("Error fetching inventory names:", error);
       }
     };
 
@@ -202,7 +220,7 @@ export default function InventoryManagementPage() {
   const handleStockOut = (inventoryID: number) => {
     // Find the item in inventoryData based on the entered inventoryID
     const item = inventoryData.find((item) => item.inventoryID === inventoryID);
-    
+
     if (item) {
       // If the item is found, proceed with setting stock out data
       setStockOutData({
@@ -372,24 +390,31 @@ export default function InventoryManagementPage() {
 
   const [detailedData, setDetailedData] = useState<{ [key: number]: any }>({}); // Store details for each inventoryID
 
+  const [expandedRow, setExpandedRow] = useState<number | null>(null); // Track the expanded row
+
   const toggleRow = async (inventoryID: number) => {
-    if (collapsedRows.includes(inventoryID)) {
-      // Collapse row
-      setCollapsedRows(collapsedRows.filter(id => id !== inventoryID));
+    if (expandedRow === inventoryID) {
+      // Collapse the currently expanded row
+      setExpandedRow(null);
     } else {
-      // Expand row and fetch details if not already fetched
+      // Expand the selected row and fetch details if not already fetched
       if (!detailedData[inventoryID]) {
         try {
-          const response = await axios.get(`http://localhost:8081/inventoryManagement/getInventoryItemDetails/${inventoryID}`);
-          setDetailedData({
-            ...detailedData,
+          const response = await axios.get(
+            `http://localhost:8081/inventoryManagement/getInventoryItemDetails/${inventoryID}`
+          );
+          setDetailedData((prev) => ({
+            ...prev,
             [inventoryID]: response.data,
-          });
+          }));
         } catch (error) {
-          console.error(`Error fetching details for inventory ID ${inventoryID}:`, error);
+          console.error(
+            `Error fetching details for inventory ID ${inventoryID}:`,
+            error
+          );
         }
       }
-      setCollapsedRows([...collapsedRows, inventoryID]);
+      setExpandedRow(inventoryID); // Set the clicked row as the expanded one
     }
   };
 
@@ -401,24 +426,31 @@ export default function InventoryManagementPage() {
     setValidationDialogVisible(false); // Close the dialog when the user clicks "OK"
   };
 
-  const handleStatusToggle = async (inventoryID: number, newStatus: boolean) => {
+  const handleStatusToggle = async (
+    inventoryID: number,
+    newStatus: boolean
+  ) => {
     const updatedStatus = newStatus ? 1 : 0;
     try {
-      await axios.put(`http://localhost:8081/inventoryManagement/updateStatus/${inventoryID}`, {
-        inventoryStatus: updatedStatus
-      });
-      
-      setInventoryData((prevData) => prevData.map((item) => 
-        item.inventoryID === inventoryID 
-          ? { ...item, inventoryStatus: updatedStatus } 
-          : item
-      ));
+      await axios.put(
+        `http://localhost:8081/inventoryManagement/updateStatus/${inventoryID}`,
+        {
+          inventoryStatus: updatedStatus,
+        }
+      );
+
+      setInventoryData((prevData) =>
+        prevData.map((item) =>
+          item.inventoryID === inventoryID
+            ? { ...item, inventoryStatus: updatedStatus }
+            : item
+        )
+      );
     } catch (error) {
       console.error("Error updating inventory status:", error);
       alert("Failed to update inventory status");
     }
   };
-  
 
   if (loading) {
     return <p>Loading...</p>;
@@ -431,7 +463,9 @@ export default function InventoryManagementPage() {
   return (
     <div className="flex justify-center items-center w-full pb-7 min-h-screen">
       <div className="w-[360px] flex flex-col items-center bg-white min-h-screen p-4 rounded-lg shadow-md">
-        <h1 className="text-center text-sm mb-4 text-black">Inventory Management</h1>
+        <h1 className="text-center text-sm mb-4 text-black">
+          Inventory Management
+        </h1>
         <div className="mb-4 w-full flex flex-wrap justify-between">
           <button
             onClick={() => setShowAddOverlay(true)}
@@ -446,7 +480,9 @@ export default function InventoryManagementPage() {
                 handleEditItem(selectedInventoryID); // Use the selected radio button's inventory ID
               } else {
                 // Set the message and show the validation dialog
-                setValidationMessage("Please select an inventory item to edit.");
+                setValidationMessage(
+                  "Please select an inventory item to edit."
+                );
                 setValidationDialogVisible(true);
               }
             }}
@@ -471,7 +507,9 @@ export default function InventoryManagementPage() {
                 }
               } else {
                 // Show validation dialog when no item is selected
-                setValidationMessage("Please select an inventory item to delete.");
+                setValidationMessage(
+                  "Please select an inventory item to delete."
+                );
                 setValidationDialogVisible(true);
               }
             }}
@@ -486,7 +524,9 @@ export default function InventoryManagementPage() {
                 handleUpdateStock(selectedInventoryID.toString());
               } else {
                 // Show validation dialog when no item is selected
-                setValidationMessage("Please select an inventory item to update.");
+                setValidationMessage(
+                  "Please select an inventory item to update."
+                );
                 setValidationDialogVisible(true);
               }
             }}
@@ -508,7 +548,9 @@ export default function InventoryManagementPage() {
                 handleStockOut(selectedInventoryID);
               } else {
                 // Show validation dialog when no item is selected
-                setValidationMessage("Please select an inventory item to stock out.");
+                setValidationMessage(
+                  "Please select an inventory item to stock out."
+                );
                 setValidationDialogVisible(true);
               }
             }}
@@ -531,14 +573,18 @@ export default function InventoryManagementPage() {
                 <th className="border p-1">Total Qty</th>
                 <th className="border p-1">Status</th> {/* New Status Column */}
               </tr>
-            </thead> 
+            </thead>
             <tbody>
               {inventoryData.map((item) => (
                 <React.Fragment key={item.inventoryID}>
                   <tr
                     onClick={(e) => {
                       const target = e.target as HTMLInputElement;
-                      if (target && target.type !== "radio" && target.type !== "checkbox") {
+                      if (
+                        target &&
+                        target.type !== "radio" &&
+                        target.type !== "checkbox"
+                      ) {
                         // Only toggle the row if the clicked target is not a radio button or a toggle button
                         toggleRow(item.inventoryID);
                       }
@@ -578,42 +624,87 @@ export default function InventoryManagementPage() {
                         icons={false}
                         onChange={(e) => {
                           e.stopPropagation(); // Prevent row collapse when clicking on the toggle button
-                          handleStatusToggle(item.inventoryID, e.target.checked);
+                          handleStatusToggle(
+                            item.inventoryID,
+                            e.target.checked
+                          );
                         }}
                       />
                       {item.inventoryStatus === 1 ? "Active" : "Inactive"}
                     </td>
                   </tr>
-                  {collapsedRows.includes(item.inventoryID) && detailedData[item.inventoryID] && (
-                    <tr>
-                      <td colSpan={6} className="p-1 border bg-cream">
-                        <div className="text-xs mb-2 ml-5">
-                          <strong>Details:</strong>
-                          {detailedData[item.inventoryID] && detailedData[item.inventoryID].length > 0 ? (
-                            <ul>
-                              {detailedData[item.inventoryID].map((detail: any, index: number) => (
-                                <li key={index} className="mt-2">
-                                  <strong>Subinventory ID:</strong> {detail.subinventoryID} <br />
-                                  <strong>Qty Remaining:</strong> {detail.quantityRemaining} <br />
-                                  <strong>Price per Unit:</strong> {detail.pricePerUnit} <br />
-                                  <strong>Expiry Date:</strong> {detail.expiryDate ? format(new Date(detail.expiryDate), "yyyy-MM-dd") : "N/A"} <br />
-                                  <strong>Stock-in Date:</strong> {detail.stockInDate ? format(new Date(detail.stockInDate), "yyyy-MM-dd") : "N/A"} <br />
-                                  <strong>Supplier:</strong> {detail.supplierName} <br />
-                                  <strong>Handled by:</strong> {detail.employeeName}
-                                </li>
-                              ))}
-                            </ul>
-                          ) : (
-                            <p>No Stock Available</p>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  )}
+                  {collapsedRows.includes(item.inventoryID) &&
+                    detailedData[item.inventoryID] && (
+                      <tr>
+                        <td colSpan={6} className="p-1 border bg-cream">
+                          <div className="text-xs mb-2 ml-5">
+                            <strong>Details:</strong>
+                            {detailedData[item.inventoryID] &&
+                            detailedData[item.inventoryID].length > 0 ? (
+                              <ul>
+                                {detailedData[item.inventoryID].map(
+                                  (detail: any, index: number) => (
+                                    <li key={index} className="mt-2">
+                                      <strong>Subinventory ID:</strong>{" "}
+                                      {detail.subinventoryID} <br />
+                                      <strong>Qty Remaining:</strong>{" "}
+                                      {detail.quantityRemaining} <br />
+                                      <strong>Price per Unit:</strong>{" "}
+                                      {detail.pricePerUnit} <br />
+                                      <strong>Expiry Date:</strong>{" "}
+                                      {detail.expiryDate
+                                        ? format(
+                                            new Date(detail.expiryDate),
+                                            "yyyy-MM-dd"
+                                          )
+                                        : "N/A"}{" "}
+                                      <br />
+                                      <strong>Stock-in Date:</strong>{" "}
+                                      {detail.stockInDate
+                                        ? format(
+                                            new Date(detail.stockInDate),
+                                            "yyyy-MM-dd"
+                                          )
+                                        : "N/A"}{" "}
+                                      <br />
+                                      <strong>Supplier:</strong>{" "}
+                                      {detail.supplierName} <br />
+                                      <strong>Handled by:</strong>{" "}
+                                      {detail.employeeName}
+                                    </li>
+                                  )
+                                )}
+                              </ul>
+                            ) : (
+                              <p>No Stock Available</p>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    )}
                 </React.Fragment>
               ))}
             </tbody>
           </table>
+        )}
+
+        {inventoryData.length === 0 ? (
+          <p className="text-sm text-black">No inventory items found</p>
+        ) : (
+          inventoryData.map((item) => (
+            <div className="mb-3" key={item.inventoryID}>
+              <InventoryManagementCard
+                inventoryItem={item}
+                handleEditItem={handleEditItem}
+                handleUpdateStock={handleUpdateStock}
+                expandedRow={expandedRow}
+                setExpandedRow={setExpandedRow}
+                toggleRow={toggleRow}
+                detailedData={detailedData}
+                setDetailedData={setDetailedData}
+              />
+            </div>
+          ))
         )}
 
         {showAddOverlay && (
