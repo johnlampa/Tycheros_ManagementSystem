@@ -16,6 +16,10 @@ import Toggle from "react-toggle";
 import "react-toggle/style.css";
 import InventoryManagementCard from "@/components/ui/InventoryManagementCard";
 
+import Header from "@/components/Header";
+import Link from "next/link";
+import { FaArrowLeft } from "react-icons/fa";
+
 export default function InventoryManagementPage() {
   const [inventoryData, setInventoryData] = useState<InventoryItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -462,231 +466,177 @@ export default function InventoryManagementPage() {
 
   return (
     <div className="flex justify-center items-center w-full pb-7 min-h-screen">
-      <div className="w-[360px] flex flex-col items-center bg-white min-h-screen p-4 rounded-lg shadow-md">
-        <h1 className="text-center text-sm mb-4 text-black">
-          Inventory Management
-        </h1>
-        <div className="mb-4 w-full flex flex-wrap justify-between">
-          <button
-            onClick={() => setShowAddOverlay(true)}
-            className="bg-black text-white py-2 px-3 text-xs rounded mr-2"
-          >
-            Add Item
-          </button>
+      <div className="w-[360px] flex flex-col items-center bg-white min-h-screen rounded-lg shadow-md">
+        <Header text="Inventory" color={"tealGreen"} type={"orders"}>
+          <Link href={"/employee-home"} className="z-100">
+            <button className="border border-white rounded-full h-[40px] w-[40px] bg-white text-white shadow-lg flex items-center justify-center overflow-hidden hover:bg-tealGreen group">
+              <FaArrowLeft className="text-tealGreen group-hover:text-white transition-colors duration-300" />
+            </button>
+          </Link>
+        </Header>
+        <div className="p-4">
+          <div className="mb-4 w-full flex flex-wrap justify-between">
+            <button
+              onClick={() => setShowAddOverlay(true)}
+              className="bg-black text-white py-2 px-3 text-xs rounded mr-2"
+            >
+              Add Item
+            </button>
 
-          <button
-            onClick={() => {
-              if (selectedInventoryID !== null) {
-                handleEditItem(selectedInventoryID); // Use the selected radio button's inventory ID
-              } else {
-                // Set the message and show the validation dialog
-                setValidationMessage(
-                  "Please select an inventory item to edit."
-                );
-                setValidationDialogVisible(true);
-              }
-            }}
-            className="bg-black text-white py-2 px-3 text-xs rounded mr-2"
-          >
-            Edit Item
-          </button>
+            <button
+              onClick={() => setShowStockInOverlay(true)}
+              className="bg-black text-white py-2 px-3 text-xs rounded"
+            >
+              Stock In
+            </button>
 
-          <button
-            onClick={() => {
-              if (selectedInventoryID !== null) {
-                const item = inventoryData.find(
-                  (item) => item.inventoryID === selectedInventoryID
-                );
-                if (item) {
-                  setItemToDelete(item);
-                  setShowDeleteOverlay(true);
+            <button
+              onClick={() => {
+                if (selectedInventoryID !== null) {
+                  handleStockOut(selectedInventoryID);
                 } else {
-                  // Show validation dialog when the item is not found
-                  setValidationMessage("Item not found");
+                  // Show validation dialog when no item is selected
+                  setValidationMessage(
+                    "Please select an inventory item to stock out."
+                  );
                   setValidationDialogVisible(true);
                 }
-              } else {
-                // Show validation dialog when no item is selected
-                setValidationMessage(
-                  "Please select an inventory item to delete."
-                );
-                setValidationDialogVisible(true);
-              }
-            }}
-            className="bg-black text-white py-2 px-3 text-xs rounded"
-          >
-            Delete Item
-          </button>
+              }}
+              className="bg-black text-white py-2 px-3 text-xs rounded"
+            >
+              Stock Out
+            </button>
+          </div>
 
-          <button
-            onClick={() => {
-              if (selectedInventoryID !== null) {
-                handleUpdateStock(selectedInventoryID.toString());
-              } else {
-                // Show validation dialog when no item is selected
-                setValidationMessage(
-                  "Please select an inventory item to update."
-                );
-                setValidationDialogVisible(true);
-              }
-            }}
-            className="bg-black text-white py-2 px-3 text-xs rounded"
-          >
-            Update Stock
-          </button>
-
-          <button
-            onClick={() => setShowStockInOverlay(true)}
-            className="bg-black text-white py-2 px-3 text-xs rounded"
-          >
-            Stock In
-          </button>
-
-          <button
-            onClick={() => {
-              if (selectedInventoryID !== null) {
-                handleStockOut(selectedInventoryID);
-              } else {
-                // Show validation dialog when no item is selected
-                setValidationMessage(
-                  "Please select an inventory item to stock out."
-                );
-                setValidationDialogVisible(true);
-              }
-            }}
-            className="bg-black text-white py-2 px-3 text-xs rounded"
-          >
-            Stock Out
-          </button>
+          {inventoryData.length === 0 ? (
+            <p className="text-sm text-black">No inventory items found</p>
+          ) : (
+            <table className="w-full text-black text-xs">
+              <thead>
+                <tr>
+                  <th className="border p-1"></th>
+                  <th className="border p-1">Name</th>
+                  <th className="border p-1">Category</th>
+                  <th className="border p-1">Reorder Point</th>
+                  <th className="border p-1">Total Qty</th>
+                  <th className="border p-1">Status</th>{" "}
+                  {/* New Status Column */}
+                </tr>
+              </thead>
+              <tbody>
+                {inventoryData.map((item) => (
+                  <React.Fragment key={item.inventoryID}>
+                    <tr
+                      onClick={(e) => {
+                        const target = e.target as HTMLInputElement;
+                        if (
+                          target &&
+                          target.type !== "radio" &&
+                          target.type !== "checkbox"
+                        ) {
+                          // Only toggle the row if the clicked target is not a radio button or a toggle button
+                          toggleRow(item.inventoryID);
+                        }
+                      }}
+                      className={`cursor-pointer ${
+                        collapsedRows.includes(item.inventoryID)
+                          ? "bg-cream"
+                          : item.totalQuantity <= item.reorderPoint
+                          ? "bg-lightRed text-black"
+                          : ""
+                      }`}
+                    >
+                      <td className="border p-1">
+                        <input
+                          type="radio"
+                          name="inventoryItem"
+                          value={item.inventoryID}
+                          checked={selectedInventoryID === item.inventoryID}
+                          onChange={(e) => {
+                            e.stopPropagation(); // Prevent row collapse when clicking on the radio button
+                            handleRadioChange(item.inventoryID);
+                          }}
+                        />
+                      </td>
+                      <td className="border p-1">{item.inventoryName}</td>
+                      <td className="border p-1">{item.inventoryCategory}</td>
+                      <td className="border p-1">
+                        {item.reorderPoint} {item.unitOfMeasure}
+                      </td>
+                      <td className="border p-1">
+                        {item.totalQuantity} {item.unitOfMeasure}
+                      </td>
+                      <td className="border p-1">
+                        {/* Toggle button for inventoryStatus */}
+                        <Toggle
+                          checked={item.inventoryStatus === 1}
+                          icons={false}
+                          onChange={(e) => {
+                            e.stopPropagation(); // Prevent row collapse when clicking on the toggle button
+                            handleStatusToggle(
+                              item.inventoryID,
+                              e.target.checked
+                            );
+                          }}
+                        />
+                        {item.inventoryStatus === 1 ? "Active" : "Inactive"}
+                      </td>
+                    </tr>
+                    {collapsedRows.includes(item.inventoryID) &&
+                      detailedData[item.inventoryID] && (
+                        <tr>
+                          <td colSpan={6} className="p-1 border bg-cream">
+                            <div className="text-xs mb-2 ml-5">
+                              <strong>Details:</strong>
+                              {detailedData[item.inventoryID] &&
+                              detailedData[item.inventoryID].length > 0 ? (
+                                <ul>
+                                  {detailedData[item.inventoryID].map(
+                                    (detail: any, index: number) => (
+                                      <li key={index} className="mt-2">
+                                        <strong>Subinventory ID:</strong>{" "}
+                                        {detail.subinventoryID} <br />
+                                        <strong>Qty Remaining:</strong>{" "}
+                                        {detail.quantityRemaining} <br />
+                                        <strong>Price per Unit:</strong>{" "}
+                                        {detail.pricePerUnit} <br />
+                                        <strong>Expiry Date:</strong>{" "}
+                                        {detail.expiryDate
+                                          ? format(
+                                              new Date(detail.expiryDate),
+                                              "yyyy-MM-dd"
+                                            )
+                                          : "N/A"}{" "}
+                                        <br />
+                                        <strong>Stock-in Date:</strong>{" "}
+                                        {detail.stockInDate
+                                          ? format(
+                                              new Date(detail.stockInDate),
+                                              "yyyy-MM-dd"
+                                            )
+                                          : "N/A"}{" "}
+                                        <br />
+                                        <strong>Supplier:</strong>{" "}
+                                        {detail.supplierName} <br />
+                                        <strong>Handled by:</strong>{" "}
+                                        {detail.employeeName}
+                                      </li>
+                                    )
+                                  )}
+                                </ul>
+                              ) : (
+                                <p>No Stock Available</p>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                  </React.Fragment>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
-
-        {inventoryData.length === 0 ? (
-          <p className="text-sm text-black">No inventory items found</p>
-        ) : (
-          <table className="w-full text-black text-xs">
-            <thead>
-              <tr>
-                <th className="border p-1"></th>
-                <th className="border p-1">Name</th>
-                <th className="border p-1">Category</th>
-                <th className="border p-1">Reorder Point</th>
-                <th className="border p-1">Total Qty</th>
-                <th className="border p-1">Status</th> {/* New Status Column */}
-              </tr>
-            </thead>
-            <tbody>
-              {inventoryData.map((item) => (
-                <React.Fragment key={item.inventoryID}>
-                  <tr
-                    onClick={(e) => {
-                      const target = e.target as HTMLInputElement;
-                      if (
-                        target &&
-                        target.type !== "radio" &&
-                        target.type !== "checkbox"
-                      ) {
-                        // Only toggle the row if the clicked target is not a radio button or a toggle button
-                        toggleRow(item.inventoryID);
-                      }
-                    }}
-                    className={`cursor-pointer ${
-                      collapsedRows.includes(item.inventoryID)
-                        ? "bg-cream"
-                        : item.totalQuantity <= item.reorderPoint
-                        ? "bg-lightRed text-black"
-                        : ""
-                    }`}
-                  >
-                    <td className="border p-1">
-                      <input
-                        type="radio"
-                        name="inventoryItem"
-                        value={item.inventoryID}
-                        checked={selectedInventoryID === item.inventoryID}
-                        onChange={(e) => {
-                          e.stopPropagation(); // Prevent row collapse when clicking on the radio button
-                          handleRadioChange(item.inventoryID);
-                        }}
-                      />
-                    </td>
-                    <td className="border p-1">{item.inventoryName}</td>
-                    <td className="border p-1">{item.inventoryCategory}</td>
-                    <td className="border p-1">
-                      {item.reorderPoint} {item.unitOfMeasure}
-                    </td>
-                    <td className="border p-1">
-                      {item.totalQuantity} {item.unitOfMeasure}
-                    </td>
-                    <td className="border p-1">
-                      {/* Toggle button for inventoryStatus */}
-                      <Toggle
-                        checked={item.inventoryStatus === 1}
-                        icons={false}
-                        onChange={(e) => {
-                          e.stopPropagation(); // Prevent row collapse when clicking on the toggle button
-                          handleStatusToggle(
-                            item.inventoryID,
-                            e.target.checked
-                          );
-                        }}
-                      />
-                      {item.inventoryStatus === 1 ? "Active" : "Inactive"}
-                    </td>
-                  </tr>
-                  {collapsedRows.includes(item.inventoryID) &&
-                    detailedData[item.inventoryID] && (
-                      <tr>
-                        <td colSpan={6} className="p-1 border bg-cream">
-                          <div className="text-xs mb-2 ml-5">
-                            <strong>Details:</strong>
-                            {detailedData[item.inventoryID] &&
-                            detailedData[item.inventoryID].length > 0 ? (
-                              <ul>
-                                {detailedData[item.inventoryID].map(
-                                  (detail: any, index: number) => (
-                                    <li key={index} className="mt-2">
-                                      <strong>Subinventory ID:</strong>{" "}
-                                      {detail.subinventoryID} <br />
-                                      <strong>Qty Remaining:</strong>{" "}
-                                      {detail.quantityRemaining} <br />
-                                      <strong>Price per Unit:</strong>{" "}
-                                      {detail.pricePerUnit} <br />
-                                      <strong>Expiry Date:</strong>{" "}
-                                      {detail.expiryDate
-                                        ? format(
-                                            new Date(detail.expiryDate),
-                                            "yyyy-MM-dd"
-                                          )
-                                        : "N/A"}{" "}
-                                      <br />
-                                      <strong>Stock-in Date:</strong>{" "}
-                                      {detail.stockInDate
-                                        ? format(
-                                            new Date(detail.stockInDate),
-                                            "yyyy-MM-dd"
-                                          )
-                                        : "N/A"}{" "}
-                                      <br />
-                                      <strong>Supplier:</strong>{" "}
-                                      {detail.supplierName} <br />
-                                      <strong>Handled by:</strong>{" "}
-                                      {detail.employeeName}
-                                    </li>
-                                  )
-                                )}
-                              </ul>
-                            ) : (
-                              <p>No Stock Available</p>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    )}
-                </React.Fragment>
-              ))}
-            </tbody>
-          </table>
-        )}
 
         {inventoryData.length === 0 ? (
           <p className="text-sm text-black">No inventory items found</p>
