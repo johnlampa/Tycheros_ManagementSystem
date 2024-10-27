@@ -35,8 +35,21 @@ const SubitemModal: React.FC<SubitemModalProps> = ({
     null
   );
 
+  const [handleStatusToggleParams, setHandleStatusToggleParams] = useState<{
+    inventoryID: number | undefined;
+    checked: boolean;
+  }>();
+
   const [subitemDataFromInventoryData, setSubitemDataFromInventoryData] =
     useState<InventoryItem>();
+
+  const [isChecked, setIsChecked] = useState(
+    subitemDataFromInventoryData?.inventoryStatus === 1
+  );
+
+  useEffect(() => {
+    setIsChecked(subitemDataFromInventoryData?.inventoryStatus === 1);
+  }, [subitemDataFromInventoryData]);
 
   useEffect(() => {
     const matchingItem = inventoryData?.find(
@@ -84,6 +97,12 @@ const SubitemModal: React.FC<SubitemModalProps> = ({
   const handleSave = () => {
     if (validateForm()) {
       onSave();
+    }
+    if (handleStatusToggle && handleStatusToggleParams) {
+      handleStatusToggle(
+        handleStatusToggleParams.inventoryID,
+        handleStatusToggleParams.checked
+      );
     }
   };
 
@@ -151,17 +170,21 @@ const SubitemModal: React.FC<SubitemModalProps> = ({
             className="mb-2 p-2 w-full text-black"
           />
 
-          <div className="flex gap-x-2 text-black">
+          <div className="flex gap-x-2 text-black mb-5">
             <p>Status: </p>
             <Toggle
-              checked={subitemDataFromInventoryData?.inventoryStatus === 1}
+              checked={isChecked}
               icons={false}
               onChange={(e) => {
+                const newChecked = e.target.checked;
+                setIsChecked(newChecked);
+
+                console.log(e);
                 if (handleStatusToggle) {
-                  handleStatusToggle(
-                    subitemDataFromInventoryData?.inventoryID,
-                    e.target.checked
-                  );
+                  setHandleStatusToggleParams({
+                    inventoryID: subitemDataFromInventoryData?.inventoryID,
+                    checked: e.target.checked,
+                  });
                 }
               }}
             />
