@@ -68,12 +68,13 @@ router.get('/getInventoryItem', async (req, res) => {
   }
 });
 
-// GET Subitem Details by Inventory ID
+// GET Subitem Details by Inventory ID (Adjusted for new one-to-one relationship)
 router.get('/getInventoryItemDetails/:inventoryID', async (req, res) => {
   const { inventoryID } = req.params;
+
   const query = `
     SELECT 
-      si.subinventoryID,
+      si.subinventoryID AS purchaseOrderItemID, 
       si.quantityRemaining,
       poi.quantityOrdered,
       poi.actualQuantity,
@@ -85,7 +86,7 @@ router.get('/getInventoryItemDetails/:inventoryID', async (req, res) => {
     FROM 
       subinventory si
     LEFT JOIN 
-      purchaseorderitem poi ON si.subinventoryID = poi.subinventoryID
+      purchaseorderitem poi ON si.subinventoryID = poi.purchaseOrderItemID
     LEFT JOIN 
       purchaseorder po ON poi.purchaseOrderID = po.purchaseOrderID
     LEFT JOIN 
@@ -94,10 +95,11 @@ router.get('/getInventoryItemDetails/:inventoryID', async (req, res) => {
       employees e ON po.employeeID = e.employeeID
     WHERE 
       si.inventoryID = ?
-      AND quantityRemaining > 0
+      AND si.quantityRemaining > 0
     ORDER BY 
-        expiryDate ASC;      -- Then order by row number (earliest expiryDate first)
+      poi.expiryDate ASC;  -- Order by expiryDate, earliest first
   `;
+
   try {
     const [result] = await pool.query(query, [inventoryID]);
     res.json(result);
@@ -158,7 +160,8 @@ router.put('/putSubitem/:inventoryID', async (req, res) => {
   }
 });
 
-// DELETE SUBITEM ENDPOINT
+ // DELETE SUBITEM ENDPOINT
+ /*
 router.delete('/deleteSubitem/:inventoryID', async (req, res) => {
   const inventoryID = req.params.inventoryID;
 
@@ -180,10 +183,11 @@ router.delete('/deleteSubitem/:inventoryID', async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
+*/
 
 // STOCK IN STOCK OUT STOCK IN STOCK OUT STOCK IN STOCK OUT STOCK IN STOCK OUT STOCK IN STOCK OUT STOCK IN STOCK OUT STOCK IN STOCK OUT 
 
-// STOCK IN ENDPOINT (Modified to Handle Multiple Items)
+// STOCK IN ENDPOINT (Adjusted for New One-to-One Relationship)
 router.post('/stockInInventoryItem', async (req, res) => {
   const {
     supplierName,
@@ -235,23 +239,16 @@ router.post('/stockInInventoryItem', async (req, res) => {
 
       // Insert into the purchaseorderitem table
       const [purchaseOrderItemResult] = await connection.query(
-        `INSERT INTO purchaseorderitem (quantityOrdered, actualQuantity, pricePerUnit, expiryDate, subinventoryID, purchaseOrderID) 
-         VALUES (?, ?, ?, ?, NULL, ?)`,
+        `INSERT INTO purchaseorderitem (quantityOrdered, actualQuantity, pricePerUnit, expiryDate, purchaseOrderID) 
+         VALUES (?, ?, ?, ?, ?)`,
         [quantityOrdered, actualQuantity, pricePerUnit, expiryDate, purchaseOrderID]
       );
       const purchaseOrderItemID = purchaseOrderItemResult.insertId;
 
-      // Insert into the subinventory table and get the subinventoryID
-      const [subinventoryResult] = await connection.query(
-        'INSERT INTO subinventory (inventoryID, quantityRemaining) VALUES (?, ?)',
-        [inventoryID, actualQuantity]
-      );
-      const subinventoryID = subinventoryResult.insertId;
-
-      // Update the subinventoryID in purchaseorderitem
+      // Insert into the subinventory table, using purchaseOrderItemID as the primary key
       await connection.query(
-        'UPDATE purchaseorderitem SET subinventoryID = ? WHERE purchaseOrderItemID = ?',
-        [subinventoryID, purchaseOrderItemID]
+        'INSERT INTO subinventory (subinventoryID, inventoryID, quantityRemaining) VALUES (?, ?, ?)',
+        [purchaseOrderItemID, inventoryID, actualQuantity]
       );
     }
 
@@ -284,7 +281,7 @@ router.post('/stockOutSubitem', async (req, res) => {
     const [subinventoryEntries] = await connection.query(`
       SELECT si.subinventoryID, si.quantityRemaining, poi.expiryDate
       FROM subinventory si
-      JOIN purchaseorderitem poi ON si.subinventoryID = poi.subinventoryID
+      JOIN purchaseorderitem poi ON si.subinventoryID = poi.purchaseOrderItemID
       WHERE si.inventoryID = ? AND si.quantityRemaining > 0
       ORDER BY poi.expiryDate ASC
     `, [inventoryID]);
@@ -339,7 +336,7 @@ router.put('/updateSubitemQuantity', async (req, res) => {
     const [subinventoryEntries] = await connection.query(`
       SELECT si.subinventoryID, si.quantityRemaining
       FROM subinventory si
-      JOIN purchaseorderitem poi ON si.subinventoryID = poi.subinventoryID
+      JOIN purchaseorderitem poi ON si.subinventoryID = poi.purchaseOrderItemID
       WHERE si.inventoryID = ?
       ORDER BY poi.expiryDate ASC
       LIMIT 1
@@ -366,100 +363,6 @@ router.put('/updateSubitemQuantity', async (req, res) => {
     res.status(500).send(`Error updating subinventory quantity: ${err.message}`);
   } finally {
     connection.release();
-  }
-});
-
-// GET Subinventory Details for Products in Cart
-router.post('/getSubinventoryDetails', async (req, res) => {
-  const { productIDs } = req.body; // Array of product IDs from the cart
-
-  if (!productIDs || productIDs.length === 0) {
-    return res.status(400).json({ error: "Product IDs are required" });
-  }
-
-  const query = `
-    WITH SubinventoryDetails AS (
-      SELECT
-        p.productID,
-        p.productName,
-        s.subitemID,
-        s.inventoryID,
-        s.quantityNeeded,
-        inv.inventoryName,
-        inv.inventoryCategory,
-        inv.unitOfMeasure,
-        inv.reorderPoint,
-        si.subinventoryID,
-        si.quantityRemaining,
-        poi.quantityOrdered,
-        poi.actualQuantity,
-        poi.pricePerUnit,
-        poi.expiryDate
-      FROM
-        product p
-      JOIN 
-        subitem s ON p.productID = s.productID
-      JOIN 
-        inventory inv ON s.inventoryID = inv.inventoryID
-      JOIN 
-        subinventory si ON inv.inventoryID = si.inventoryID
-      JOIN 
-        purchaseOrderItem poi ON si.subinventoryID = poi.subinventoryID
-      WHERE
-        p.productID IN (?)
-    )
-    SELECT *
-    FROM SubinventoryDetails
-    ORDER BY inventoryID, expiryDate ASC;
-  `;
-
-  try {
-    const [results] = await pool.query(query, [productIDs]);
-    res.json(results);
-  } catch (err) {
-    console.error("Error fetching subinventory details:", err);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
-
-// UPDATE MULTIPLE SUBINVENTORY QUANTITIES
-router.put('/updateMultipleSubitemQuantities', async (req, res) => {
-  const { updates } = req.body; // Array of updates, each with subinventoryID and quantity to reduce
-
-  // Log the incoming updates array for debugging purposes
-  console.log('Received updates for subinventory quantities:', updates);
-
-  const connection = await pool.getConnection();
-  try {
-    await connection.beginTransaction();
-
-    for (const update of updates) {
-      const { subinventoryID, quantityToReduce } = update;
-
-      // Log the details of the subinventoryID and quantity to reduce before the update
-      console.log(`Updating subinventoryID ${subinventoryID}: reducing quantity by ${quantityToReduce}`);
-
-      // Update the quantityRemaining, ensuring no value goes below zero
-      const [result] = await connection.query(`
-        UPDATE subinventory
-        SET quantityRemaining = GREATEST(quantityRemaining - ?, 0)
-        WHERE subinventoryID = ?
-      `, [quantityToReduce, subinventoryID]);
-
-      // Log the result of the update query
-      console.log(`Result of update for subinventoryID ${subinventoryID}:`, result);
-    }
-
-    await connection.commit();
-    console.log('Transaction committed successfully.');
-    res.status(200).send('Subinventory quantities updated successfully');
-  } catch (err) {
-    await connection.rollback();
-    console.error('Error updating subinventory quantities:', err);
-    res.status(500).send(`Error updating subinventory quantities: ${err.message}`);
-  } finally {
-    connection.release();
-    console.log('Database connection released.');
   }
 });
 
