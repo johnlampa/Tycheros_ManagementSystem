@@ -593,7 +593,7 @@ export default function InventoryManagementPage() {
                             <ul>
                               {detailedData[item.inventoryID].map((detail: any, index: number) => (
                                 <li key={index} className="mt-2">
-                                  <strong>Subinventory ID:</strong> {detail.subinventoryID} <br />
+                                  <strong>Subinventory ID:</strong> {detail.purchaseOrderItemID} <br />
                                   <strong>Qty Remaining:</strong> {detail.quantityRemaining} <br />
                                   <strong>Price per Unit:</strong> {detail.pricePerUnit} <br />
                                   <strong>Expiry Date:</strong> {detail.expiryDate ? format(new Date(detail.expiryDate), "yyyy-MM-dd") : "N/A"} <br />

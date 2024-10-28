@@ -32,6 +32,7 @@ function OrderSummaryPage() {
   const [previousPage, setPreviousPage] = useState("/");
   const searchParams = useSearchParams();
   const [orderID, setOrderID] = useState(-1);
+  const [orderInventoryIDs, setOrderInventoryIDs] = useState<number[]>([]);
   const [cart, setCart] = useState<OrderItemDataTypes[]>([]);
   const [error, setError] = useState<Error | null>(null);
 
@@ -92,30 +93,50 @@ function OrderSummaryPage() {
     localStorage.removeItem("cart");
   };
 
-  // Function to fetch subinventory details for products in the cart
-const fetchSubinventoryDetails = async (productIDs: number[]) => {
-  try {
-    // Make a single POST request to the new endpoint
-    const response = await axios.post(
-      "http://localhost:8081/inventoryManagement/getSubinventoryDetails",
-      { productIDs }
-    );
-
-    // Check if the response is okay
-    if (response.status === 200) {
-      const subinventoryDetails: SubitemForStockInDataTypes[] = response.data;
-      console.log("Fetched subinventory details:", subinventoryDetails);
-      return subinventoryDetails;
-    } else {
-      console.error("Failed to fetch subinventory details:", response.data);
+  const fetchNecessarySubinventoryIDs = async (inventoryID: number, totalNeeded: number) => {
+    try {
+      const response = await axios.post("http://localhost:8081/orderManagement/getSubinventoryID", {
+        inventoryID: inventoryID,
+        totalInventoryQuantityNeeded: totalNeeded,
+      });
+  
+      if (response.status === 200) {
+        const { necessarySubinventoryIDs, totalQuantityRemaining } = response.data;
+        console.log(`Necessary subinventoryIDs for inventoryID ${inventoryID}:`, necessarySubinventoryIDs);
+        return necessarySubinventoryIDs;
+      } else {
+        console.error("Failed to fetch necessary subinventory IDs:", response.data);
+        return [];
+      }
+    } catch (error) {
+      console.error("Error fetching necessary subinventory IDs:", error);
       return [];
     }
-  } catch (error) {
-    console.error("Error fetching subinventory details:", error);
-    return [];
-  }
-};
+  };  
 
+  // Function to fetch subinventory details for products in the cart
+  const fetchSubinventoryDetails = async (productIDs: number[]) => {
+    try {
+      // Make a single POST request to the new endpoint
+      const response = await axios.post(
+        "http://localhost:8081/orderManagement/getSubinventoryDetails",
+        { productIDs }
+      );
+
+      // Check if the response is okay
+      if (response.status === 200) {
+        const subinventoryDetails = response.data; // Directly use the response data
+        console.log("Fetched subinventory details:", subinventoryDetails);
+        return subinventoryDetails;
+      } else {
+        console.error("Failed to fetch subinventory details:", response.data);
+        return [];
+      }
+    } catch (error) {
+      console.error("Error fetching subinventory details:", error);
+      return [];
+    }
+  };
 
   // Define the type for an update
   type UpdateType = {
@@ -123,135 +144,163 @@ const fetchSubinventoryDetails = async (productIDs: number[]) => {
     quantityToReduce: number;
   };
 
-const updateInventoryAfterOrder = async (
-  totalInventoryQuantityNeeded: { [inventoryID: number]: number },
-  subinventoryDetails: SubitemForStockInDataTypes[]
-) => {
-  try {
-    let updates: UpdateType[] = [];
+  // Modified updateInventoryAfterOrder function
+  const updateInventoryAfterOrder = async (
+    totalInventoryQuantityNeeded: { [inventoryID: number]: number },
+    subinventoryDetails: SubitemForStockInDataTypes[]
+  ) => {
+    try {
+      let updates: UpdateType[] = [];
 
-    // Process each inventoryID to update quantities in subinventories
-    for (const [inventoryID, totalNeeded] of Object.entries(totalInventoryQuantityNeeded)) {
-      let remainingNeeded = totalNeeded;
+      // Process each inventoryID to update quantities in subinventories
+      for (const [inventoryID, totalNeeded] of Object.entries(totalInventoryQuantityNeeded)) {
+        let remainingNeeded = totalNeeded;
 
-      // Filter relevant subinventory items by inventoryID in ascending order of expiry date
-      const relevantSubinventories = subinventoryDetails
-        .filter(
-          (subitem) => subitem.inventoryID === parseInt(inventoryID) && subitem.quantityRemaining > 0
-        )
-        .sort(
-          (a, b) =>
-            new Date(a.expiryDate).getTime() - new Date(b.expiryDate).getTime()
+        // Fetch necessary subinventory IDs for the current inventoryID
+        const necessarySubinventoryIDs = await fetchNecessarySubinventoryIDs(
+          parseInt(inventoryID),
+          totalNeeded
         );
 
-      // Deduct quantities from subinventory items
-      for (let sub of relevantSubinventories) {
-        if (remainingNeeded <= 0) break;
+        console.log(`Necessary subinventoryIDs for inventoryID ${inventoryID}:`, necessarySubinventoryIDs);
 
-        const quantityToDeduct = Math.min(sub.quantityRemaining, remainingNeeded);
+        // Loop through necessary subinventory IDs to build updates array
+        for (const { subinventoryID, quantityToUse } of necessarySubinventoryIDs) {
+          if (remainingNeeded <= 0) break;
 
-        updates.push({
-          subinventoryID: sub.subinventoryID,
-          quantityToReduce: quantityToDeduct,
-        });
+          // Find the corresponding subinventory details to get the quantityToReduce
+          const subinventoryDetail = subinventoryDetails.find(
+            (sub) => sub.subinventoryID === subinventoryID && sub.inventoryID === parseInt(inventoryID)
+          );
 
-        console.log(`Deducting ${quantityToDeduct} from subinventoryID ${sub.subinventoryID}`);
-        remainingNeeded -= quantityToDeduct;
+          if (subinventoryDetail) {
+            // Calculate the quantity to reduce from the fetched subinventory details
+            const quantityToReduce = Math.min(quantityToUse, remainingNeeded, subinventoryDetail.quantityRemaining);
+
+            updates.push({
+              subinventoryID: subinventoryID,
+              quantityToReduce: quantityToReduce,
+            });
+
+            console.log(`Adding update: subinventoryID ${subinventoryID}, quantityToReduce ${quantityToReduce}`);
+
+            // Update remainingNeeded
+            remainingNeeded -= quantityToReduce;
+          }
+        }
+
+        // If remainingNeeded is still greater than 0, log a warning
+        if (remainingNeeded > 0) {
+          console.warn(`Not enough stock available for inventoryID ${inventoryID}. ${remainingNeeded} still needed.`);
+        }
       }
-    }
 
-    console.log("Final updates to be sent to backend:", JSON.stringify({ updates }, null, 2));
+      console.log("Final updates to be sent to backend:", JSON.stringify({ updates }, null, 2));
 
-    // Send the updates to the backend
-    const response = await fetch(
-      "http://localhost:8081/inventoryManagement/updateMultipleSubitemQuantities",
-      {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ updates }),
+      // Send the updates to the backend
+      const response = await fetch(
+        "http://localhost:8081/orderManagement/updateMultipleSubitemQuantities",
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ updates }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Failed to update inventory quantities:", errorData);
+        throw new Error("Failed to update inventory quantities");
       }
-    );
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error("Failed to update inventory quantities:", errorData);
-      throw new Error("Failed to update inventory quantities");
+      console.log("Inventory updated successfully");
+    } catch (error) {
+      console.error("Error updating inventory quantities:", error);
     }
-
-    console.log("Inventory updated successfully");
-  } catch (error) {
-    console.error("Error updating inventory quantities:", error);
-  }
-};
+  };
   
   // Function to fetch subitems for each productID using the new endpoint
   const fetchSubitemsForProducts = async (productIDs: number[]) => {
     try {
       // Initialize an empty array to store all subitems
       let allSubitems: SubitemForStockInDataTypes[] = [];
-
+      let orderInventoryIDs = new Set<number>(); // Use a Set to track unique inventoryIDs
+  
       // Iterate over each productID and make individual GET requests
       for (const productID of productIDs) {
+        console.log("productID: ", productID);
         const response = await axios.get(
           `http://localhost:8081/menuManagement/getSpecificSubitems/${productID}`
         );
-
-        // Add the fetched subitems to the allSubitems array
-        allSubitems.push(...response.data);
+  
+        const fetchedSubitems: SubitemForStockInDataTypes[] = response.data;
+        console.log("fetchedSubitems: ", fetchedSubitems);
+  
+        // Filter and add unique inventoryIDs to the allSubitems array
+        fetchedSubitems.forEach((subitem) => {
+          allSubitems.push(subitem); // Add the subitem to the allSubitems array
+          if (!orderInventoryIDs.has(subitem.inventoryID)) {
+            orderInventoryIDs.add(subitem.inventoryID); // Add unique inventoryID to the Set
+          }
+        });
+  
+        console.log("All Subitems: ", allSubitems);
+        console.log("Order Inventory IDs: ", Array.from(orderInventoryIDs));
       }
-
+  
       console.log("Fetched subitems for inventory update:", allSubitems);
       return allSubitems;
     } catch (error) {
       console.error("Error fetching subitems for products:", error);
       return [];
     }
-  };
+  };  
 
-// Updated handleClick function
-const handleClick = async () => {
-  await createOrder(); // Place the order
+  // Updated handleClick function
+  const handleClick = async () => {
+    await createOrder(); // Place the order
 
-  // After creating the order, process inventory updates
-  if (cart.length > 0) {
-    try {
-      const productIDs = cart.map((product) => product.productID);
+    // After creating the order, process inventory updates
+    if (cart.length > 0) {
+      try {
+        const productIDs = cart.map((product) => product.productID);
+        console.log("Product IDs: ", productIDs);
+        
+        // Step 1: Fetch subitems for each productID to calculate totalQuantityNeeded
+        const allSubitems = await fetchSubitemsForProducts(productIDs);
 
-      // Step 1: Fetch subitems for each productID to calculate totalQuantityNeeded
-      const allSubitems = await fetchSubitemsForProducts(productIDs);
+        // Calculate totalQuantityNeeded for each inventoryID
+        const totalInventoryQuantityNeeded: { [inventoryID: number]: number } = {};
+        allSubitems.forEach((subitem) => {
+          const cartItem = cart.find((item) => item.productID === subitem.productID);
+          if (!cartItem) return;
 
-      // Calculate totalQuantityNeeded for each inventoryID
-      const totalInventoryQuantityNeeded: { [inventoryID: number]: number } = {};
-      allSubitems.forEach((subitem) => {
-        const cartItem = cart.find((item) => item.productID === subitem.productID);
-        if (!cartItem) return;
+          const totalSubitemQuantityNeeded = subitem.quantityNeeded * cartItem.quantity;
 
-        const totalSubitemQuantityNeeded = subitem.quantityNeeded * cartItem.quantity;
+          if (totalInventoryQuantityNeeded[subitem.inventoryID]) {
+            totalInventoryQuantityNeeded[subitem.inventoryID] += totalSubitemQuantityNeeded;
+          } else {
+            totalInventoryQuantityNeeded[subitem.inventoryID] = totalSubitemQuantityNeeded;
+          }
+        });
 
-        if (totalInventoryQuantityNeeded[subitem.inventoryID]) {
-          totalInventoryQuantityNeeded[subitem.inventoryID] += totalSubitemQuantityNeeded;
-        } else {
-          totalInventoryQuantityNeeded[subitem.inventoryID] = totalSubitemQuantityNeeded;
-        }
-      });
+        // Step 2: Fetch subinventory details for each productID using the updated endpoint
+        const subinventoryDetails = await fetchSubinventoryDetails(productIDs);
 
-      console.log("Total inventory quantities needed:", totalInventoryQuantityNeeded);
+        console.log("Total inventory quantities needed:", totalInventoryQuantityNeeded, " Subinventory Details: ", subinventoryDetails);
 
-      // Step 2: Fetch subinventory details for each productID using the updated endpoint
-      const subinventoryDetails = await fetchSubinventoryDetails(productIDs);
-
-      // Step 3: Update inventory quantities based on totalInventoryQuantityNeeded and subinventoryDetails
-      await updateInventoryAfterOrder(totalInventoryQuantityNeeded, subinventoryDetails);
-    } catch (error) {
-      console.error("Error updating inventory after order:", error);
+        // Step 3: Update inventory quantities based on totalInventoryQuantityNeeded and subinventoryDetails
+        await updateInventoryAfterOrder(totalInventoryQuantityNeeded, subinventoryDetails);
+      } catch (error) {
+        console.error("Error updating inventory after order:", error);
+      }
     }
-  }
 
-  // Remove the cart after the order is created
-  localStorage.removeItem("cart");
-};
+    // Remove the cart after the order is created
+    localStorage.removeItem("cart");
+  };
 
 
 
