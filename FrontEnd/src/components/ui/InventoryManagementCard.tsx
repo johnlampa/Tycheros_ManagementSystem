@@ -153,7 +153,11 @@ const InventoryManagementCard: React.FC<InventoryManagementCardProps> = ({
                                 </div>
                               </div>
                             </li>
-                            <div className="h-[2px] w-full bg-secondaryBrown mt-3"></div>
+                            {index <
+                              detailedData[inventoryItem?.inventoryID].length -
+                                1 && (
+                              <div className="h-[2px] w-full bg-secondaryBrown mt-3"></div>
+                            )}
                           </div>
                         )
                       )}
