@@ -8,20 +8,18 @@ export default function MenuSelection() {
     <>
       <div className="w-full flex justify-center items-center min-h-screen">
         <div className="flex flex-col items-center w-[360px] h-screen relative bg-white">
-          
           {/* Header with the FaArrowLeft button included */}
-          <Header
-            text="Menu Selection"
-            color="tealGreen"
-            type="home"
-          >
+          <Header text="Menu" color="tealGreen" type="orders">
             <Link href={"/employee-home"} className="absolute left-[29px] mb-1">
               <button className="border border-white rounded-full h-[40px] w-[40px] bg-white shadow-lg flex items-center justify-center overflow-hidden hover:bg-tealGreen group">
-                <FaArrowLeft style={{ fontSize: '24px' }} className="text-tealGreen group-hover:text-white transition-colors duration-300" />
+                <FaArrowLeft
+                  style={{ fontSize: "24px" }}
+                  className="text-tealGreen group-hover:text-white transition-colors duration-300"
+                />
               </button>
             </Link>
           </Header>
-          
+
           {/* Center content vertically */}
           <div className="flex flex-col justify-center flex-grow">
             <Link href="/food-menu-management">

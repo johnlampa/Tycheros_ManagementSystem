@@ -469,8 +469,8 @@ export default function InventoryManagementPage() {
   }
 
   return (
-    <div className="flex justify-center items-center w-full pb-7 min-h-screen">
-      <div className="w-[360px] flex flex-col items-center bg-white min-h-screen rounded-lg shadow-md">
+    <div className="flex justify-center items-center w-full min-h-screen">
+      <div className="w-[360px] flex flex-col items-center bg-white min-h-screen shadow-md pb-7">
         <Header text="Inventory" color={"tealGreen"} type={"orders"}>
           <Link href={"/employee-home"} className="z-100">
             <button className="border border-white rounded-full h-[40px] w-[40px] bg-white text-white shadow-lg flex items-center justify-center overflow-hidden hover:bg-tealGreen group">

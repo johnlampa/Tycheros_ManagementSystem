@@ -29,12 +29,12 @@ export default function Home() {
             />
           </div>
           <Link href={"/food-menu"}>
-            <div className="w-[220px] h-[100px] text-[25px] font-bold rounded-3xl border border-2 bg-tealGreen flex justify-center items-center mb-[15px]">
+            <div className="w-[220px] h-[100px] text-[25px] font-bold rounded-3xl text-white bg-tealGreen flex justify-center items-center mb-[15px]">
               Food Menu
             </div>
           </Link>
           <Link href={"/bar-menu"}>
-            <div className="w-[220px] h-[100px] text-[25px] font-bold rounded-3xl border border-2 bg-tealGreen flex justify-center items-center">
+            <div className="w-[220px] h-[100px] text-[25px] font-bold rounded-3xl text-white bg-tealGreen flex justify-center items-center">
               Bar Menu
             </div>
           </Link>
