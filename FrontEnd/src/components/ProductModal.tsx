@@ -325,33 +325,35 @@ const ProductModal: React.FC<ProductModalProps> = ({
         <button
           type="button"
           onClick={handleAddSubitem}
-          className="bg-black hover:bg-black text-white font-semibold py-2 px-4 rounded w-full mb-4"
+          className="bg-white border-2 border-black hover:bg-black hover:text-white text-black text-sm font-semibold py-2 px-4 rounded w-full"
         >
-          + Add Subitem
+          Add New Subitem
         </button>
 
-        <label htmlFor="imageUpload" className="block mb-2 text-black">
-          Upload Image <span className="text-gray">(PNG or JPEG format)</span>
-        </label>
-        <input
-          id="imageUpload"
-          name="imageUpload"
-          type="file"
-          className="cursor-pointer"
-          onChange={(e) => {
-            const selectedFile = e.target.files?.[0];
-            if (selectedFile) {
-              // Check file size (2MB = 2 * 1024 * 1024 = 2097152 bytes)
-              const maxSizeInBytes = 2 * 1024 * 1024;
-              if (selectedFile.size > maxSizeInBytes) {
-                alert("File size exceeds 2MB. Please upload a smaller file.");
-                e.target.value = ""; // Reset file input
-                return;
+        <div className="mt-7 mb-5">
+          <label htmlFor="imageUpload" className="block mb-2 text-black">
+            Upload Image <span className="text-gray">(PNG or JPEG format)</span>
+          </label>
+          <input
+            id="imageUpload"
+            name="imageUpload"
+            type="file"
+            className="cursor-pointer"
+            onChange={(e) => {
+              const selectedFile = e.target.files?.[0];
+              if (selectedFile) {
+                // Check file size (2MB = 2 * 1024 * 1024 = 2097152 bytes)
+                const maxSizeInBytes = 2 * 1024 * 1024;
+                if (selectedFile.size > maxSizeInBytes) {
+                  alert("File size exceeds 2MB. Please upload a smaller file.");
+                  e.target.value = ""; // Reset file input
+                  return;
+                }
+                setFile(selectedFile); // Proceed if file size is valid
               }
-              setFile(selectedFile); // Proceed if file size is valid
-            }
-          }}
-        />
+            }}
+          />
+        </div>
 
         {/* Save button with conditional disabled state */}
         <button
@@ -368,7 +370,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
           <button
             type="button"
             onClick={handleDelete}
-            className="bg-red hover:bg-red text-white font-semibold py-2 px-4 rounded w-full mt-4"
+            className="bg-white hover:bg-red hover:text-white text-red border-2 border-red font-semibold py-2 px-4 rounded w-full mt-2"
           >
             Delete Product
           </button>
@@ -379,9 +381,9 @@ const ProductModal: React.FC<ProductModalProps> = ({
           <p className="text-black text-center mt-4">{uploadingMessage}</p>
         )}
 
-        <div className="mt-4 text-center">
+        <div className="mt-2 text-center">
           <button
-            className="bg-gray hover:bg-gray text-white font-semibold py-2 px-4 rounded"
+            className="bg-white hover:bg-gray hover:text-white text-gray border-2 border-gray font-semibold py-2 px-4 w-full rounded"
             onClick={handleCancel}
           >
             Cancel
