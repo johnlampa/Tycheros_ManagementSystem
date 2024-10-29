@@ -457,4 +457,38 @@ router.put('/updateMultipleSubitemQuantities', (req, res) => {
   });
 });
 
+// GET Payment Details for all Orders where status is not 'Unpaid'
+router.get('/getPaymentDetails', (req, res) => {
+  const query = `
+    SELECT 
+      p.paymentID,
+      p.amount,
+      p.method,
+      p.referenceNumber,
+      p.discountType,
+      p.discountAmount,
+      o.orderID,
+      o.status
+    FROM 
+      \`order\` o
+    JOIN 
+      payment p ON o.paymentID = p.paymentID
+    WHERE 
+      o.status != 'Unpaid';
+  `;
+
+  db.query(query, (err, result) => {
+    if (err) {
+      console.error('Error fetching payment details:', err);
+      return res.status(500).json({ error: 'Internal Server Error' });
+    }
+
+    if (result.length === 0) {
+      return res.status(404).json({ message: 'No payment details found for orders with status other than Unpaid' });
+    }
+
+    res.status(200).json(result);
+  });
+});
+
 module.exports = router;
