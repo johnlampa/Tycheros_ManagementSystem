@@ -49,11 +49,21 @@ export default function Page() {
       }
     };
 
-    //const fetchPayments
+    const fetchPayments = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:8081/orderManagement/getPaymentDetails"
+        );
+        setPayments(response.data);
+      } catch (error) {
+        console.error("Error fetching payment details:", error);
+        setError("Error fetching payment details");
+      }
+    };
 
     fetchOrders();
     fetchMenuData();
-    //fetchPayments();
+    fetchPayments();
   }, []);
 
   useEffect(() => {
