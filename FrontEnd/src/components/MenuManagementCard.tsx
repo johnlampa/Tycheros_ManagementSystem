@@ -32,10 +32,11 @@ const MenuManagementCard: React.FC<MenuManagementCardProps> = ({
 
     setProductModalVisibility(!productModalIsVisible);
 
-    const menuProduct = menuData.find((product) => product.productID === productID);
+    const menuProduct = menuData.find(
+      (product) => product.productID === productID
+    );
     setMenuProductToEdit(menuProduct);
   };
-
 
   const toggleAdd = () => {
     setModalType("add");
@@ -45,36 +46,41 @@ const MenuManagementCard: React.FC<MenuManagementCardProps> = ({
 
   return (
     <>
-      <div className="border border-black dark:border-black rounded-md p-4 bg-cream">
-        <div className="grid grid-cols-3 gap-2 text-lg font-semibold mb-3">
+      <div className="rounded-md p-4 bg-cream w-[310px]">
+        <div className="grid grid-cols-[3fr_2fr_2fr] gap-2 text-base font-semibold mb-3">
           <p className="justify-normal items-center text-black">Name</p>
-          <p className="flex justify-center items-center text-black">Price</p>
+          <p className="flex ml-auto text-black">Price</p>
           <p></p>
         </div>
         {menuData
           .filter((item) => item.categoryName === categoryName)
           .map((item) => (
-            <div key={item.productID} className="grid grid-cols-3 gap-2 mb-3">
-              <p className="justify-normal items-center text-black truncate">
+            <div
+              key={item.productID}
+              className="grid grid-cols-[3fr_2fr_2fr] gap-2 mb-3"
+            >
+              <p className="my-auto text-black truncate text-sm">
                 {item.productName}
               </p>
-              <p className="flex justify-center items-center text-black">
-                {item.sellingPrice}
+              <p className="flex ml-auto items-center text-black text-sm">
+                &#8369; {item.sellingPrice.toFixed(2)}
               </p>
-              <button
-                onClick={() => toggleEdit(item.productID)}
-                className="px-1 py-1 rounded-full border border-black text-black text-sm bg-lightTealGreen hover:bg-gray-50 hover:bg-tealGreen"
-              >
-                Edit
-              </button>
+              <div className="ml-3">
+                <button
+                  onClick={() => toggleEdit(item.productID)}
+                  className="w-min px-4 py-1 rounded-full text-black text-sm bg-cream border-2 border-lightTealGreen hover:text-black hover:bg-lightTealGreen"
+                >
+                  Edit
+                </button>
+              </div>
             </div>
           ))}
-        <div>
+        <div className="flex justify-center items-center">
           <button
-            className="mt-3 px-3 py-1 rounded-full border border-black text-black text-sm bg-lightTealGreen hover:bg-gray-50 hover:bg-tealGreen"
+            className="mt-3 px-3 py-1 rounded-md w-full text-black text-sm bg-lightTealGreen hover:bg-gray-50 hover:bg-lightTealGreen"
             onClick={toggleAdd}
           >
-            Add
+            Add Product
           </button>
         </div>
       </div>
