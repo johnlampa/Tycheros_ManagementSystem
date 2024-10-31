@@ -46,7 +46,7 @@ const InventoryManagementCard: React.FC<InventoryManagementCardProps> = ({
                 Inactive
               </div>
             )}
-            {inventoryItem?.totalQuantity < inventoryItem?.reorderPoint && (
+            {inventoryItem?.totalQuantity <= inventoryItem?.reorderPoint && (
               <div className="py-1 px-2 rounded-md bg-red text-xs text-white mb-2 w-max">
                 Low stock
               </div>
